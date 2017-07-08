@@ -7,4 +7,4 @@ A global host of tools used to mod the Project Diva games.
 
 # Tool Progress:
 
-+ `dsc_tools`: can import dsc files, cannot edit or create new ones. 50%
++ `dsc_tools`: can import dsc files, cannot edit or create new ones. 50.0%
