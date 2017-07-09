@@ -1,8 +1,11 @@
 from bitstring import *
-from script.binclass import *
+from script.python.binclass import *
 
-bs = BitStream(filename="/Users/waelwindows/Documents/DIVA_Tools/dsc/pv_717_normal.dsc")
-file = open("/Users/waelwindows/Documents/DIVA_Tools/dsc/pv_717_normal.dsc", "r+b")
+#fileloc = input()
+fileloc = "/Users/waelwindows/Documents/DIVA_Tools/test_files/dsc/pv_717_normal.dsc"
+
+bs = BitStream(filename=fileloc)
+file = open(fileloc, "r+b")
 
 class dsc_header(BinClass):
     def __init__(self, bs):
@@ -131,7 +134,7 @@ class dsc_file(BinClass):
 dsc = dsc_file(bs)
 first_note = dsc.notes[0]
 first_note.time_stamp = 69696
-dsc.overwrite_note(first_note, 0)
+#dsc.overwrite_note(first_note, 0)
 
 new_note = dsc_note(bs, None,True)
 new_note.time_stamp = 54321
