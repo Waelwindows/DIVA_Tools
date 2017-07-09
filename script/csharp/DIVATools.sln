@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIVALib", "DIVALib\DIVALib.csproj", "{0777CD4F-2D6B-4E46-9F55-EC4DCC1AB59B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarcPack", "FarcPack\FarcPack.csproj", "{5614B568-F303-4293-8F45-51EF0BE1BE42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBTools", "DBTools\DBTools.csproj", "{0BCD4758-560D-40A4-A600-28FB78EE8526}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0777CD4F-2D6B-4E46-9F55-EC4DCC1AB59B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0777CD4F-2D6B-4E46-9F55-EC4DCC1AB59B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0777CD4F-2D6B-4E46-9F55-EC4DCC1AB59B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0777CD4F-2D6B-4E46-9F55-EC4DCC1AB59B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5614B568-F303-4293-8F45-51EF0BE1BE42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5614B568-F303-4293-8F45-51EF0BE1BE42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5614B568-F303-4293-8F45-51EF0BE1BE42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5614B568-F303-4293-8F45-51EF0BE1BE42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
