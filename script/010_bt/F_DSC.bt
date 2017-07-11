@@ -1,0 +1,334 @@
+//------------------------------------------------
+//--- 010 Editor v8.0 Binary Template
+//
+//      File:
+//   Authors:
+//   Version:
+//   Purpose:
+//  Category:
+// File Mask:
+//  ID Bytes:
+//   History:
+//------------------------------------------------
+
+typedef struct {
+    char magic[4] <name="Magic", format=hex>;
+} HEADER <name="Header", bgcolor=cRed>;
+
+//0x00
+typedef struct {
+    uint id <hidden=1>;
+    uint unk;
+} END <name="End", bgcolor=cBlue>;
+
+//0x01
+typedef struct {
+    uint id <hidden=1>;
+    uint timestamp <name="Timestamp">;
+} TIME <name="Function Timestamp", bgcolor=cBlue>;
+
+//0x02
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint xtrans <name="X Transform">;
+    uint ytrans <name="Y Transform">;
+    uint ztrans <name="Z Transform">;
+} MIKU_MOVE <name="MIKU - Move", bgcolor=cBlue>;
+
+//0x03
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint rotation <name="Rotation">;
+} MIKU_ROT <name="MIKU - Rotate", bgcolor=cBlue>;
+
+//0x04
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint displayState <name="Display state">;
+} MIKU_DISP <name="MIKU - Display", bgcolor=cBlue>;
+
+//0x05
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint shadowState <name="State">;
+} MIKU_SHADOW <name="MIKU - Shadow", bgcolor=cBlue>;
+
+//0x06
+typedef struct {
+    uint id <hidden=1>;
+    uint type <name="Note Type">;
+    int  hold_length <name="Hold Length", comment="Disabled if 0xFF_FF_FF_FF">;
+    int  is_hold_end <name="Hold End?">;
+    uint pos_x <name="Position X">;
+    uint pos_y <name="Position Y">;
+    uint curve1 <name="Curve - Small">;
+    uint speed <name="Speed", comment="Challenge Item speed">;
+    uint curve2 <name="Curve - Big">;
+    uint bpm <name="BPM">;
+    uint none <hidden=1>;
+} TARGET <name="Note", bgcolor=cGreen>;
+
+//0x07
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint anim_id <name="Animation ID", comment="Based on", format=hex>;
+    int time <name="Animation Start time", comment="In MS, disabled when set to -1">;
+    uint speed <name="Speed">;
+} SET_MOTION <name="Set Motion", bgcolor=cBlue>;
+
+//0x08
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[2] <hidden=1>;
+} SET_PLAYDATA <name="Set Playdata", bgcolor=cBlue>;
+
+//0x09
+typedef struct {
+    uint id <hidden=1>;
+    uint fxID <name="Effect ID">;
+    uint unk[5] <hidden=1>;
+} EFFECT <name="Effect", bgcolor=cBlue>;
+
+//0x0C
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[2] <hidden=1>;
+} SET_CAMERA <name="Set Camera", bgcolor=cBlue>;
+
+//0x0D
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[2] <hidden=1>;
+} DATA_CAMERA <name="Data - Camera", bgcolor=cBlue>;
+
+//0x0E
+typedef struct {
+    uint id <hidden=1>;
+    uint fieldID <name="Field ID", comment="Based on", format=hex>;
+} CHANGE_FIELD <name="Change Field (Stage)", bgcolor=cBlue>;
+
+//0x12
+typedef struct {
+    uint id <hidden=1>;
+    uint player_id <name="Player ID">;
+    uint anim_id <name="Anim ID", comment="Bool, just for blinking">;
+    uint unk <hidden=1>;
+} EYE_ANIM <name="Eye Animation", bgcolor=cBlue>;
+
+//0x13
+typedef struct {
+    uint id <hidden=1>;
+    uint player_id <name="Player ID">;
+    uint anim_id <name="Anim ID">;
+    uint unk[3] <hidden=1>;
+} MOUTH_ANIM <name="Mouth Animation", bgcolor=cBlue>;
+
+//0x14
+typedef struct {
+    uint id <hidden=1>;
+    uint player_id <name="Player ID">;
+    uint anim_id <name="Anim ID">;
+    uint unk[3] <hidden=1>;
+} HAND_ANIM <name="Hand Animation", bgcolor=cBlue>;
+
+//0x15
+typedef struct {
+    uint id <hidden=1>;
+    uint player_id <name="Player ID">;
+    uint anim_id <name="Anim ID">;
+    uint unk <hidden=1>;
+} LOOK_ANIM <name="Look Animation", bgcolor=cBlue>;
+
+//0x16
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[4] <hidden=1>;
+} EXPRESSION <name="Expression", bgcolor=cBlue>;
+
+//0x18
+typedef struct {
+    uint id <hidden=1>;
+    uint lyric_id <name="Lyric ID">;
+    uint color <name="Color", comment="BGRA format, Set to (FF, FF, FF, FF)", format=hex>;
+} LYRIC_COLOR <name="Lyrics - Color", bgcolor=cBlue>;
+
+//0x19
+typedef struct {
+    uint id <hidden=1>;
+} PLAY_MUSIC <name="Play Music", bgcolor=cBlue, comment="Neccessary to start the song">;
+
+//0x1A
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[2];
+} MODE_SELECT <name="Mode Select", bgcolor=cBlue>;
+
+//0x1C
+typedef struct {
+    uint id <hidden=1>;
+    uint bpm <name="BPM">;
+    uint unk <hidden=1>;
+
+} BAR_TIME_SET <name="Bar time set", bgcolor=cBlue, comment="Globally changes the BPM for following notes">;
+
+//0x1D
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[2];
+} SHADOW_HEIGHT <name="Shadow Height", bgcolor=cBlue>;
+
+//0x1F
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[21];
+} MOVE_CAMERA <name="MOVE - Camera", bgcolor=cBlue>;
+
+//0x20
+typedef struct {
+    uint id <hidden=1>;
+} PV_END <name="PV End", bgcolor=cBlue, comment="Ends the song when triggered">;
+
+//0x25
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID<name="Player ID", comment="Only used in edit mode">;
+} SET_CHARA <name="EDIT - Set Character", bgcolor=cBlue>;
+
+//0x2A
+typedef struct {
+    uint id <hidden=1>;
+    uint item <name="Item ID">;
+} EDIT_ITEM <name="EDIT - Set Character Item", bgcolor=cBlue>;
+
+//0x2B
+typedef struct {
+    uint id <hidden=1>;
+    uint fxID <name="Effect ID">;
+} EDIT_EFFECT <name="EDIT - Set Effect", bgcolor=cBlue>;
+
+//0x2C
+typedef struct {
+    uint id <hidden=1>;
+    uint display_state <name="Display State">;
+} EDIT_DISP <name="EDIT - Set Character Display State", bgcolor=cBlue>;
+
+//0x30
+typedef struct {
+    uint id <hidden=1>;
+    uint blushID <name="Blush ID", comment="Based on", format=hex>;
+} EDIT_BLUSH <name="EDIT - Set Character Blush", bgcolor=cBlue>;
+
+//0x34
+typedef struct {
+    uint id <hidden=1>;
+    uint speed <name="Fade Speed">;
+    uint fade_in <name="Fade In">;
+    uint fade_out <name="Fade Out">;
+    uint red <name="Red">;
+    uint green <name="Green">;
+    uint blue <name="Blue">;
+} SCENE_FADE <name="Scene Fade", bgcolor=cBlue>;
+
+//0x3A
+typedef struct {
+    uint id <hidden=1>;
+    uint bpm <name="BPM">;
+} TARGET_FLYING_TIME <name="Note Fly Time", bgcolor=cBlue, comment="Same as Bar time set, only used in FT">;
+
+//0x41
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[4];
+} PV_BRANCH_MODE <name="PV - Branch Mode", bgcolor=cBlue>;
+
+//0x42
+typedef struct {
+    uint id <hidden=1>;
+    uint unk <hidden=1>;
+} DATA_CAMERA_START <name="Data - Camera Start", bgcolor=cBlue>;
+
+//0x43
+typedef struct {
+    uint id <hidden=1>;
+    uint play <name="Play", comment="Acts as bool">;
+} MOVIE_PLAY <name="MOVIE - Play", bgcolor=cBlue, comment="Plays movie, but doens't display">;
+
+//0x44
+typedef struct {
+    uint id <hidden=1>;
+    uint display <name="Display">;
+} MOVIE_DISP <name="MOVIE - Display", bgcolor=cBlue, comment="Displays movie, but doens't play">;
+
+//0x48
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint color <name="Color">;
+} CHARA_COLOR <name="Character - Color", bgcolor=cBlue>;
+
+//0x51
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[24];
+} EDIT_CAMERA <name="EDIT - Camera", bgcolor=cBlue>;
+
+//0x4
+typedef struct {
+    uint id <hidden=1>;
+} TST <name="NAME", bgcolor=cBlue>;
+
+LittleEndian();
+HEADER header;
+local int i;
+local int pos;
+local uint func_id;
+for (i=0; i<5000; i++){
+    pos = FTell();
+    //Printf("Currently at 0x%x, ", pos);
+    func_id = ReadUInt();
+    //Printf("0x%x func_id \n", func_id);
+    switch(func_id){
+        case 0x00: END end; break;
+        case 0x01: TIME timestamp; break;
+        case 0x02: MIKU_MOVE mmove; break;
+        case 0x03: MIKU_ROT mrot; break;
+        case 0x04: MIKU_DISP mikdisp; break;
+        case 0x05: MIKU_SHADOW mshadow; break;
+        case 0x06: TARGET note; break;
+        case 0x07: SET_MOTION smotion; break;
+        case 0x08: SET_PLAYDATA splaydata; break;
+        case 0x09: EFFECT fx; break;
+        case 0x0D: DATA_CAMERA dcam; break;
+        case 0x0E: CHANGE_FIELD cfield; break;
+        case 0x12: EYE_ANIM eanim; break;
+        case 0x13: MOUTH_ANIM manim; break;
+        case 0x14: HAND_ANIM hanim; break;
+        case 0x15: LOOK_ANIM lanim; break;
+        case 0x16: EXPRESSION exp; break;
+        case 0x18: LYRIC_COLOR lcolor; break;
+        case 0x19: PLAY_MUSIC pmusic; break;
+        case 0x1A: MODE_SELECT mselect; break;
+        case 0x1C: BAR_TIME_SET bts; break;
+        case 0x1D: SHADOW_HEIGHT sheight; break;
+        case 0x20: PV_END pvend; break;
+        case 0x25: SET_CHARA schara; break;
+        case 0x2A: EDIT_ITEM eitem; break;
+        case 0x2B: EDIT_EFFECT efx; break;
+        case 0x2C: EDIT_DISP edisp; break;
+        case 0x30: EDIT_BLUSH eblush; break;
+        case 0x34: SCENE_FADE sfade; break;
+        case 0x3A: TARGET_FLYING_TIME tft; break;
+        case 0x41: PV_BRANCH_MODE pbm; break;
+        case 0x42: DATA_CAMERA_START dcs; break;
+        case 0x43: MOVIE_PLAY mplay; break;
+        case 0x44: MOVIE_DISP mdisp; break;
+        case 0x48: CHARA_COLOR ccolor; break;
+        case 0x51: EDIT_CAMERA ecam; break;
+        default: Printf("Unimplemented func_id (0x%x) at *0x%x offset \n", func_id, pos); break; break;
+    }
+}

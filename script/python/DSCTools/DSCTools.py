@@ -1,11 +1,32 @@
 from bitstring import *
 from script.python.binclass import *
+#from python.binclass import *
+from enum import IntEnum
 
 #fileloc = input()
 fileloc = "/Users/waelwindows/Documents/DIVA_Tools/test_files/dsc/pv_717_normal.dsc"
 
 bs = BitStream(filename=fileloc)
 file = open(fileloc, "r+b")
+
+class NOTE(IntEnum):
+    TRIANGLE        = 0
+    CIRCLE          = 1
+    CROSS           = 2
+    SQUARE          = 3
+    ARROW_TRIANGLE  = 4
+    ARROW_CIRCLE    = 5
+    ARROW_CROSS     = 6
+    ARROW_SQUARE    = 7
+    HOLD_TRIANGLE   = 8
+    HOLD_CIRCLE     = 9
+    HOLD_CROSS      = 10
+    HOLD_SQUARE     = 11
+    STAR            = 12
+    DOUBLE_STAR     = 14
+    CHANCE_STAR     = 15
+    LINKED_STAR     = 22
+    LINKED_STAR_END = 23
 
 class dsc_header(BinClass):
     def __init__(self, bs):
@@ -20,34 +41,35 @@ class dsc_header(BinClass):
         s.shift(s_uint, 7)
 
 class dsc_note(BinClass):
-    def __init__(self, bs, encoding="le", create=False):
+    def __init__(self, bs, create=False):
+        static_encode = "be"
         s = self
         BinClass.__init__(s, bs)
         s.note_pos = 0
         if not create:
             s.note_pos = bs.pos
-            s.unk1 = s.read_uint8(encoding)
-            s.time_stamp = s.read_uint8(encoding)
-            s.note_opcode = s.read_uint8(encoding)
-            s.note_type = s.read_uint8(encoding)
-            s.hold_length = s.read_int8(encoding)
-            s.is_hold_end = s.read_int8(encoding)
-            s.note_xcoord = s.read_int8(encoding)
-            s.note_ycoord = s.read_int8(encoding)
-            s.curve_angle1 = s.read_int8(encoding)
-            s.curve_angle2 = s.read_int8(encoding)
-            s.unk2 = s.read_uint8(encoding)
-            s.unk3 = s.read_uint8(encoding)
-            s.note_timeout = s.read_uint8(encoding) #in ms
-            s.unk4 = s.read_uint8(encoding)
-            s.unk5 = s.read_int8(encoding)
+            s.unk1 = s.read_uint8(static_encode)
+            s.time_stamp = s.read_uint8(static_encode)
+            s.note_opcode = s.read_uint8(static_encode)
+            s.note_type = s.read_uint8(static_encode)
+            s.hold_length = s.read_int8(static_encode)
+            s.is_hold_end = s.read_int8(static_encode)
+            s.note_xcoord = s.read_int8(static_encode)
+            s.note_ycoord = s.read_int8(static_encode)
+            s.curve_angle1 = s.read_int8(static_encode)
+            s.curve_angle2 = s.read_int8(static_encode)
+            s.unk2 = s.read_uint8(static_encode)
+            s.unk3 = s.read_uint8(static_encode)
+            s.note_timeout = s.read_uint8(static_encode) #in ms
+            s.unk4 = s.read_uint8(static_encode)
+            s.unk5 = s.read_int8(static_encode)
         else:
             s.unk1 = 0
-            s.time_stamp = 0 # / 100,000 ?
+            s.time_stamp = 0 # / 10 (e.g. 12345 = 0.12345)
             s.note_opcode = 0
-            s.note_type = 0
+            s.note_type = 0 # Add enum ?
             s.hold_length = 0
-            s.is_hold_end = 0
+            s.is_hold_end = 0 # is Bool
             s.note_xcoord = 0
             s.note_ycoord = 0
             s.curve_angle1 = 0
@@ -115,12 +137,16 @@ class dsc_file(BinClass):
         counter = 8
         s.notes = []
         while counter <= s.header.content_length-60:
-            self.notes.append(dsc_note(bs, "be"))
+            self.notes.append(dsc_note(bs))
             counter+=60
 
     def overwrite_note(self, note, pos=0):
         note_offset = self.notes[pos].note_pos
         self.bs.overwrite(note.to_BArray, note_offset)
+
+    def update_note(self, pos=0):
+        note_offset = self.notes[pos].note_pos
+        self.bs.overwrite(self.notes[pos].to_BArray, note_offset)
 
     def add_note(self, note):
         note_offset = self.notes[-1].note_pos
@@ -132,11 +158,3 @@ class dsc_file(BinClass):
         self.bs.tofile(file)
 
 dsc = dsc_file(bs)
-first_note = dsc.notes[0]
-first_note.time_stamp = 69696
-#dsc.overwrite_note(first_note, 0)
-
-new_note = dsc_note(bs, None,True)
-new_note.time_stamp = 54321
-dsc.add_note(new_note)
-dsc.save_changes(file)
