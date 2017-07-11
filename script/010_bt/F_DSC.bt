@@ -1,14 +1,11 @@
 //------------------------------------------------
 //--- 010 Editor v8.0 Binary Template
 //
-//      File:
-//   Authors:
-//   Version:
-//   Purpose:
-//  Category:
-// File Mask:
-//  ID Bytes:
-//   History:
+//   Authors: Waelwindows, Stewie 1.0
+//   Version: 0.1
+//   Purpose: Parse F dsc
+// File Mask: .dsc
+//  ID Bytes: 20 02 02 12
 //------------------------------------------------
 
 typedef struct {
@@ -243,7 +240,7 @@ typedef struct {
 //0x41
 typedef struct {
     uint id <hidden=1>;
-    uint unk[4];
+    uint unk[3];
 } PV_BRANCH_MODE <name="PV - Branch Mode", bgcolor=cBlue>;
 
 //0x42
@@ -332,3 +329,4 @@ for (i=0; i<5000; i++){
         default: Printf("Unimplemented func_id (0x%x) at *0x%x offset \n", func_id, pos); break; break;
     }
 }
+Printf("Script done, at %Lx bytes!", FTell());
