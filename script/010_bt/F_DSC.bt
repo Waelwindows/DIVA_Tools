@@ -8,6 +8,205 @@
 //  ID Bytes: 20 02 02 12
 //------------------------------------------------
 
+typedef uint uintbool <read=uintbool_read, write=uintbool_write>;
+typedef int intbool <read=intbool_read, write=intbool_write>;
+typedef uint msec <read=msec_read, write=msec_write, open=suppress>;
+typedef ubyte ub_bgra[4] <read=ub_bgra_read, write=ub_bgra_write, comment=ub_bgra_comment>;
+typedef int timeLength <read=tl_read, write=tl_write>;
+typedef uint hex_id <read=hexid_read, write=hexid_write>;
+
+const local float screenpos_unit = 10000.0;
+typedef uint screenpos <read=pos_read, write=pos_write>;
+const local float sub_degrees = 1000;
+typedef int degrees <read=degree_read, write=degree_write, comment="Starts clockwise">;
+
+enum <uint> note_type {
+    TRIANGLE        = 0,
+    CIRCLE          = 1,
+    CROSS           = 2,
+    SQUARE          = 3,
+    ARROW_TRIANGLE  = 4,
+    ARROW_CIRCLE    = 5,
+    ARROW_CROSS     = 6,
+    ARROW_SQUARE    = 7,
+    HOLD_TRIANGLE   = 8,
+    HOLD_CIRCLE     = 9,
+    HOLD_CROSS      = 10,
+    HOLD_SQUARE     = 11,
+    STAR            = 12,
+    DOUBLE_STAR     = 14,
+    CHANCE_STAR     = 15,
+    LINKED_STAR     = 22,
+    LINKED_STAR_END = 23,
+};
+
+float getDecimal(float f) {
+    int fint = f;
+    return f - fint;
+}
+
+string numToString(int i){
+    string rslt;
+    SPrintf(rslt, "%i", i);
+    return rslt;
+}
+
+string floatToString(float i){
+    string rslt;
+    SPrintf(rslt, "%f", i);
+    return rslt;
+}
+
+string floatStrAtDP(float i, int dp){
+    int intonly = i;
+    string value;
+    string nofloat;
+    SPrintf(value, "%f", i);
+    SPrintf(nofloat, "%i", intonly);
+    return nofloat + SubStr(value, Strlen(nofloat), dp+1);
+}
+
+string uintbool_read(uintbool i){
+    switch (i) {
+        case 0: return "False"; break;
+        case 1: return "True"; break;
+        default: return; break;
+    }
+}
+
+void uintbool_write(uintbool &i,string s){
+    switch (s) {
+        case "False" : i = 0; break;
+        case "True" : i = 1; break;
+        case "0": i = 0; break;
+        case "1": i = 1; break;
+        default: break;
+    }
+}
+
+string intbool_read(intbool i){
+    switch (i) {
+        case -1: return "False"; break;
+        case 1: return "True"; break;
+        default: return; break;
+    }
+}
+
+void intbool_write(intbool &i,string s){
+    switch (s) {
+        case "False" : i = -1; break;
+        case "True" : i = 1; break;
+        case "-1": i = -1; break;
+        case "1": i = 1; break;
+        default: break;
+    }
+}
+
+string msec_read(msec ms) {
+    float sec = ms / 100000.0;
+    float milsec = ms / 100.0;
+    return floatStrAtDP(milsec, 2) + " ms, " + floatStrAtDP(sec, 2) + "s";
+}
+
+void msec_write(msec &ms, string s) {
+    float value;
+    uint multiplier;
+    SScanf( s, "%f", value);
+    if (SubStr(s, Strlen(s)-1, 1) == "s"){
+        multiplier = 100000;
+    } else {
+        multiplier = 1000;
+    }
+    ms = value * multiplier;
+}
+
+string ub_bgra_read(ub_bgra ub){
+    string b;
+    string g;
+    string r;
+    string a;
+    SPrintf(b, "%u, ", ub[0]);
+    SPrintf(g, "%u, ", ub[1]);
+    SPrintf(r, "%u, ", ub[2]);
+    SPrintf(a, "%u", ub[3]);
+    return "(" +b+g+r+a+")";
+}
+
+void ub_bgra_write(ub_bgra &ub, string s){
+    SScanf( s, "(%u, %u, %u, %u)", ub[0], ub[1], ub[2], ub[3]);
+}
+
+string ub_bgra_comment(ub_bgra ub){
+    string b;
+    string g;
+    string r;
+    string a;
+    SPrintf(b, "%X", ub[0]);
+    SPrintf(g, "%X", ub[1]);
+    SPrintf(r, "%X", ub[2]);
+    return "BGRA Color " + "#"+b+g+r;
+}
+
+string pos_read(screenpos sp){
+    return "At " + floatStrAtDP(sp / screenpos_unit, 2);
+}
+
+void pos_write(screenpos &sp, string s) {
+    float prenum;
+    SScanf( s, "%f", prenum);
+    sp = prenum * screenpos_unit;
+}
+
+string degree_read(degrees d) {
+    float degree = d / sub_degrees;
+    if (getDecimal(degree) == 0){
+        if (degree == 1){
+            return numToString(degree) + " degree";
+        } else {
+            return numToString(degree) + " degrees";
+        }
+    } else {
+        return floatStrAtDP(degree, 2) + " degrees";
+    }
+}
+
+void degree_write(degrees &d, string s) {
+    float value;
+    SScanf(s, "%f", value);
+    d = value * sub_degrees;
+}
+
+string tl_read(timeLength tl) {
+    if (tl == -1) {
+        return "(Disabled)";
+    }
+    float sec = tl / 100000.0;
+    float milisec = tl / 100.0;
+    return floatStrAtDP(milisec, 2) + " ms, " + floatStrAtDP(sec, 2) + "s long";
+}
+
+void tl_write(timeLength &tl, string s) {
+    float value;
+    SScanf(s, "%f", value);
+    if (SubStr(s, Strlen(s)-1, 1) == "s") {
+        tl = value * 100000;
+    } else {
+        tl = value * 100;
+    }
+}
+
+string hexid_read(hex_id hid) {
+    string rslt;
+    SPrintf(rslt, "0x%X", hid);
+    return rslt + " ID";
+};
+
+void hexid_write(hex_id &hid, string s){
+    uint id;
+    SScanf(s, "%x", id);
+    hid = id;
+}
+
 typedef struct {
     char magic[4] <name="Magic", format=hex>;
 } HEADER <name="Header", bgcolor=cRed>;
@@ -21,8 +220,8 @@ typedef struct {
 //0x01
 typedef struct {
     uint id <hidden=1>;
-    uint timestamp <name="Timestamp">;
-} TIME <name="Function Timestamp", bgcolor=cBlue>;
+    msec timestamp <name="Timestamp">;
+} TIME <name="Function Timestamp", bgcolor=cAqua>;
 
 //0x02
 typedef struct {
@@ -37,58 +236,59 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint playerID <name="Player ID">;
-    uint rotation <name="Rotation">;
+    int rotation <name="Rotation">;
 } MIKU_ROT <name="MIKU - Rotate", bgcolor=cBlue>;
 
 //0x04
 typedef struct {
     uint id <hidden=1>;
     uint playerID <name="Player ID">;
-    uint displayState <name="Display state">;
+    uintbool displayState <name="Display state">;
 } MIKU_DISP <name="MIKU - Display", bgcolor=cBlue>;
 
 //0x05
 typedef struct {
     uint id <hidden=1>;
     uint playerID <name="Player ID">;
-    uint shadowState <name="State">;
+    uintbool shadowState <name="State">;
 } MIKU_SHADOW <name="MIKU - Shadow", bgcolor=cBlue>;
 
 //0x06
 typedef struct {
     uint id <hidden=1>;
-    uint type <name="Note Type">;
-    int  hold_length <name="Hold Length", comment="Disabled if 0xFF_FF_FF_FF">;
-    int  is_hold_end <name="Hold End?">;
-    uint pos_x <name="Position X">;
-    uint pos_y <name="Position Y">;
-    uint curve1 <name="Curve - Small">;
+    note_type type <name="Note Type">;
+    timeLength  hold_length <name="Hold Length">;
+    intbool  is_hold_end <name="Hold End">;
+    screenpos xpos <name="X Position", comment="Ends at 50">;
+    screenpos ypos <name="Y Position", comment="Ends at 30">;
+    degrees curve1 <name="Curve - Small">;
     uint speed <name="Speed", comment="Challenge Item speed">;
-    uint curve2 <name="Curve - Big">;
+    degrees curve2 <name="Curve - Big">;
     uint bpm <name="BPM">;
-    uint none <hidden=1>;
+    uint unk <name="Unknown Value", comment="Same value on notes from one file">;
 } TARGET <name="Note", bgcolor=cGreen>;
 
 //0x07
 typedef struct {
     uint id <hidden=1>;
     uint playerID <name="Player ID">;
-    uint anim_id <name="Animation ID", comment="Based on", format=hex>;
-    int time <name="Animation Start time", comment="In MS, disabled when set to -1">;
+    hex_id anim_id <name="Animation ID", comment="Based on", format=hex>;
+    timeLength time <name="Animation Start time">;
     uint speed <name="Speed">;
 } SET_MOTION <name="Set Motion", bgcolor=cBlue>;
 
 //0x08
 typedef struct {
     uint id <hidden=1>;
-    uint unk[2] <hidden=1>;
+    uint playerID <name="Player ID">;
+    uintbool mode <name="Mode">;
 } SET_PLAYDATA <name="Set Playdata", bgcolor=cBlue>;
 
 //0x09
 typedef struct {
     uint id <hidden=1>;
     uint fxID <name="Effect ID">;
-    uint unk[5] <hidden=1>;
+    uint unk[5];
 } EFFECT <name="Effect", bgcolor=cBlue>;
 
 //0x0C
@@ -106,14 +306,14 @@ typedef struct {
 //0x0E
 typedef struct {
     uint id <hidden=1>;
-    uint fieldID <name="Field ID", comment="Based on", format=hex>;
+    hex_id field_id <name="Field ID", comment="Based on field_db">;
 } CHANGE_FIELD <name="Change Field (Stage)", bgcolor=cBlue>;
 
 //0x12
 typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
-    uint anim_id <name="Anim ID", comment="Bool, just for blinking">;
+    hex_id anim_id <name="Anim ID", comment="Bool, just for blinking">;
     uint unk <hidden=1>;
 } EYE_ANIM <name="Eye Animation", bgcolor=cBlue>;
 
@@ -121,7 +321,7 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
-    uint anim_id <name="Anim ID">;
+    hex_id anim_id <name="Anim ID">;
     uint unk[3] <hidden=1>;
 } MOUTH_ANIM <name="Mouth Animation", bgcolor=cBlue>;
 
@@ -129,7 +329,7 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
-    uint anim_id <name="Anim ID">;
+    hex_id anim_id <name="Anim ID">;
     uint unk[3] <hidden=1>;
 } HAND_ANIM <name="Hand Animation", bgcolor=cBlue>;
 
@@ -137,21 +337,24 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
-    uint anim_id <name="Anim ID">;
+    hex_id anim_id <name="Anim ID">;
     uint unk <hidden=1>;
 } LOOK_ANIM <name="Look Animation", bgcolor=cBlue>;
 
 //0x16
 typedef struct {
     uint id <hidden=1>;
-    uint unk[4] <hidden=1>;
+    uint player_id <name="Player ID">;
+    hex_id exp_id <name="Expression ID", format=hex>;
+    timeLength unk1 <name="Expression Start-time">;
+    int unk2 <name="Speed?", comment="Disabled if set to -1">;
 } EXPRESSION <name="Expression", bgcolor=cBlue>;
 
 //0x18
 typedef struct {
     uint id <hidden=1>;
-    uint lyric_id <name="Lyric ID">;
-    uint color <name="Color", comment="BGRA format, Set to (FF, FF, FF, FF)", format=hex>;
+    hex_id lyric_id <name="Lyric ID">;
+    ub_bgra color <name="Color">;
 } LYRIC_COLOR <name="Lyrics - Color", bgcolor=cBlue>;
 
 //0x19
@@ -169,8 +372,7 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint bpm <name="BPM">;
-    uint unk <hidden=1>;
-
+    uint noteSpeed <name="Note speed">;
 } BAR_TIME_SET <name="Bar time set", bgcolor=cBlue, comment="Globally changes the BPM for following notes">;
 
 //0x1D
@@ -211,7 +413,7 @@ typedef struct {
 //0x2C
 typedef struct {
     uint id <hidden=1>;
-    uint display_state <name="Display State">;
+    uintbool display_state <name="Display State">;
 } EDIT_DISP <name="EDIT - Set Character Display State", bgcolor=cBlue>;
 
 //0x30
@@ -240,26 +442,26 @@ typedef struct {
 //0x41
 typedef struct {
     uint id <hidden=1>;
-    uint unk[3];
-} PV_BRANCH_MODE <name="PV - Branch Mode", bgcolor=cBlue>;
+    uint mode <name="Mode">;
+} PV_BRANCH_MODE <name="PV - Branch Mode", bgcolor=cYellow>;
 
 //0x42
 typedef struct {
     uint id <hidden=1>;
-    uint unk <hidden=1>;
+    uint unk[3];
 } DATA_CAMERA_START <name="Data - Camera Start", bgcolor=cBlue>;
 
 //0x43
 typedef struct {
     uint id <hidden=1>;
-    uint play <name="Play", comment="Acts as bool">;
+    uintbool play <name="Play">;
 } MOVIE_PLAY <name="MOVIE - Play", bgcolor=cBlue, comment="Plays movie, but doens't display">;
 
 //0x44
 typedef struct {
     uint id <hidden=1>;
     uint display <name="Display">;
-} MOVIE_DISP <name="MOVIE - Display", bgcolor=cBlue, comment="Displays movie, but doens't play">;
+} MOVIE_DISP <name="MOVIE - Display", bgcolor=cBlue, comment="Displays movie, but doens'lay">;
 
 //0x48
 typedef struct {
@@ -267,6 +469,12 @@ typedef struct {
     uint playerID <name="Player ID">;
     uint color <name="Color">;
 } CHARA_COLOR <name="Character - Color", bgcolor=cBlue>;
+
+//0x49
+typedef struct {
+    uint id <hidden=1>;
+    uint seID <name="Sound ID">;
+} SE_EFFECT <name="Chance Time Success Sound", bgcolor=cBlue>;
 
 //0x51
 typedef struct {
@@ -279,54 +487,60 @@ typedef struct {
     uint id <hidden=1>;
 } TST <name="NAME", bgcolor=cBlue>;
 
+typedef struct {
+    local int i;
+    local int pos;
+    local uint func_id;
+    local uint isbreak;
+    for (i=0; i<5000; i++){
+        if (isbreak == 1){
+            break;
+        }
+        pos = FTell();
+        func_id = ReadUInt();
+        switch(func_id){
+            case 0x00: END end; break;
+            case 0x01: TIME timestamp; break;
+            case 0x02: MIKU_MOVE mmove; break;
+            case 0x03: MIKU_ROT mrot; break;
+            case 0x04: MIKU_DISP mikdisp; break;
+            case 0x05: MIKU_SHADOW mshadow; break;
+            case 0x06: TARGET note; break;
+            case 0x07: SET_MOTION smotion; break;
+            case 0x08: SET_PLAYDATA splaydata; break;
+            case 0x09: EFFECT fx; break;
+            case 0x0D: DATA_CAMERA dcam; break;
+            case 0x0E: CHANGE_FIELD cfield; break;
+            case 0x12: EYE_ANIM eanim; break;
+            case 0x13: MOUTH_ANIM manim; break;
+            case 0x14: HAND_ANIM hanim; break;
+            case 0x15: LOOK_ANIM lanim; break;
+            case 0x16: EXPRESSION exp; break;
+            case 0x18: LYRIC_COLOR lcolor; break;
+            case 0x19: PLAY_MUSIC pmusic; break;
+            case 0x1A: MODE_SELECT mselect; break;
+            case 0x1C: BAR_TIME_SET bts; break;
+            case 0x1D: SHADOW_HEIGHT sheight; break;
+            case 0x20: PV_END pvend; break;
+            case 0x25: SET_CHARA schara; break;
+            case 0x2A: EDIT_ITEM eitem; break;
+            case 0x2B: EDIT_EFFECT efx; break;
+            case 0x2C: EDIT_DISP edisp; break;
+            case 0x30: EDIT_BLUSH eblush; break;
+            case 0x34: SCENE_FADE sfade; break;
+            case 0x3A: TARGET_FLYING_TIME tft; break;
+            case 0x41: PV_BRANCH_MODE pbm; break;
+            case 0x42: DATA_CAMERA_START dcs; break;
+            case 0x43: MOVIE_PLAY mplay; break;
+            case 0x44: MOVIE_DISP mdisp; break;
+            case 0x48: CHARA_COLOR ccolor; break;
+            case 0x49: SE_EFFECT sefx; break;
+            case 0x51: EDIT_CAMERA ecam; break;
+            default: Printf("Unimplemented func_id (0x%X) at *0x%X offset \n", func_id, pos); isbreak = 1; break;
+        }
+    }
+} DSC_FILE <name="DSC File", open=true>;
+
 LittleEndian();
 HEADER header;
-local int i;
-local int pos;
-local uint func_id;
-for (i=0; i<5000; i++){
-    pos = FTell();
-    //Printf("Currently at 0x%x, ", pos);
-    func_id = ReadUInt();
-    //Printf("0x%x func_id \n", func_id);
-    switch(func_id){
-        case 0x00: END end; break;
-        case 0x01: TIME timestamp; break;
-        case 0x02: MIKU_MOVE mmove; break;
-        case 0x03: MIKU_ROT mrot; break;
-        case 0x04: MIKU_DISP mikdisp; break;
-        case 0x05: MIKU_SHADOW mshadow; break;
-        case 0x06: TARGET note; break;
-        case 0x07: SET_MOTION smotion; break;
-        case 0x08: SET_PLAYDATA splaydata; break;
-        case 0x09: EFFECT fx; break;
-        case 0x0D: DATA_CAMERA dcam; break;
-        case 0x0E: CHANGE_FIELD cfield; break;
-        case 0x12: EYE_ANIM eanim; break;
-        case 0x13: MOUTH_ANIM manim; break;
-        case 0x14: HAND_ANIM hanim; break;
-        case 0x15: LOOK_ANIM lanim; break;
-        case 0x16: EXPRESSION exp; break;
-        case 0x18: LYRIC_COLOR lcolor; break;
-        case 0x19: PLAY_MUSIC pmusic; break;
-        case 0x1A: MODE_SELECT mselect; break;
-        case 0x1C: BAR_TIME_SET bts; break;
-        case 0x1D: SHADOW_HEIGHT sheight; break;
-        case 0x20: PV_END pvend; break;
-        case 0x25: SET_CHARA schara; break;
-        case 0x2A: EDIT_ITEM eitem; break;
-        case 0x2B: EDIT_EFFECT efx; break;
-        case 0x2C: EDIT_DISP edisp; break;
-        case 0x30: EDIT_BLUSH eblush; break;
-        case 0x34: SCENE_FADE sfade; break;
-        case 0x3A: TARGET_FLYING_TIME tft; break;
-        case 0x41: PV_BRANCH_MODE pbm; break;
-        case 0x42: DATA_CAMERA_START dcs; break;
-        case 0x43: MOVIE_PLAY mplay; break;
-        case 0x44: MOVIE_DISP mdisp; break;
-        case 0x48: CHARA_COLOR ccolor; break;
-        case 0x51: EDIT_CAMERA ecam; break;
-        default: Printf("Unimplemented func_id (0x%x) at *0x%x offset \n", func_id, pos); break; break;
-    }
-}
-Printf("Script done, at %Lx bytes!", FTell());
+DSC_FILE dsc;

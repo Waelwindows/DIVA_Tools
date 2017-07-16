@@ -1,10 +1,6 @@
 from bitstring import *
 from script.python.binclass import *
-#from python.binclass import *
 from enum import IntEnum
-
-#fileloc = input()
-fileloc = "/Users/waelwindows/Documents/DIVA_Tools/test_files/dsc/pv_717_normal.dsc"
 
 bs = BitStream(filename=fileloc)
 file = open(fileloc, "r+b")
@@ -156,5 +152,3 @@ class dsc_file(BinClass):
 
     def save_changes(self, file):
         self.bs.tofile(file)
-
-dsc = dsc_file(bs)

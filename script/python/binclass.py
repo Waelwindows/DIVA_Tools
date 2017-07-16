@@ -24,7 +24,8 @@ class BinClass():
     @property
     def to_BArray(self):
         var = vars(self)
-        var.pop("bs")
+        try: var.pop("bs")
+        except: pass
         byteStr = ""
         for value in var.values():
             byteStr+=str(byteStr)
@@ -33,7 +34,6 @@ class BinClass():
         return barray
 
     def read_bool(self, count=1):
-        #return self.read("bool", count)
         if count == 1:
             return self.read("bool")
         else:
