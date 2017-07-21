@@ -1,0 +1,50 @@
+//------------------------------------------------
+//--- 010 Editor v8.0 Binary Template
+//
+//      File: .mot
+//   Authors: Waelwindows
+//   Version: 0.0
+//   Purpose: Parse F2nd .mot files
+// File Mask: MOTC
+//------------------------------------------------
+
+typedef struct {
+    char magic[4] <name="Magic">;
+    uint bytesize <name="Bytesize", comment="Padding is 0x60 bytes, at the EOF", format=hex>;
+    uint size <name="Header Size", comment="Always set to 64", format=hex>;
+    uint ver <name="File version", comment="Always set to 0x1_800_000", format=hex>;
+    int unk2 <name="UNK", comment="Set to 0?">;
+    uint subBytesize <name="Sub-anim Bytesize", comment="Starts at the Offset Table", format=hex>;
+    int ebr1[2] <hidden=1>;
+    uint motID <name="Motion ID", comment="Consistent between PVs", format=hex>;
+    int ebr2[3] <hidden=1>;
+    int unk5 <name="UNK", comment="ID? Always set to 0xFF_010_008", format=hex>;
+    int ebr3[3] <hidden=1>;
+} HEADER <name="File Header", bgcolor=cRed, open=1>;
+
+typedef struct {
+    BigEndian();
+    uint unk <comment="Always set to 0">;
+    uint unk1 <comment="ID? Always a 10 digits">;
+    int nameOffsetTBL <name="Name Offset Table", format=hex>;
+    uint pvNameOffset <name="PV Name offset", comment="(Relative) Always 0x70, In bits", format=hex>;
+    uint unk2 <name="UNK Offset", comment="(Relative) Always 0x74, In bits", format=hex>;
+    uint unk3 <name="UNK Offset", comment="Always 0x100, Relative to Name Table?", format=hex>;
+    int unk4 <comment="ID? Least significant bytes are the same?", format=hex>;
+    int unk5 <comment="ID? Least significant bytes are the same?", format=hex>;
+    int unk6;
+    int isMain <name="Is Main?", comment="Always 0x3_E81_200 If in a main file", format=hex>;
+    uint ebr[2] <hidden=1>;
+    uint unk7 <name="Anim Order?", comment="Main is last anim, Sub-anims increment">;
+    uint unk8 <name="ID?", comment="Always set to 0xC0_3F0_0FC",format=hex>;
+    uint unk9;
+    uint unk10;
+    uint unk11;
+    uint unk12;
+    uint ebr2[12] <hidden=1>;
+    uint unk13;
+} HDOFF <name="Header Offsets",bgcolor=cBlue, open=1>;
+
+LittleEndian();
+HEADER hdr;
+HDOFF hdoff;

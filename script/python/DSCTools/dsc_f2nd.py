@@ -2,8 +2,17 @@ from bitstring import *
 from script.python.binclass import *
 from enum import IntEnum
 
-bs = BitStream(filename=fileloc)
-file = open(fileloc, "r+b")
+mode = Input("Would you like to create or edit a DSC file? (c / e)")
+if mode.lower != "c" or mode.lower != "e":
+    raise Exception("Please enter valid setting")
+fileloc = Input("Please enter your {0} file's location (Absolute).".format("new" if mode == "c" else ""))
+
+if mode.lower == "c":
+    bs = BitStream()
+    file = open(fileloc, "w+b")
+elif mode.lower == "e":
+    bs = BitStream(filename=fileloc)
+    file = open(fileloc, "r+b")
 
 class NOTE(IntEnum):
     TRIANGLE        = 0
@@ -46,12 +55,12 @@ class dsc_note(BinClass):
             s.note_pos = bs.pos
             s.unk1 = s.read_uint8(static_encode)
             s.time_stamp = s.read_uint8(static_encode)
-            s.note_opcode = s.read_uint8(static_encode)
-            s.note_type = s.read_uint8(static_encode)
+            s.opcode = s.read_uint8(static_encode)
+            s.type = s.read_uint8(static_encode)
             s.hold_length = s.read_int8(static_encode)
             s.is_hold_end = s.read_int8(static_encode)
-            s.note_xcoord = s.read_int8(static_encode)
-            s.note_ycoord = s.read_int8(static_encode)
+            s.xcoord = s.read_int8(static_encode)
+            s.ycoord = s.read_int8(static_encode)
             s.curve_angle1 = s.read_int8(static_encode)
             s.curve_angle2 = s.read_int8(static_encode)
             s.unk2 = s.read_uint8(static_encode)
@@ -62,12 +71,12 @@ class dsc_note(BinClass):
         else:
             s.unk1 = 0
             s.time_stamp = 0 # / 10 (e.g. 12345 = 0.12345)
-            s.note_opcode = 0
-            s.note_type = 0 # Add enum ?
+            s.opcode = 0
+            s.type = 0 # Add enum ?
             s.hold_length = 0
             s.is_hold_end = 0 # is Bool
-            s.note_xcoord = 0
-            s.note_ycoord = 0
+            s.xcoord = 0
+            s.ycoord = 0
             s.curve_angle1 = 0
             s.curve_angle2 = 0
             s.unk2 = 0
@@ -76,9 +85,23 @@ class dsc_note(BinClass):
             s.unk4 = 0
             s.unk5 = 0
 
+        def set_time(time):
+            if isinstance(time, str) and time[-1] == "s":
+                self.timestamp = float(time) * 100_000
+            elif isinstance(time, int) and str(time)[0] == "-":
+                self.timestamp = time
+
+        def set_pos(axis, pos=25):
+            if axis == "x":
+                self.xcoord = pos * 10_000
+            elif axis == "y":
+                self.ycoord = pos * 10_000
+            else:
+                raise Exception("Invalid {0} axis".format(axis.upper))
+
 
     def __str__(self):
-        return "Note: {0} note at {1} ms".format(self.get_note_type(), self.time_stamp)
+        return "Note: {0} note at {1}s".format(self.get_note_type(), self.time_stamp / 100_000)
 
     @property
     def to_BArray(self):
