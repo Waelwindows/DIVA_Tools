@@ -26,7 +26,7 @@ typedef struct {
     BigEndian();
     uint unk <comment="Always set to 0">;
     uint unk1 <comment="ID? Always a 10 digits">;
-    int nameOffsetTBL <name="Name Offset Table", format=hex>;
+    uint nameOffsetTBL <name="Name Offset Table", format=hex>;
     uint pvNameOffset <name="PV Name offset", comment="(Relative) Always 0x70, In bits", format=hex>;
     uint unk2 <name="UNK Offset", comment="(Relative) Always 0x74, In bits", format=hex>;
     uint unk3 <name="UNK Offset", comment="Always 0x100, Relative to Name Table?", format=hex>;
@@ -43,6 +43,23 @@ typedef struct {
     uint unk12;
     uint ebr2[12] <hidden=1>;
     uint unk13;
+    uint unk14 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk15 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk16 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk17 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk18 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk19 <name="ID?", comment="Consistent between PVs", format=hex>;
+    uint unk20 <name="ID?", comment="Consistent between PVs", format=hex>;
+    int unk21 <name="ID?", comment="Consistent between PVs">;
+    int unk22 <name="ID?", comment="Consistent between PVs">;
+    int unk23 <name="ID?", comment="Consistent between PVs">;
+    int unk24 <name="ID?", comment="Consistent between PVs">;
+    uint unk25 <name="Consant", comment="Always 0x40_400_415", format=hex>;
+    int unk26 <name="Consant", comment="Disabled if -1 ?">;
+    int unk27 <name="ID?">;
+    int unk28 <name="ID?", comment="Consistent between PVs">;
+    uint unk29 <name="Const?", comment="Always 0x51_044_411", format=hex>;
+    uint unk30 <name="Consant", format=hex>;
 } HDOFF <name="Header Offsets",bgcolor=cBlue, open=1>;
 
 LittleEndian();
