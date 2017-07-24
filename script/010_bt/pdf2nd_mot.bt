@@ -9,59 +9,66 @@
 //------------------------------------------------
 
 typedef struct {
-    char magic[4] <name="Magic">;
-    uint bytesize <name="Bytesize", comment="Padding is 0x60 bytes, at the EOF", format=hex>;
-    uint size <name="Header Size", comment="Always set to 64", format=hex>;
-    uint ver <name="File version", comment="Always set to 0x1_800_000", format=hex>;
-    int unk2 <name="UNK", comment="Set to 0?">;
-    uint subBytesize <name="Sub-anim Bytesize", comment="Starts at the Offset Table", format=hex>;
-    int ebr1[2] <hidden=1>;
-    uint motID <name="Motion ID", comment="Consistent between PVs", format=hex>;
-    int ebr2[3] <hidden=1>;
-    int unk5 <name="UNK", comment="ID? Always set to 0xFF_010_008", format=hex>;
-    int ebr3[3] <hidden=1>;
-} HEADER <name="File Header", bgcolor=cRed, open=1>;
+    LittleEndian();
+    char    magic[4] <name="Magic">;
+    UINT    fileSize <name="File Size", comment="From 0x40 to last EOFC">;
+    UINT    headerSize <name="Header Size", comment="Usually always 64 bytes">;
+    UINT    divaVersion <name="DIVA ID", comment="F 2nd is 0x18", format=hex>;
+    int     unk1 <name="UNK1", hidden=true>;
+    UINT    subFileSize <name="Subfile Size", comment="Different value where applicable.">;
+    int     ebr1[2] <hidden=true>;
+    uint    motID <name="Motion ID", comment="Consistent between PVs", format=hex>;
+    int     ebr2[3] <hidden=true>;
+    int     unk2 <name="UNK", comment="ID? Always set to 0xFF,010,008", format=hex>;
+    int     ebr3[3] <hidden=true>;
+} HEADER <name="HEADER", bgcolor=cRed, open=true>;
 
 typedef struct {
     BigEndian();
-    uint unk <comment="Always set to 0">;
-    uint unk1 <comment="ID? Always a 10 digits">;
-    uint nameOffsetTBL <name="Name Offset Table", format=hex>;
-    uint pvNameOffset <name="PV Name offset", comment="(Relative) Always 0x70, In bits", format=hex>;
-    uint unk2 <name="UNK Offset", comment="(Relative) Always 0x74, In bits", format=hex>;
-    uint unk3 <name="UNK Offset", comment="Always 0x100, Relative to Name Table?", format=hex>;
-    int unk4 <comment="ID? Least significant bytes are the same?", format=hex>;
-    int unk5 <comment="ID? Least significant bytes are the same?", format=hex>;
-    int unk6;
-    int isMain <name="Is Main?", comment="Always 0x3_E81_200 If in a main file", format=hex>;
+    uint    unk <comment="Always set to 0">;
+    uint    unk1 <comment="ID? Always a 10 digits">;
+    UINT    thisFileName <name="File Name", comment="Name of the Animation File, always 15 bytes long">;
+    uint    pvNameOffset <name="Properties(?)", comment="End of Offset table">;
+    uint    unk2 <name="UNK Offset", comment="(Relative) Always 0x74 // This could disprove my thoughts about the above being a properties section.">;
+    uint    unk3 <name="HEAD+OFF+PROP size", comment="Always 0x100">;
+    UINT    nameTable_PTRS <name="Name Table PTRs", comment="Address of Name Array (Pointers)">;
+    UINT    nameTable_ID <name="Name IDs(?)", comment="Unsure. Maybe global constants for bones and body parts?">;
+    int     unk6;
+    int     isMain <name="Is Main?", comment="Always 0x3_E81_200 If in a main file">;
     uint ebr[2] <hidden=1>;
-    uint unk7 <name="Anim Order?", comment="Main is last anim, Sub-anims increment">;
-    uint unk8 <name="ID?", comment="Always set to 0xC0_3F0_0FC",format=hex>;
-    uint unk9;
-    uint unk10;
-    uint unk11;
-    uint unk12;
-    uint ebr2[12] <hidden=1>;
-    uint unk13;
-    uint unk14 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk15 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk16 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk17 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk18 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk19 <name="ID?", comment="Consistent between PVs", format=hex>;
-    uint unk20 <name="ID?", comment="Consistent between PVs", format=hex>;
-    int unk21 <name="ID?", comment="Consistent between PVs">;
-    int unk22 <name="ID?", comment="Consistent between PVs">;
-    int unk23 <name="ID?", comment="Consistent between PVs">;
-    int unk24 <name="ID?", comment="Consistent between PVs">;
-    uint unk25 <name="Consant", comment="Always 0x40_400_415", format=hex>;
-    int unk26 <name="Consant", comment="Disabled if -1 ?">;
-    int unk27 <name="ID?">;
-    int unk28 <name="ID?", comment="Consistent between PVs">;
-    uint unk29 <name="Const?", comment="Always 0x51_044_411", format=hex>;
-    uint unk30 <name="Consant", format=hex>;
-} HDOFF <name="Header Offsets",bgcolor=cBlue, open=1>;
+} OFFSET_TABLE <name="OFFSETS", bgcolor=cLtBlue, open=true>;
 
-LittleEndian();
-HEADER hdr;
-HDOFF hdoff;
+typedef struct {
+    uint unk7 <name="Anim Order?", comment="Main is last anim, Sub-anims increment">;
+    uint unk8 <comment="Consistent between PVs", format=hex>;
+    uint unk9 <comment="Consistent between PVs", format=hex>;
+    uint unk10 <comment="Consistent between PVs", format=hex>;
+    uint unk11 <comment="Offset tbl start? Consistent between PVs">;
+    uint unk12 <comment="Consistent between PVs">;
+    uint ebr2[12] <hidden=1>;
+    uint unk13 <comment="Consistent between PVs">;
+    uint unk14 <comment="Consistent between PVs">;
+    uint unk15 <comment="Consistent between PVs">;
+    uint unk16 <comment="Consistent between PVs">;
+    uint unk17 <comment="Consistent between PVs">;
+    uint unk18 <comment="Consistent between PVs">;
+    uint unk19 <comment="Always 0x55_014_410", format=hex>;
+    uint unk20 <comment="Consistent between PVs">;
+    int unk21 <comment="Consistent between PVs">;
+    int unk22 <comment="Consistent between PVs">;
+    int unk23 <comment="Consistent between PVs">;
+    int unk24 <comment="Consistent between PVs">;
+    uint unk25 <comment="Const, Always 0x40_400_415", format=hex>;
+    int unk26 <comment="Disabled if -1 ?">;
+    int unk27;
+    int unk28 <comment="Consistent between PVs">;
+    uint unk29 <comment="Const, Always 0x51_044_411", format=hex>;
+    uint unk30 <name="Consant", format=hex>;
+} PROPERTIES <name="Properties(?)", bgcolor=cLtGreen, open=true>;
+
+
+//-------------------------------------------//
+// Now initialize and parse the file
+HEADER          header;
+OFFSET_TABLE    offsets;
+PROPERTIES      properties;
