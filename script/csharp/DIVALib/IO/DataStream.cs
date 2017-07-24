@@ -8,6 +8,18 @@ namespace DIVALib.IO
 {
     public static class DataStream
     {
+
+        public enum Endian
+        {
+            LittleEndian,
+            BigEndian
+        };
+
+        private static bool IsLE(Endian endiannes)
+        {
+            return endiannes == Endian.LittleEndian;
+        }
+
         [StructLayout(LayoutKind.Explicit)]
         private struct SingleUnion
         {
@@ -167,6 +179,13 @@ namespace DIVALib.IO
             return (ushort)(buffer[0] | buffer[1] << 8);
         }
 
+        public static ushort ReadUInt16(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 2);
+
+            return (ushort)( IsLE(endianness) ? buffer[0] | buffer[1] << 8 : buffer[0] << 8 | buffer[1]);
+        }
+
         public static ushort ReadUInt16BE(Stream source)
         {
             source.Read(buffer, 0, 2);
@@ -178,6 +197,14 @@ namespace DIVALib.IO
         {
             buffer[0] = (byte)(value);
             buffer[1] = (byte)(value >> 8);
+
+            destination.Write(buffer, 0, 2);
+        }
+
+        public static void WriteUInt16(Stream destination, ushort value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value : value >> 8);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8 : value);
 
             destination.Write(buffer, 0, 2);
         }
@@ -197,6 +224,13 @@ namespace DIVALib.IO
             return (short)(buffer[0] | buffer[1] << 8);
         }
 
+        public static short ReadInt16(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 2);
+
+            return (short)(IsLE(endianness) ? buffer[0] | buffer[1] << 8 : buffer[0] << 8 | buffer[1] );
+        }
+
         public static short ReadInt16BE(Stream source)
         {
             source.Read(buffer, 0, 2);
@@ -208,6 +242,14 @@ namespace DIVALib.IO
         {
             buffer[0] = (byte)(value);
             buffer[1] = (byte)(value >> 8);
+
+            destination.Write(buffer, 0, 2);
+        }
+
+        public static void WriteInt16(Stream destination, short value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value : value >> 8);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8 : value);
 
             destination.Write(buffer, 0, 2);
         }
@@ -227,6 +269,13 @@ namespace DIVALib.IO
             return (uint)(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);
         }
 
+        public static uint ReadUInt32(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 4);
+
+            return (uint)(IsLE(endianness) ? buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24 : buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3]);
+        }
+
         public static uint ReadUInt32BE(Stream source)
         {
             source.Read(buffer, 0, 4);
@@ -240,6 +289,16 @@ namespace DIVALib.IO
             buffer[1] = (byte)(value >> 8);
             buffer[2] = (byte)(value >> 16);
             buffer[3] = (byte)(value >> 24);
+
+            destination.Write(buffer, 0, 4);
+        }
+
+        public static void WriteUInt32(Stream destination, uint value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value : value >> 24);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8 : value >> 16);
+            buffer[2] = (byte)(IsLE(endianness) ? value >> 16: value >> 8);
+            buffer[3] = (byte)((IsLE(endianness) ? value >> 24: value));
 
             destination.Write(buffer, 0, 4);
         }
@@ -306,6 +365,13 @@ namespace DIVALib.IO
             return buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24;
         }
 
+        public static int ReadInt32(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 4);
+
+            return IsLE(endianness) ? buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24 : buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+        }
+
         public static int ReadInt32BE(Stream source)
         {
             source.Read(buffer, 0, 4);
@@ -319,6 +385,16 @@ namespace DIVALib.IO
             buffer[1] = (byte)(value >> 8);
             buffer[2] = (byte)(value >> 16);
             buffer[3] = (byte)(value >> 24);
+
+            destination.Write(buffer, 0, 4);
+        }
+
+        public static void WriteInt32(Stream destination, int value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value : value >> 24);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8 : value >> 16);
+            buffer[2] = (byte)(IsLE(endianness) ? value >> 16 : value >> 8);
+            buffer[3] = (byte)((IsLE(endianness) ? value >> 24 : value));
 
             destination.Write(buffer, 0, 4);
         }
@@ -343,6 +419,20 @@ namespace DIVALib.IO
                 (ulong)buffer[6] << 48 | (ulong)buffer[7] << 56);
         }
 
+        public static ulong ReadUInt64(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 8);
+
+            return IsLE(endianness) ? (buffer[0] | (ulong)buffer[1] << 8 |
+                (ulong)buffer[2] << 16 | (ulong)buffer[3] << 24 |
+                (ulong)buffer[4] << 32 | (ulong)buffer[5] << 40 |
+                (ulong)buffer[6] << 48 | (ulong)buffer[7] << 56) :
+                ((ulong)buffer[0] << 56 | (ulong)buffer[1] << 48 |
+                (ulong)buffer[2] << 40 | (ulong)buffer[3] << 32 |
+                (ulong)buffer[4] << 24 | (ulong)buffer[5] << 16 |
+                (ulong)buffer[6] << 8 | buffer[7]);
+        }
+
         public static ulong ReadUInt64BE(Stream source)
         {
             source.Read(buffer, 0, 8);
@@ -363,6 +453,20 @@ namespace DIVALib.IO
             buffer[5] = (byte)(value >> 40);
             buffer[6] = (byte)(value >> 48);
             buffer[7] = (byte)(value >> 56);
+
+            destination.Write(buffer, 0, 8);
+        }
+
+        public static void WriteUInt64(Stream destination, ulong value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value >> 0  : value >> 56);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8  : value >> 48);
+            buffer[2] = (byte)(IsLE(endianness) ? value >> 16 : value >> 40);
+            buffer[3] = (byte)(IsLE(endianness) ? value >> 24 : value >> 32);
+            buffer[4] = (byte)(IsLE(endianness) ? value >> 32 : value >> 24);
+            buffer[5] = (byte)(IsLE(endianness) ? value >> 40 : value >> 16);
+            buffer[6] = (byte)(IsLE(endianness) ? value >> 48 : value >> 8 );
+            buffer[7] = (byte)(IsLE(endianness) ? value >> 56 : value >> 0 );
 
             destination.Write(buffer, 0, 8);
         }
@@ -391,6 +495,20 @@ namespace DIVALib.IO
                 buffer[6] << 48 | buffer[7] << 56;
         }
 
+        public static long ReadInt64(Stream source, Endian endianness)
+        {
+            source.Read(buffer, 0, 8);
+
+            return IsLE(endianness) ? (buffer[0] | buffer[1] << 8 |
+                buffer[2] << 16 | buffer[3] << 24 |
+                buffer[4] << 32 | buffer[5] << 40 |
+                buffer[6] << 48 | buffer[7] << 56) :
+                (buffer[0] << 56 | buffer[1] << 48 |
+                buffer[2] << 40 | buffer[3] << 32 |
+                buffer[4] << 24 | buffer[5] << 16 |
+                buffer[6] << 8 | buffer[7]);
+        }
+
         public static long ReadInt64BE(Stream source)
         {
             source.Read(buffer, 0, 8);
@@ -411,6 +529,20 @@ namespace DIVALib.IO
             buffer[5] = (byte)(value >> 40);
             buffer[6] = (byte)(value >> 48);
             buffer[7] = (byte)(value >> 56);
+
+            destination.Write(buffer, 0, 8);
+        }
+
+        public static void WriteInt64(Stream destination, long value, Endian endianness)
+        {
+            buffer[0] = (byte)(IsLE(endianness) ? value >> 0 : value >> 56);
+            buffer[1] = (byte)(IsLE(endianness) ? value >> 8 : value >> 48);
+            buffer[2] = (byte)(IsLE(endianness) ? value >> 16 : value >> 40);
+            buffer[3] = (byte)(IsLE(endianness) ? value >> 24 : value >> 32);
+            buffer[4] = (byte)(IsLE(endianness) ? value >> 32 : value >> 24);
+            buffer[5] = (byte)(IsLE(endianness) ? value >> 40 : value >> 16);
+            buffer[6] = (byte)(IsLE(endianness) ? value >> 48 : value >> 8);
+            buffer[7] = (byte)(IsLE(endianness) ? value >> 56 : value >> 0);
 
             destination.Write(buffer, 0, 8);
         }
@@ -512,9 +644,28 @@ namespace DIVALib.IO
             return encoding.GetString(characters.ToArray());
         }
 
+        public static string ReadMagic(Stream source, Encoding encoding)
+        {
+            var characters = new List<byte>();
+
+            source.Read(buffer, 0, 1);
+            for (int i=0; i < 4; ++i)
+            {
+                characters.Add(buffer[0]);
+                source.Read(buffer, 0, 1);
+            }
+
+            return encoding.GetString(characters.ToArray());
+        }
+
         public static void WriteCString(Stream destination, string value)
         {
             WriteCString(destination, value, Encoding.ASCII);
+        }
+
+        public static void WriteMagic(Stream destination, string magic)
+        {
+            WriteMagic(destination, magic, Encoding.ASCII);
         }
 
         public static void WriteCString(Stream destination, string value, Encoding encoding)
@@ -523,6 +674,13 @@ namespace DIVALib.IO
 
             destination.Write(buffer, 0, buffer.Length);
             WriteByte(destination, 0);
+        }
+
+        public static void WriteMagic(Stream destination, string magic, Encoding encoding)
+        {
+            byte[] buffer = encoding.GetBytes(magic);
+
+            destination.Write(buffer, 0, buffer.Length);
         }
 
         public static string ReadCString(Stream source, int length)

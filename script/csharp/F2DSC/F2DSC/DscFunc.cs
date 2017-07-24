@@ -2,43 +2,57 @@
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
-using BinOp;
+using DIVALib.IO;
 
 namespace DscFunc
 {
     public class DscHeader
     {
         public string magic;
+        public uint size;
+        public uint version;
         public long clPos;
         public uint contentLength;
-        public uint unk;
+        public uint unk1;
+        public uint unk2;
 
         public DscHeader()
         {
             magic = "PVSC";
+            size = 64;
+            version = 402_653_184;
             clPos = 4;
             contentLength = 12;
-            unk = 0;
+            unk1 = 0;
+            unk2 = 0;
         }
 
-        public DscHeader(FileStream file)
+        public DscHeader(Stream s)
         {
-            BinaryReader br = new BinaryReader(file);
-            magic = new string(br.ReadChars(4));
-            clPos = file.Position;
-            contentLength = br.ReadUInt32();
-            file.Seek(24, SeekOrigin.Current);
-            unk = br.ReadUInt32();
-            file.Seek(28, SeekOrigin.Current);
+            magic = DataStream.ReadCString(s, 4);
+            contentLength = DataStream.ReadUInt32(s);
+            size = DataStream.ReadUInt32(s);
+            version = DataStream.ReadUInt32(s);
+            s.Seek(16, SeekOrigin.Current);
+            unk1 = DataStream.ReadUInt32(s);
+            s.Seek(12, SeekOrigin.Current);
+            unk2 = DataStream.ReadUInt32(s);
+            s.Seek(12, SeekOrigin.Current);
         }
 
-        public void Write(BinaryWriter bw)
+        public void Write(Stream s)
         {
-            FileOp.WriteString(bw, magic);
-            bw.Write(contentLength);
-            FileOp.WriteNullByte(bw, 24);
-            bw.Write(unk);
-            FileOp.WriteNullByte(bw, 28);
+            DataStream.WriteMagic(s, magic);
+            DataStream.WriteUInt32(s, contentLength);
+            DataStream.WriteUInt32(s, size);
+            DataStream.WriteUInt32(s, version);
+            DataStream.WriteUInt32(s, 0);
+            DataStream.WriteUInt32(s, contentLength);
+            DataStream.WriteNulls(s, 8);
+            DataStream.WriteUInt32(s, unk1);
+            DataStream.WriteNulls(s, 12);
+            DataStream.WriteUInt32(s, unk2);
+            DataStream.WriteNulls(s, 12);
         }
     }
 
@@ -87,42 +101,42 @@ namespace DscFunc
 
         }
 
-        public DscNote(BinaryReader br)
+        public DscNote(Stream s)
         {
-            unk1       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian);
-            timestamp  = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian) / 1000;
-            opcode     = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian);
-            type       = (NoteType)FileOp.ReadUInt32(br, FileOp.Endian.BigEndian);
-            holdLength = FileOp.ReadInt32(br, FileOp.Endian.BigEndian) / 1000;
-            isHoldEnd  = FileOp.ReadInt32(br, FileOp.Endian.BigEndian);
-            posX       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian) / 10_000;
-            posY       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian) / 10_000;
-            curve1     = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian); 
-            curve2     = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian); 
-            unk2       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian); 
-            unk3       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian); 
-            timeOut    = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian); 
-            unk4       = FileOp.ReadUInt32(br, FileOp.Endian.BigEndian);
-            unk5       = FileOp.ReadInt32(br, FileOp.Endian.BigEndian);
+            unk1       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
+            timestamp  = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 1000.0f;
+            opcode     = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
+            type       = (NoteType)DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
+            holdLength = DataStream.ReadInt32(s, DataStream.Endian.BigEndian) / 1000.0f;
+            isHoldEnd  = DataStream.ReadInt32(s, DataStream.Endian.BigEndian);
+            posX       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 10_000.0f;
+            posY       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 10_000.0f;
+            curve1     = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian); 
+            curve2     = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian); 
+            unk2       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian); 
+            unk3       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian); 
+            timeOut    = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian); 
+            unk4       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
+            unk5       = DataStream.ReadInt32(s, DataStream.Endian.BigEndian);
         }
-
-        public void Write(BinaryWriter bw)
+        
+        public void Write(Stream s)
         {
-            FileOp.Write(bw, unk1, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, timestamp * 1000, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, opcode, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, (uint)type, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, holdLength * 1000, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, isHoldEnd, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, posX * 10_000, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, posY * 10_000, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, curve1, FileOp.Endian.BigEndian);
-            FileOp.WriteFloatAsUInt(bw, curve2, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, unk2, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, unk3, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, timeOut, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, unk4, FileOp.Endian.BigEndian);
-            FileOp.Write(bw, unk5, FileOp.Endian.BigEndian);
+            DataStream.WriteUInt32(s, unk1, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)(timestamp*1000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, opcode, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)type, DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, (int)(holdLength*1000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, isHoldEnd, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)(posX * 10_000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)(posY * 10_000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, (int)curve1, DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, (int)curve2, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, unk2, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, unk3, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)timeOut, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, unk4, DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, unk5, DataStream.Endian.BigEndian);
         }
 
         public static DscNote FromXmlNode(XmlNode node)
@@ -138,7 +152,7 @@ namespace DscFunc
                 {
                     case "unk1": note.unk1 = uint.Parse(child.InnerText); break;
                     case "timestamp": note.timestamp = float.Parse(child.InnerText); break;
-                    case "opcode": note.timestamp = uint.Parse(child.InnerText); break;
+                    case "opcode": note.opcode = uint.Parse(child.InnerText); break;
                     case "type": note.type = (NoteType)NoteType.Parse(typeof(NoteType), child.InnerText); break;
                     case "holdLength": note.holdLength = float.Parse(child.InnerText); break;
                     case "isHoldEnd": note.isHoldEnd = int.Parse(child.InnerText); break;
@@ -201,6 +215,7 @@ namespace DscFunc
     {
 
         public DscHeader header;
+        public bool[] flags = new bool[8];
         public List<DscNote> notes;
 
         public DscFile()
@@ -209,41 +224,43 @@ namespace DscFunc
             notes = new List<DscNote>();
         }
 
-        public DscFile(FileStream file)
+        public DscFile(Stream s)
         {
-            header = new DscHeader(file);
+            header = new DscHeader(s);
             notes = new List<DscNote>();
             if (header.magic != "PVSC")
             {
                 return;
             }
-            file.Seek(8, SeekOrigin.Current);
+            //s.Seek(8, SeekOrigin.Current);
+            for (int i=0; i<8; i++)
+            {
+                flags[i] = DataStream.ReadBoolean(s);
+            }
             uint counter = 8;
-            BinaryReader br = new BinaryReader(file);
             while (counter <= header.contentLength - 60)
             {
-                DscNote newNote = new DscNote(br);
+                DscNote newNote = new DscNote(s);
                 notes.Add(newNote);
                 counter += 60;
             }
         }
 
-        public void SaveToFile(FileStream file)
+        public void SaveToFile(Stream s)
         {
-            BinaryWriter bw = new BinaryWriter(file);
             header.contentLength = (uint)notes.Count * 60 + 12;
-            header.Write(bw);
-            file.Seek(8, SeekOrigin.Current);
-            foreach(DscNote note in notes)
+            header.Write(s);
+            DataStream.WriteUInt32(s, 0); DataStream.WriteUInt32(s, 0); 
+            foreach (DscNote note in notes)
             {
-                note.Write(bw);
+                note.Write(s);
             }
-            bw.Write(0);
-            FileOp.WriteString(bw, "EOFC");
-            bw.Write(0);
-            bw.Write(32);
-            bw.Write(268_435_456);
-            bw.Write(0); bw.Write(0); bw.Write(0); bw.Write(0);
+            DataStream.WriteUInt32(s, 0);
+            DataStream.WriteMagic(s, "EOFC");
+            DataStream.WriteUInt32(s, 0);
+            DataStream.WriteUInt32(s, 32, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, 268_435_456, DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, 0); DataStream.WriteUInt32(s, 0); DataStream.WriteUInt32(s, 0); DataStream.WriteUInt32(s, 0);
         }
 
         public void CreateNotesFromXml(XmlDocument doc)
