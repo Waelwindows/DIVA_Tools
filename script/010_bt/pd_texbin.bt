@@ -1,0 +1,42 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: Parse projetc diva _tex.bin
+//   Authors: Skyth, Waelwindows
+//   Version:
+//   Purpose:
+//  Category:
+// File Mask:
+//  ID Bytes:
+//   History:
+//------------------------------------------------
+
+typedef struct {
+    char magic[3];
+    char flag;
+    if (flag != 0x2) {
+        FSkip(-4);
+        HEADER header;
+    }
+} TEX <name="Texture", bgcolor=cBlue>;
+
+typedef struct {
+    char magic[3] <name="File Magic">;
+    char flag;
+    if (hd.flag == 0x2){
+        FSeek(0);
+        TEX tex;
+    } else {
+        uint texCount <name="Texture Count">;
+        uint unk;
+        uint tblOffset <name="Table Offset", format=hex>;
+        local int i;
+        for (i=0; i<texCount; i++){
+            FSeek(tblOffset + i * 4);
+            TEX tex;
+        }
+    }
+} HEADER <name="File Header", bgcolor=cGreen>;
+
+LittleEndian();
+HEADER hd;

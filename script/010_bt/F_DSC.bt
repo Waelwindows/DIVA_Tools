@@ -34,10 +34,8 @@ enum <uint> note_type {
     HOLD_CROSS      = 10,
     HOLD_SQUARE     = 11,
     STAR            = 12,
-    DOUBLE_STAR     = 14,
+    HOLD_STAR     = 14,
     CHANCE_STAR     = 15,
-    LINKED_STAR     = 22,
-    LINKED_STAR_END = 23,
 };
 
 float getDecimal(float f) {
@@ -214,8 +212,9 @@ typedef struct {
 //0x00
 typedef struct {
     uint id <hidden=1>;
-    uint unk;
-} END <name="End", bgcolor=cBlue>;
+    if (!FEof())
+        uint unk;
+} END <name="End", bgcolor=cBlue, optimize=false>;
 
 //0x01
 typedef struct {
@@ -291,6 +290,18 @@ typedef struct {
     uint unk[5];
 } EFFECT <name="Effect", bgcolor=cBlue>;
 
+//0x0A
+typedef struct {
+    uint id <hidden=1>;
+} FADEIN_FIELD <name="Field Fade in", bgcolor=cBlue>;
+
+//0x0B
+typedef struct {
+    uint id <hidden=1>;
+    uint fxID <name="Effect ID">;
+    uint unk[5];
+} EFFECT_OFF <name="Effect off", bgcolor=cBlue>;
+
 //0x0C
 typedef struct {
     uint id <hidden=1>;
@@ -308,6 +319,25 @@ typedef struct {
     uint id <hidden=1>;
     hex_id field_id <name="Field ID", comment="Based on field_db">;
 } CHANGE_FIELD <name="Change Field (Stage)", bgcolor=cBlue>;
+
+//0x0F
+typedef struct {
+    uint id <hidden=1>;
+    hex_id field_id <name="Field ID", comment="Based on field_db">;
+    uintbool state <name="State?">;
+} HIDE_FIELD <name="Hide Field (Stage)", bgcolor=cBlue>;
+
+//0x10
+typedef struct {
+    uint id <hidden=1>;
+    hex_id field_id <name="Field ID", comment="Based on field_db">;
+    int unk[3];
+} MOVE_FIELD <name="Move Field (Stage)", bgcolor=cBlue>;
+
+//0x11
+typedef struct {
+    uint id <hidden=1>;
+} FADEOUT_FIELD <name="Field Fade out", bgcolor=cBlue>;
 
 //0x12
 typedef struct {
@@ -350,6 +380,11 @@ typedef struct {
     int unk2 <name="Speed?", comment="Disabled if set to -1">;
 } EXPRESSION <name="Expression", bgcolor=cBlue>;
 
+//0x17
+typedef struct {
+    uint id <hidden=1>;
+} LOOK_CAMERA <name="Look Camera", bgcolor=cBlue>;
+
 //0x18
 typedef struct {
     uint id <hidden=1>;
@@ -368,6 +403,14 @@ typedef struct {
     uint unk[2];
 } MODE_SELECT <name="Mode Select", bgcolor=cBlue>;
 
+//0x07
+typedef struct {
+    uint id <hidden=1>;
+    hex_id anim_id <name="Animation ID", comment="Based on", format=hex>;
+    timeLength time <name="Animation Start time">;
+    uint speed <name="Speed">;
+} EDIT_MOTION <name="EDIT - Motion", bgcolor=cBlue, comment="Unused">;
+
 //0x1C
 typedef struct {
     uint id <hidden=1>;
@@ -381,6 +424,11 @@ typedef struct {
     uint unk[2];
 } SHADOW_HEIGHT <name="Shadow Height", bgcolor=cBlue>;
 
+//0x1E
+typedef struct {
+    uint id <hidden=1>;
+} EDIT_FACE <name="Edit - Face", bgcolor=cBlue>;
+
 //0x1F
 typedef struct {
     uint id <hidden=1>;
@@ -392,16 +440,69 @@ typedef struct {
     uint id <hidden=1>;
 } PV_END <name="PV End", bgcolor=cBlue, comment="Ends the song when triggered">;
 
+//0x21
+typedef struct {
+    uint id <hidden=1>;
+} SHADOWPOS <name="Shadow Position", bgcolor=cBlue, comment="Unused">;
+
+//0x22
+typedef struct {
+    uint id <hidden=1>;
+    hex_id lyric_id <name="Lyric ID">;
+    ub_bgra color <name="Color">;
+} EDIT_LYRIC <name="EDIT - Lyrics", bgcolor=cBlue>;
+
+//0x23
+typedef struct {
+    uint id <hidden=1>;
+    hex_id lyric_id <name="Lyric ID">;
+    ub_bgra color <name="Color">;
+} EDIT_TARGET <name="EDIT - Target", bgcolor=cBlue, comment="Crashes the game">;
+
+//0x24
+typedef struct {
+    uint id <hidden=1>;
+    hex_id anim_id <name="Anim ID">;
+    uint unk[3] <hidden=1>;
+} EDIT_MOUTH <name="EDIT - Mouth", bgcolor=cBlue>;
+
 //0x25
 typedef struct {
     uint id <hidden=1>;
     uint playerID<name="Player ID", comment="Only used in edit mode">;
 } SET_CHARA <name="EDIT - Set Character", bgcolor=cBlue>;
 
+//0x26
+typedef struct {
+    uint id <hidden=1>;
+    uint xtrans <name="X Transform">;
+    uint ytrans <name="Y Transform">;
+    uint ztrans <name="Z Transform">;
+} EDIT_MOVE <name="EDIT - Move", bgcolor=cBlue>;
+
+//0x27
+typedef struct {
+    uint id <hidden=1>;
+    uintbool shadowState <name="State">;
+} EDIT_SHADOW <name="EDIT - Shadow", bgcolor=cBlue>;
+
+//0x28
+typedef struct {
+    uint id <hidden=1>;
+    uintbool shadowState <name="State">;
+} EDIT_EYELID <name="EDIT - Eyelid", bgcolor=cBlue>;
+
+//0x29
+typedef struct {
+    uint id <hidden=1>;
+    hex_id anim_id <name="Anim ID", comment="Bool, just for blinking">;
+    uint unk <hidden=1>;
+} EDIT_EYE <name="EDIT - Eye", bgcolor=cBlue>;
+
 //0x2A
 typedef struct {
     uint id <hidden=1>;
-    uint item <name="Item ID">;
+    hex_id item <name="Item ID">;
 } EDIT_ITEM <name="EDIT - Set Character Item", bgcolor=cBlue>;
 
 //0x2B
@@ -416,11 +517,36 @@ typedef struct {
     uintbool display_state <name="Display State">;
 } EDIT_DISP <name="EDIT - Set Character Display State", bgcolor=cBlue>;
 
+//0x2D
+typedef struct {
+    uint id <hidden=1>;
+    hex_id anim_id <name="Anim ID">;
+    uint unk[3] <hidden=1>;
+} EDIT_HAND_ANIM <name="EDIT - Hand Animation", bgcolor=cBlue>;
+
+//0x2E
+typedef struct {
+    uint id <hidden=1>;
+} AIM <name="AIM", bgcolor=cBlue>;
+
+//0x2F
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    hex_id item <name="Item ID">;
+} HAND_ITEM <name="Hand Item", bgcolor=cBlue>;
+
 //0x30
 typedef struct {
     uint id <hidden=1>;
     uint blushID <name="Blush ID", comment="Based on", format=hex>;
 } EDIT_BLUSH <name="EDIT - Set Character Blush", bgcolor=cBlue>;
+
+//0x31
+typedef struct {
+    uint id <hidden=1>;
+    uint clip <name="New Near Clip">;
+} NEAR_CLIP <name="Near Clip", bgcolor=cBlue>;
 
 //0x34
 typedef struct {
@@ -438,6 +564,12 @@ typedef struct {
     uint id <hidden=1>;
     uint bpm <name="BPM">;
 } TARGET_FLYING_TIME <name="Note Fly Time", bgcolor=cBlue, comment="Same as Bar time set, only used in FT">;
+
+//0x3D
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[5];
+} ITEM_ANIM <name="Item Animation", bgcolor=cBlue>;
 
 //0x41
 typedef struct {
@@ -461,7 +593,13 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint display <name="Display">;
-} MOVIE_DISP <name="MOVIE - Display", bgcolor=cBlue, comment="Displays movie, but doens'lay">;
+} MOVIE_DISP <name="MOVIE - Display", bgcolor=cBlue, comment="Displays movie, but doesn't play">;
+
+//0x47
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[3];
+} OSAGE_MV_CCL <name="Osage move collider", bgcolor=cBlue>;
 
 //0x48
 typedef struct {
@@ -497,6 +635,8 @@ typedef struct {
             break;
         }
         pos = FTell();
+        if (FEof())
+            break;
         func_id = ReadUInt();
         switch(func_id){
             case 0x00: END end; break;
@@ -509,30 +649,51 @@ typedef struct {
             case 0x07: SET_MOTION smotion; break;
             case 0x08: SET_PLAYDATA splaydata; break;
             case 0x09: EFFECT fx; break;
+            case 0x0A: FADEIN_FIELD fadeinf; break;
+            case 0x0B: EFFECT_OFF fxoff; break;
+            case 0x0C: SET_CAMERA setcamera; break;
             case 0x0D: DATA_CAMERA dcam; break;
             case 0x0E: CHANGE_FIELD cfield; break;
+            case 0x0F: HIDE_FIELD hidef; break;
+            case 0x10: MOVE_FIELD movef; break;
+            case 0x11: FADEOUT_FIELD fadeoutf; break;
             case 0x12: EYE_ANIM eanim; break;
             case 0x13: MOUTH_ANIM manim; break;
             case 0x14: HAND_ANIM hanim; break;
             case 0x15: LOOK_ANIM lanim; break;
             case 0x16: EXPRESSION exp; break;
+            case 0x17: LOOK_CAMERA lcam; break;
             case 0x18: LYRIC_COLOR lcolor; break;
             case 0x19: PLAY_MUSIC pmusic; break;
             case 0x1A: MODE_SELECT mselect; break;
+            case 0x1B: EDIT_MOTION editmot; break;
             case 0x1C: BAR_TIME_SET bts; break;
             case 0x1D: SHADOW_HEIGHT sheight; break;
+            case 0x1E: EDIT_FACE editface; break;
+            case 0x1F: MOVE_CAMERA mov_cam; break;
             case 0x20: PV_END pvend; break;
+            case 0x21: SHADOWPOS shadpos; break;
+            case 0x22: EDIT_LYRIC editlyric; break;
+            case 0x23: EDIT_TARGET editnote; break;
+            case 0x24: EDIT_MOUTH editmouth; break;
             case 0x25: SET_CHARA schara; break;
+            case 0x26: EDIT_MOVE editmov; break;
+            case 0x27: EDIT_SHADOW editshadow; break;
+            case 0x28: EDIT_EYELID editeyelid; break;
+            case 0x29: EDIT_EYE editeye; break;
             case 0x2A: EDIT_ITEM eitem; break;
             case 0x2B: EDIT_EFFECT efx; break;
             case 0x2C: EDIT_DISP edisp; break;
             case 0x30: EDIT_BLUSH eblush; break;
+            case 0x31: NEAR_CLIP nclip; break;
             case 0x34: SCENE_FADE sfade; break;
             case 0x3A: TARGET_FLYING_TIME tft; break;
+            case 0x3D: ITEM_ANIM itmanim; break;
             case 0x41: PV_BRANCH_MODE pbm; break;
             case 0x42: DATA_CAMERA_START dcs; break;
             case 0x43: MOVIE_PLAY mplay; break;
             case 0x44: MOVIE_DISP mdisp; break;
+            case 0x47: OSAGE_MV_CCL omvccl; break;
             case 0x48: CHARA_COLOR ccolor; break;
             case 0x49: SE_EFFECT sefx; break;
             case 0x51: EDIT_CAMERA ecam; break;

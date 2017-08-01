@@ -1,0 +1,54 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct{
+    string texName;
+} TEXNAME <name="Texture Name">;
+
+typedef struct{
+    LittleEndian();
+    uint64 unk1;
+    uint64 unk2;
+    local uint counter;
+    for(counter = 0; counter < 15; counter++ ) {
+        FSeek(unk2 + 32 + (16 * counter));
+        uint texHash;
+        uint null <hidden=1>;
+        uint64 nameOffset;
+        FSeek(nameOffset + 32);
+        TEXNAME name<optimize=0>;
+    };
+} MTXI_10 <name="Chunk Information", comment="MTXI-10 mode">;
+
+typedef struct{
+    BigEndian();
+    uint unk1;
+    uint unk2;
+    uint unk3;
+    uint unk4;
+} MTXI_18 <name="Chunk Information", comment="MTXI-18 mode">;
+
+typedef struct{
+    char magic[4] <name="File Magic", comment="Always MTXD">;
+    uint byteSize <name="Bytesize">;
+    uint size <name="Header Size">;'
+    uint ver <name="File Version", format=hex>;
+    switch(ver){
+        case 0x10000000: MTXI_10 m10; break;
+        case 0x18000000: MTXI_18 m18; break;
+    };
+} MTXI_HEADER <name="File Header", bgcolor=cBlue>;
+
+
+LittleEndian();
+MTXI_HEADER hd;

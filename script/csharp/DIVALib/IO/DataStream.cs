@@ -82,6 +82,28 @@ namespace DIVALib.IO
             CopyPartTo(source, destination, length, bufferSize);
         }
 
+        public static bool SeekFromTable(Stream s, uint offstTbl, int i)
+        {
+            s.Seek(offstTbl + ((i + 1) * 4), SeekOrigin.Begin);
+            uint itemOffset = ReadUInt32(s);
+#if (DEBUG)
+            Console.Write("Offset tbl: " + (offstTbl + ((i+1) * 4)) + ", detected uint is " + itemOffset + "\n");
+#endif
+            if (itemOffset == 0) { return false; }
+            s.Seek(itemOffset, SeekOrigin.Begin);
+            return true;
+        }
+
+        public static bool SeekFromTableRelative(Stream s, uint offstTbl, int i, uint relativeOffset)
+        {
+            s.Seek(offstTbl + ((i + 1) * 4) + relativeOffset, SeekOrigin.Begin);
+            uint itemOffset = ReadUInt32(s);
+            //Console.Write("Offset tbl: " + (offstTbl + ((i + 1) * 4)) + ", detected uint is " + itemOffset + "\n");
+            if (itemOffset == 0) { return false; }
+            s.Seek(itemOffset, SeekOrigin.Begin);
+            return true;
+        }
+
         public static byte[] ReadBytes(Stream source, int length)
         {
             byte[] buffer = new byte[length];
@@ -625,9 +647,51 @@ namespace DIVALib.IO
             WriteUInt64BE(destination, union.ULong);
         }
 
+        public static char[] ReadChars(Stream source, int length=1)
+        {
+            return ReadChars(source, length, Encoding.ASCII);
+        }
+
+        public static string ReadString(Stream source, int length)
+        {
+            return ReadString(source, length, Encoding.ASCII);
+        }
+
         public static string ReadCString(Stream source)
         {
             return ReadCString(source, Encoding.ASCII);
+        }
+
+        public static string ReadMagic(Stream source, int length=4)
+        {
+            return ReadMagic(source, length, Encoding.ASCII);
+        }
+
+        public static char[] ReadChars(Stream source, int length,Encoding encoding)
+        {
+            var characters = new List<byte>();
+
+            source.Read(buffer, 0, 1);
+            for (int i=0; i<length; i++)
+            {
+                characters.Add(buffer[0]);
+                source.Read(buffer, 0, 1);
+            }
+            return encoding.GetChars(characters.ToArray());
+        }
+
+        public static string ReadString(Stream source, int length, Encoding encoding)
+        {
+            var characters = new List<byte>();
+
+            source.Read(buffer, 0, 1);
+            for (int i=0; i<length; i++)
+            {
+                characters.Add(buffer[0]);
+                source.Read(buffer, 0, 1);
+            }
+            source.Seek(-1, SeekOrigin.Current);
+            return encoding.GetString(characters.ToArray());
         }
 
         public static string ReadCString(Stream source, Encoding encoding)
@@ -644,12 +708,12 @@ namespace DIVALib.IO
             return encoding.GetString(characters.ToArray());
         }
 
-        public static string ReadMagic(Stream source, Encoding encoding)
+        public static string ReadMagic(Stream source, int length, Encoding encoding)
         {
             var characters = new List<byte>();
 
             source.Read(buffer, 0, 1);
-            for (int i=0; i < 4; ++i)
+            for (int i=0; i < length; i++)
             {
                 characters.Add(buffer[0]);
                 source.Read(buffer, 0, 1);
@@ -709,10 +773,21 @@ namespace DIVALib.IO
             WriteCString(destination, value, length, Encoding.ASCII);
         }
 
+        public static void WriteChars(Stream destination, char[] value)
+        {
+            WriteChars(destination, value, Encoding.ASCII);
+        }
+
         public static void WriteCString(Stream destination, string value, int length, Encoding encoding)
         {
             byte[] buffer = encoding.GetBytes(value.ToCharArray(), 0, length);
             destination.Write(buffer, 0, length);
+        }
+
+        public static void WriteChars(Stream destination, char[] value, Encoding encoding)
+        {
+            byte[] buffer = encoding.GetBytes(value, 0, value.Length);
+            destination.Write(buffer, 0, buffer.Length);
         }
 
         public static void Pad(Stream destination, long alignment, byte nullByte)

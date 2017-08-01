@@ -104,10 +104,10 @@ namespace DscFunc
         public DscNote(Stream s)
         {
             unk1       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
-            timestamp  = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 1000.0f;
+            timestamp  = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 100.0f;
             opcode     = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
             type       = (NoteType)DataStream.ReadUInt32(s, DataStream.Endian.BigEndian);
-            holdLength = DataStream.ReadInt32(s, DataStream.Endian.BigEndian) / 1000.0f;
+            holdLength = DataStream.ReadInt32(s, DataStream.Endian.BigEndian) / 100.0f;
             isHoldEnd  = DataStream.ReadInt32(s, DataStream.Endian.BigEndian);
             posX       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 10_000.0f;
             posY       = DataStream.ReadUInt32(s, DataStream.Endian.BigEndian) / 10_000.0f;
@@ -123,10 +123,10 @@ namespace DscFunc
         public void Write(Stream s)
         {
             DataStream.WriteUInt32(s, unk1, DataStream.Endian.BigEndian);
-            DataStream.WriteUInt32(s, (uint)(timestamp*1000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteUInt32(s, (uint)(timestamp*100.0f), DataStream.Endian.BigEndian);
             DataStream.WriteUInt32(s, opcode, DataStream.Endian.BigEndian);
             DataStream.WriteUInt32(s, (uint)type, DataStream.Endian.BigEndian);
-            DataStream.WriteInt32(s, (int)(holdLength*1000.0f), DataStream.Endian.BigEndian);
+            DataStream.WriteInt32(s, (int)(holdLength*100.0f), DataStream.Endian.BigEndian);
             DataStream.WriteInt32(s, isHoldEnd, DataStream.Endian.BigEndian);
             DataStream.WriteUInt32(s, (uint)(posX * 10_000.0f), DataStream.Endian.BigEndian);
             DataStream.WriteUInt32(s, (uint)(posY * 10_000.0f), DataStream.Endian.BigEndian);
