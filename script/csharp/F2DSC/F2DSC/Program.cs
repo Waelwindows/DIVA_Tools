@@ -8,6 +8,7 @@ class Program
     static void Main(string[] args)
     {
         Console.Title = "Project Diva F2nd DSC Converter";
+        Console.Clear();
         string userInput = "";
         //Console.Write(args.Length + "\n");
         if (args.Length == 0)
@@ -35,7 +36,7 @@ class Program
             return;
         }
         string extention = userInput.Substring(userInput.Length - 3);
-        if (extention != "dsc" && extention != "xml" && extention != "elp")
+        if (!userInput.Contains(".dsc") && !userInput.Contains(".xml") && !userInput.Contains("help"))
         {
             Console.Write("Invalid file extention ." + extention);
             Console.ReadLine();
@@ -93,6 +94,7 @@ class Program
             FileStream saveFile = new FileStream(path.Substring(0, path.Length - 3) + "xml", FileMode.CreateNew);
             dsc.OutputToXml(doc);
             doc.Save(saveFile);
+            saveFile.Close();
         }
         success = true;
     }

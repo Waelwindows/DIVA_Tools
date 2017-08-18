@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using TxpFunc;
 using DdsTools;
+using TxpFunc;
 
 namespace TXP2DDS
 {
@@ -10,31 +10,50 @@ namespace TXP2DDS
     {
         static void Main(string[] args)
         {
-            string ddsDir = "D:\\QuickBMS\\mikitm\\exports\\dds";
-            string txpDir = "D:\\QuickBMS\\mikitm\\exports\\test_tex.bin";
-            string[] ddsPath = Directory.GetFiles(ddsDir);
-            //DdsFile[] ddsTex = new DdsFile[ddsPath.Length];
-            List<DdsFile> ddsFiles = new List<DdsFile>();
-            //uint counter = 0;
-            foreach (string path in ddsPath)
+            string dir = "D:\\QuickBMS\\mikitm\\exports\\dds";
+            dir = Console.ReadLine();
+            //dir.Replace("\", "\\");
+            if (dir.Contains("."))
             {
-                FileStream file = new FileStream(path, FileMode.Open);
-                DdsFile ddsTex = new DdsFile(file);
-                if (ddsTex == null) { return; }
-                ddsFiles.Add(ddsTex);
+                Console.Write("TXP to DDS mode");
+                FileStream file = new FileStream(dir, FileMode.Open);
+                TxpToDds(file, dir.Substring(0, dir.Length-8));
+            } else 
+            {
+                Console.Write("DDS to TXP mode");
+                DdsToTxp(dir);
             }
-            DdsFile[] allDds = new DdsFile[ddsFiles.Count];
+            Console.ReadKey();
+        }
+
+		public static void TxpToDds(Stream s, string path)
+		{
+            TxpFile txp = new TxpFile(s);
             uint counter = 0;
-            foreach(DdsFile done in ddsFiles)
+            foreach(TxpTexture tex in txp.textures)
             {
-                allDds[counter] = done;
-                counter++;
+                FileStream saveFile = new FileStream(string.Format("{0}_{1}.dds", path, ++counter), FileMode.Create);
+                tex.ToDds().Save(saveFile);
+                saveFile.Close();
             }
-            TxpFile txp = TxpFile.FromDds(allDds);
-            FileStream save = new FileStream(txpDir, FileMode.Create);
+		}
+
+        public static void DdsToTxp(string directory)
+        {
+            string[] ddsPaths = Directory.GetFiles(directory);
+            DdsFile[] dfiles = new DdsFile[ddsPaths.Length];
+            uint counter = 0;
+            foreach(string path in ddsPaths)
+            {
+                ++counter;
+                FileStream file = new FileStream(path, FileMode.Open);
+                dfiles[counter] = new DdsFile(file);
+                if (dfiles == null) {Console.Write("Oh no, the newly created DDS object is null");}
+            }
+            TxpFile txp = TxpFile.FromDds(dfiles);
+            FileStream save = new FileStream(ddsPaths[0].Substring(0, ddsPaths[0].Length - 5) + "tex.bin", FileMode.Create);
             txp.Save(save);
             save.Close();
-            Console.ReadKey();
         }
     }
 }

@@ -137,13 +137,11 @@ namespace DdsTools
         public uint pitchOrLinearSize;
         public uint depth;
         public uint mipMapCount;
-        uint[] reserved = new uint[11];
         public DdsPixelFormat pixelFormat;
         public uint caps;
         public uint caps2;
         public uint caps3;
         public uint caps4;
-        uint reserved2;
         public byte[] data;
         public DdsMipMap[] mipMaps;
 

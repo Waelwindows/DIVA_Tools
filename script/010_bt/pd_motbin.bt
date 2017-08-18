@@ -1,0 +1,111 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: *.bin
+//   Authors: Waelwindows, Minmode
+//   Version: 0.0
+//   Purpose: Document project diva .bin format for animations
+//------------------------------------------------
+
+typedef struct{
+    uint animInfoOffset <name="Animation Info Offset">;
+    uint animUNKDataOffset <name="UNK Struct Offset">;
+    uint animDataOffset <name="Animation Data Offset">;
+    uint boneDataOffset <name="Bone Data Offset">;
+} HEADER <name="File Header", bgcolor=cRed>;
+
+typedef struct(uint offset)
+{
+    local uint counter = 0x10;
+    for (counter; FTell() < offset; counter++)
+    {
+        HEADER header <name="Sub-header", optimize=false, bgcolor=cLtRed>;
+    }
+} SUBHEADER <name="Anim Sub-Headers", bgcolor=cBlue>;
+
+typedef struct(uint count)
+{
+    local uint counter = 0;
+    for (counter; counter < count; counter++)
+    {
+        uint subAnimSize <name="Size", optimize=false>;
+    }
+} SUBSIZE <name="Sub Anim Sizes", bgcolor=cYellow>;
+
+typedef struct{
+    ushort unk;
+    ushort frameCount <name="Frame Count">;
+} ANIMINFO <name="Animation Info", bgcolor=cGreen>;
+
+typedef struct{
+    uint unk[7];
+} UNKCHILD <name="UNK Data child">;
+
+typedef struct(){
+    //uint ebr <hidden=true>;
+    ushort frameID <name="Frame ID">;
+    if (frameID % 2 == 0)
+    {
+        ushort padding <name="Padding">;
+    }
+    local int counter = 0;
+    struct {
+        for (counter; counter < frameID; counter++)
+        {
+            ushort frameCount <name="Frame Count", optimize=false>;
+        }
+    } frameCounts <name="Frame Counts">;
+    counter = 0;
+    struct {
+        for (counter; counter < frameID; counter++){
+            float value <name="Value", optimize=false>;
+            float unk <optimize=false>;
+        }
+    } data <name="Animation Values">;
+} ANIMDATA <name="Animation Data", bgcolor=cYellow>;
+
+typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
+    ANIMINFO animInfo <optimize=false>;
+    local int c1 = 0;
+    Printf("Anim data start is : %u \n", animDataStart);
+    struct(int animDataStart){
+        for(c1; FTell() < animDataStart; ++c1){
+                UNKCHILD unkChild;
+            }
+    } UNK(animDataStart) <name="Animation Settings?", comment="Size depends on game", bgcolor=cLtBlue>;
+    Printf("Bone data offst is : %u \n", boneDataStart);
+    local int sCount = 0;
+    struct{
+    //for (sCount; FTell() < boneDataStart; ++sCount)
+    for (sCount; sCount < 18; ++sCount)
+        {
+            ANIMDATA animData <name="Motion Data",optimize=false>;
+        }
+    } ANIMDATAGROUP <name="Animation Data">;
+    Printf("Next anim info is : %u \n", nextAnimInfo);
+    FSeek(boneDataStart);
+    struct(int nextAnimInfo){
+        local int bCount = 0;
+        for (bCount; FTell() < nextAnimInfo; ++bCount)
+        {
+            short id <name="Bone ID">;
+        }
+    } BONEDATA(nextAnimInfo) <name="Bone Data", comment="Corresponds to the mot_db.bin", bgcolor=cLtRed>;
+} ANIM <name="Animation">;
+
+LittleEndian();
+HEADER hd;
+SUBHEADER subHD(hd.animInfoOffset);
+local int animCount = -1;
+struct{
+    for (animCount; animCount < 2; ++animCount)
+    {
+        if (animCount == -1)
+        {
+            FSeek(hd.animInfoOffset);
+            ANIM anim(hd.animDataOffset, hd.boneDataOffset, subHD.header[0].animInfoOffset);
+        } else {
+            ANIM anim(subHD.header[animCount].animDataOffset, subHD.header[animCount].boneDataOffset, subHD.header[animCount+1].animInfoOffset);
+        }
+    }
+} ANIMS <name="Animations">;
