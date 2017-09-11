@@ -7,8 +7,8 @@ namespace DscOp
 {
     public class DscFile
     {
-        byte[] magic = { 0x20, 02, 02, 0x12 };
-        List<DSCFunc> funcs = new List<DSCFunc>();
+        const uint magic = 302121504;
+        public List<DSCFunc> funcs = new List<DSCFunc>();
         public DscFile()
         {
 
@@ -16,7 +16,7 @@ namespace DscOp
 
         public DscFile(Stream s)
         {
-            if (DataStream.ReadBytes(s, 4) != magic)
+            if (DataStream.ReadInt32(s) != magic)
             {
                 return;
             }
@@ -24,13 +24,20 @@ namespace DscOp
             while (!EOF)
             {
                 uint readFuncId = DataStream.ReadUInt32(s);
+                s.Position -= 4;
+                switch(readFuncId)
+                {
+                    case 0x00: funcs.Add(new fEnd(s)); break;
+                    case 0x01: funcs.Add(new fTime(s)); break;
+                    default: break;
+                }
                 EOF = true;
             }
         }
 
         public void Write(Stream s)
         {
-            DataStream.WriteBytes(s, magic);
+            DataStream.WriteUInt32(s, magic, DataStream.Endian.LittleEndian);
             foreach(DSCFunc func in funcs)
             {
 
@@ -63,7 +70,7 @@ namespace DscOp
     {
         public uint unk;
 
-        public fEnd() : base() { }
+        public fEnd() { func_id = 0x00; }
         public fEnd(Stream s) : base(s, 0x00)
         {
             unk = DataStream.ReadUInt32(s);
@@ -71,7 +78,7 @@ namespace DscOp
 
         public override void Write(Stream s)
         {
-            DataStream.WriteUInt32(s, (uint)(unk));
+            DataStream.WriteUInt32(s, unk);
         }
     }
 
@@ -79,7 +86,7 @@ namespace DscOp
     {
         public  float timestamp;
 
-        public fTime() : base() { }
+        public fTime() { func_id = 0x01; }
         public fTime(Stream s) : base(s, 0x01)
         {
             timestamp = DataStream.ReadUInt32(s) / 100.0f;

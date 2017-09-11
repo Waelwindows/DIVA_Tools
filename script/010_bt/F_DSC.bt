@@ -17,8 +17,8 @@ typedef uint hex_id <read=hexid_read, write=hexid_write>;
 
 const local float screenpos_unit = 10000.0;
 typedef uint screenpos <read=pos_read, write=pos_write>;
-const local float sub_degrees = 1000;
-typedef int degrees <read=degree_read, write=degree_write, comment="Starts clockwise">;
+const local float sub_degrees = 10000;
+typedef int degrees <read=degree_read, write=degree_write, comment="Radians, Starts clockwise">;
 
 enum <uint> note_type {
     TRIANGLE        = 0,
@@ -159,12 +159,12 @@ string degree_read(degrees d) {
     float degree = d / sub_degrees;
     if (getDecimal(degree) == 0){
         if (degree == 1){
-            return numToString(degree) + " degree";
+            return numToString(degree) + " radian";
         } else {
-            return numToString(degree) + " degrees";
+            return numToString(degree) + " radians";
         }
     } else {
-        return floatStrAtDP(degree, 2) + " degrees";
+        return floatStrAtDP(degree, 2) + " radians";
     }
 }
 
@@ -255,16 +255,16 @@ typedef struct {
 //0x06
 typedef struct {
     uint id <hidden=1>;
-    note_type type <name="Note Type">;
-    timeLength  hold_length <name="Hold Length">;
-    intbool  is_hold_end <name="Hold End">;
-    screenpos xpos <name="X Position", comment="Ends at 50">;
-    screenpos ypos <name="Y Position", comment="Ends at 30">;
-    degrees curve1 <name="Curve - Small">;
-    uint speed <name="Speed", comment="Challenge Item speed">;
-    degrees curve2 <name="Curve - Big">;
-    uint bpm <name="BPM">;
-    uint unk <name="Unknown Value", comment="Same value on notes from one file">;
+    note_type     type <name="Note Type">;
+    timeLength    hold_length <name="Hold Length">;
+    intbool       is_hold_end <name="Hold End">;
+    screenpos     pos_x <name="X Position", comment="Ends at 50">;
+    screenpos     pos_y <name="Y Position", comment="Ends at 30">;
+    degrees       oscil_angle <name="Oscillation Angle">;
+    int           oscil_cycle <name="Oscillation Cycles", comment="0.5 Cycle / Timeout">;
+    degrees       entry_angle <name="Entry angle">;
+    uint          oscil_altitude <name="Oscillation Altitude">;
+    uint          timeOut <name="Timeout">;
 } TARGET <name="Note", bgcolor=cGreen>;
 
 //0x07

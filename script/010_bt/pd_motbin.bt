@@ -4,7 +4,9 @@
 //      File: *.bin
 //   Authors: Waelwindows, Minmode
 //   Version: 0.0
-//   Purpose: Document project diva .bin format for animations
+//   Purpose: Parse PD ".bin" anim format.
+//------------------------------------------------
+
 //------------------------------------------------
 
 typedef struct{
@@ -23,15 +25,6 @@ typedef struct(uint offset)
     }
 } SUBHEADER <name="Anim Sub-Headers", bgcolor=cBlue>;
 
-typedef struct(uint count)
-{
-    local uint counter = 0;
-    for (counter; counter < count; counter++)
-    {
-        uint subAnimSize <name="Size", optimize=false>;
-    }
-} SUBSIZE <name="Sub Anim Sizes", bgcolor=cYellow>;
-
 typedef struct{
     ushort unk;
     ushort frameCount <name="Frame Count">;
@@ -41,7 +34,23 @@ typedef struct{
     uint unk[7];
 } UNKCHILD <name="UNK Data child">;
 
-typedef struct(){
+//This struct's size changes per game
+// DT = 138
+// F = 140
+// FT = 148
+typedef struct(int animDataStart){
+    ushort unk[10];
+    ushort reserved[25] <name="Reserved", comment="Possibly unused?">;
+    ushort const1[2] <name="Const?">;
+    //ushort value1[20];
+    ushort value[6];
+    ushort const2[4];
+    ushort value2[10];
+    ushort const3[9];
+
+} ANIMUNK <name="Animation Settings?", comment="Size is game dependant", bgcolor=cLtBlue>;
+
+typedef struct(int boneDataStart){
     //uint ebr <hidden=true>;
     ushort frameID <name="Frame ID">;
     if (frameID % 2 == 0)
@@ -56,56 +65,136 @@ typedef struct(){
         }
     } frameCounts <name="Frame Counts">;
     counter = 0;
-    struct {
+    struct(int boneDataStart) {
         for (counter; counter < frameID; counter++){
+            if (FTell() >= boneDataStart)
+            {
+                break;
+            }
             float value <name="Value", optimize=false>;
+            if (FTell() >= boneDataStart)
+            {
+                break;
+            }
             float unk <optimize=false>;
         }
-    } data <name="Animation Values">;
+    } data(boneDataStart) <name="Animation Values">;
 } ANIMDATA <name="Animation Data", bgcolor=cYellow>;
+
+string floatStrAtDP(float i, int dp){
+    int intonly = i;
+    string value;
+    string nofloat;
+    SPrintf(value, "%f", i);
+    SPrintf(nofloat, "%i", intonly);
+    return nofloat + SubStr(value, Strlen(nofloat), dp+1);
+}
+
+string motDataValue(ANIMDATA &data) {
+    string str;
+    SPrintf(str, "%u frames, ", data.frameID);
+    str += floatStrAtDP((data.frameID / 60.0f) / 60.0f, 2) + " min";
+    return str;
+}
+
+typedef struct(int nextAnimInfo){
+    local int bCount = 0;
+    local int endOffset = nextAnimInfo;
+    if (nextAnimInfo == 0)
+    {
+        endOffset = FileSize();
+    }
+    for (bCount; FTell() < endOffset; ++bCount)
+    {
+        short id <name="Bone ID">;
+    }
+} BONEDATA <name="Bone Data", comment="Corresponds to the mot_db.bin", bgcolor=cLtRed>;
+
+typedef struct(int amount) {
+        local uint size = amount;
+        int pad[amount];
+        Printf("Pad of %u ints size at %X \n", amount, FTell());
+    } DATAPAD ;
+
+string padInfo(DATAPAD &pad)
+{
+    string size;
+    SPrintf(size, "%u ints at 0x%X", pad.size, FTell() );
+    return size; 
+}
 
 typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
     ANIMINFO animInfo <optimize=false>;
     local int c1 = 0;
     Printf("Anim data start is : %u \n", animDataStart);
-    struct(int animDataStart){
-        for(c1; FTell() < animDataStart; ++c1){
-                UNKCHILD unkChild;
-            }
-    } UNK(animDataStart) <name="Animation Settings?", comment="Size depends on game", bgcolor=cLtBlue>;
+    ANIMUNK unk(animDataStart);
     Printf("Bone data offst is : %u \n", boneDataStart);
     local int sCount = 0;
-    struct{
-    //for (sCount; FTell() < boneDataStart; ++sCount)
-    for (sCount; sCount < 18; ++sCount)
+    struct(int boneDataStart){
+    local int motDataLim = 109;
+    for (sCount; sCount <motDataLim; ++sCount)
         {
-            ANIMDATA animData <name="Motion Data",optimize=false>;
+            Printf("loop iteration %u \n", sCount);
+            if (FTell() >= boneDataStart)
+            {
+                break;
+            }
+            /* Shushitsu Manual Padding */
+            /* */
+            if (sCount ==   7) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  11) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  17) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  21) { DATAPAD pad( 5) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  26) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  54) { DATAPAD pad(11) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  59) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  87) { DATAPAD pad( 9) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount ==  93) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount == 101) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            
+            /* Yellow Manual Padding*/
+            /*
+            if (sCount == 6) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount == 11) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount == 17) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            if (sCount == 22) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
+            */
+            ANIMDATA animData(boneDataStart) <name="Motion Data", read=motDataValue, optimize=false>;
         }
-    } ANIMDATAGROUP <name="Animation Data">;
+    } ANIMDATAGROUP(boneDataStart) <name="Animation Data">;
     Printf("Next anim info is : %u \n", nextAnimInfo);
     FSeek(boneDataStart);
-    struct(int nextAnimInfo){
-        local int bCount = 0;
-        for (bCount; FTell() < nextAnimInfo; ++bCount)
-        {
-            short id <name="Bone ID">;
-        }
-    } BONEDATA(nextAnimInfo) <name="Bone Data", comment="Corresponds to the mot_db.bin", bgcolor=cLtRed>;
+    BONEDATA boneData(nextAnimInfo);
 } ANIM <name="Animation">;
 
 LittleEndian();
 HEADER hd;
 SUBHEADER subHD(hd.animInfoOffset);
-local int animCount = -1;
+
+Printf( "Size of header %u", sizeof(subHD) / sizeof(HEADER) );
 struct{
-    for (animCount; animCount < 2; ++animCount)
+    local int counter = -1;
+    local int animCount;
+    if (subHD.header[0].animInfoOffset == 0)
     {
-        if (animCount == -1)
+        animCount == 0;
+    } else {
+        animCount = sizeof(subHD) / sizeof(HEADER);
+    }
+    for (counter; counter < animCount; ++counter)
+    {
+        if (counter == -1)
         {
             FSeek(hd.animInfoOffset);
             ANIM anim(hd.animDataOffset, hd.boneDataOffset, subHD.header[0].animInfoOffset);
         } else {
-            ANIM anim(subHD.header[animCount].animDataOffset, subHD.header[animCount].boneDataOffset, subHD.header[animCount+1].animInfoOffset);
+            if (counter == sizeof(subHD) / sizeof(HEADER) - 1)
+            {
+                ANIM anim(subHD.header[counter].animDataOffset, subHD.header[counter].boneDataOffset, 0);
+            } else
+            {
+                ANIM anim(subHD.header[counter].animDataOffset, subHD.header[counter].boneDataOffset, subHD.header[counter+1].animInfoOffset);
+            }
         }
     }
 } ANIMS <name="Animations">;

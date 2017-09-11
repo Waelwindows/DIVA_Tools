@@ -1,0 +1,79 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//   Authors: Waelwindows, Minmode
+//   Version: 0.1
+//   Purpose: Parse pd bone database
+// File Mask: .bin
+//  ID Bytes: 20 27 10 09
+//------------------------------------------------
+
+typedef struct {
+    char magic[4] <name="File Magic", comment="Always 0x20_27_10_09">;
+    int sectionCount;
+    int skeletonsOffset;
+    int unk1;
+} HEADER <name="Header", bgcolor=cRed>;
+
+typedef struct (int count)
+{
+	local int counter = 0;
+	for (counter; counter < hd.sectionCount; ++counter)
+	{
+		struct { int skelOffset; } SKELINFO <name="Skeleton Information">;
+	}
+	counter = 0;
+	for (counter; counter < count; ++counter)
+	{
+		struct { string name; } NAME <name="Name", bgcolor=cLtRed>;
+	}
+} CHARS <name="Character Information", bgcolor=cLtBlue>;
+
+typedef struct 
+{
+	float matElement[3];
+} MATRIX <name="Matrix">;
+
+typedef struct (int skelOffset)
+{
+	FSeek(skelOffset);
+	int unk1;
+	int skelCount1;
+	int skelMatrixOffset;
+	int unk2;
+	int skelCount2;
+	int skelNameOffset1;
+	int skelCount3;
+	int skelNameOffset2;
+	int skelParents;
+
+	FSeek(skelMatrixOffset);
+	struct(int skelCount1) {
+		local int counter = 0;
+		for (counter; counter < skelCount1; ++counter)
+		{
+			MATRIX mat;
+		}
+	} SKELMATRIX (skelCount1) <name="Skeleton Matricies">;
+
+	FSeek(skelNameOffset1);
+	struct(int skelCount2) {
+		local int current = FTell();
+		local int counter = 0;
+		for (counter; counter < skelCount2; ++counter)
+		{
+			FSeek(current);
+			current = FTell() + 4;
+			int boneNameOffset <hidden=1>;
+			FSeek(boneNameOffset);
+			struct { string boneNames; } BONENAME <name="Bone Name">;
+		}
+	} CHARNAMES1(skelCount2) <name="Character Names 1">;
+} CHARSKEL <name="Character Skeleton", bgcolor=cGreen>;
+
+HEADER hd;
+FSeek(hd.skeletonsOffset);
+local int counter = 0;
+CHARS chr(hd.sectionCount);
+CHARSKEL cmnSkel(chr.SKELINFO.skelOffset[0]);
+CHARSKEL cmnSkel(chr.SKELINFO.skelOffset[6]) <comment="MIKU">;
