@@ -17,7 +17,7 @@ typedef uint hex_id <read=hexid_read, write=hexid_write>;
 
 const local float screenpos_unit = 10000.0;
 typedef uint screenpos <read=pos_read, write=pos_write>;
-const local float sub_degrees = 10000;
+const local float sub_degrees = 100000;
 typedef int degrees <read=degree_read, write=degree_write, comment="Radians, Starts clockwise">;
 
 enum <uint> note_type {
@@ -56,12 +56,17 @@ string floatToString(float i){
 }
 
 string floatStrAtDP(float i, int dp){
-    int intonly = i;
+    int iInt = i;
     string value;
-    string nofloat;
+    string intonly;
     SPrintf(value, "%f", i);
-    SPrintf(nofloat, "%i", intonly);
-    return nofloat + SubStr(value, Strlen(nofloat), dp+1);
+    SPrintf(intonly, "%u", iInt);
+    if (dp == 0 || i - iInt == 0) {
+        value = SubStr(value, 0, Strlen(intonly));
+    } else {
+        value = SubStr(value, 0, dp+2);
+    }
+    return value;
 }
 
 string uintbool_read(uintbool i){
@@ -157,15 +162,16 @@ void pos_write(screenpos &sp, string s) {
 
 string degree_read(degrees d) {
     float degree = d / sub_degrees;
-    if (getDecimal(degree) == 0){
-        if (degree == 1){
-            return numToString(degree) + " radian";
-        } else {
-            return numToString(degree) + " radians";
-        }
+    degree = d / 1000;
+    degree *= 0.01;
+    string rslt;
+    if (degree == 1)
+    {
+        rslt = "1 radian";
     } else {
-        return floatStrAtDP(degree, 2) + " radians";
+        rslt = floatStrAtDP(degree, 2) + " radians";   
     }
+    return rslt;
 }
 
 void degree_write(degrees &d, string s) {

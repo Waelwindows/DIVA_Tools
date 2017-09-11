@@ -12,8 +12,13 @@ namespace FDSC
             string path = "D:\\DIVATools\\test_files\\dsc\\pv_609_extreme.dsc";
             path = "//Users//waelwindows//Documents//DIVA_Tools//test_files//dsc//f_tst.dsc";
             FileStream file = new FileStream(path, FileMode.Open);
+            Console.Write("Preparing to read file");
             DscFile dsc = new DscFile(file);
-            Console.Write(dsc.funcs);
+            Console.Write("{0} funcs in dsc\n", dsc.funcs.Count);
+            foreach (DSCFunc func in dsc.funcs)
+            {
+                Console.Write(func);
+            }
             Console.ReadKey();
         }
     }
