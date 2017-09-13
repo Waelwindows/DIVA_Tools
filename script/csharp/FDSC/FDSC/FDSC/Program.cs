@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using DscOp;
+using System.Linq;
 
 namespace FDSC
 {
@@ -9,17 +9,38 @@ namespace FDSC
     {
         static void Main(string[] args)
         {
-            string path = "D:\\DIVATools\\test_files\\dsc\\pv_609_extreme.dsc";
-            path = "//Users//waelwindows//Documents//DIVA_Tools//test_files//dsc//f_tst.dsc";
-            FileStream file = new FileStream(path, FileMode.Open);
-            Console.Write("Preparing to read file");
-            DscFile dsc = new DscFile(file);
-            Console.Write("{0} funcs in dsc\n", dsc.funcs.Count);
-            foreach (DSCFunc func in dsc.funcs)
+            if (args.Count() != 1)
             {
-                Console.Write(func);
+                throw new ArgumentException("Needs directory");
             }
-            Console.ReadKey();
+            string ext = args[0].Substring(args[0].Length - 3, 3);
+            switch(ext)
+            {
+                case "dsc": DscConvert(args[0]); break;
+                case "xml": XmlConvert(args[0]); break;
+            }
+        }
+
+        public static void DscConvert(string path)
+        {
+            FileStream file = new FileStream(path, FileMode.Open);
+            DscFile dsc = new DscFile(file);
+            file.Close();
+            string spath = path.Substring(0, path.Length - 3) + "xml";
+            FileStream save = new FileStream(spath, FileMode.Create);
+            dsc.Serialize(save);
+            return;
+        }
+
+        public static void XmlConvert(string path)
+        {
+			FileStream file = new FileStream(path, FileMode.Open);
+            DscFile dsc = DscFile.Deserialize(file);
+			string spath = path.Substring(0, path.Length - 3) + "dsc";
+			FileStream save = new FileStream(spath, FileMode.Create);
+			dsc.Save(save);
+			save.Close();
+			return;
         }
     }
 }

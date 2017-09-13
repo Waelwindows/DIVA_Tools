@@ -1,14 +1,28 @@
 ﻿using System;
 using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
 using System.Collections.Generic;
 using DIVALib.IO;
 using DIVALib.Math;
+using DIVALib.XmlHelper;
 
 namespace DscOp
 {
+    [XmlRoot("dsc")]
+	[XmlInclude(typeof(DSCFunc))]
+	[XmlInclude(typeof(FEnd))]
+	[XmlInclude(typeof(FTime))]
+	[XmlInclude(typeof(FMikuMove))]
+	[XmlInclude(typeof(FMikuRotate))]
+	[XmlInclude(typeof(FMikuDisplay))]
+    [XmlInclude(typeof(FMikuShadow))]
+    [XmlInclude(typeof(FTarget))]
     public class DscFile
     {
-        const uint magic = 302121504;
+        [XmlAttribute("version")]
+        public const uint magic = 302121504;
+        [XmlArray("functions")]
         public List<DSCFunc> funcs = new List<DSCFunc>();
         public DscFile()
         {
@@ -22,8 +36,14 @@ namespace DscOp
                 return;
             }
             bool EOF = false;
+            Console.Write("File size is {0}\n", s.Length);
             while (!EOF)
             {
+                Console.Write("Current position {0}\n", s.Position);
+				if (s.Position >= s.Length)
+				{
+                    EOF = true; break;
+				}
                 uint readFuncId = DataStream.ReadUInt32(s);
                 s.Position -= 4;
                 switch(readFuncId)
@@ -35,41 +55,77 @@ namespace DscOp
                     case 0x04: funcs.Add(new FMikuDisplay(s)); break;
                     case 0x05: funcs.Add(new FMikuShadow(s)); break;
                     case 0x06: funcs.Add(new FTarget(s)); break;
-                    default: break;
-                }
-                if (s.Position == s.Length)
-                {
-                    EOF = true;
+                    default: 
+                        Console.Write("Unknown opcode: 0x{0:X}\n", readFuncId); 
+                        EOF = true; return;
                 }
             }
         }
 
-        public void Write(Stream s)
+        public void Save(Stream s)
         {
             DataStream.WriteUInt32(s, magic, DataStream.Endian.LittleEndian);
             foreach(DSCFunc func in funcs)
             {
-
+                func.Write(s);
             }
+        }
+
+        public XmlDocument ToXml() 
+        {
+            var doc = new XmlDocument();
+
+			XmlDeclaration dec = doc.CreateXmlDeclaration("1.0", "utf-8", null);
+			XmlNode root = doc.CreateElement("pd_dsc");
+            XmlAttribute dscVersion = doc.CreateAttribute("dsc_version");
+            dscVersion.Value = "f|dt";
+
+            root.Attributes.Append(dscVersion);
+
+            doc.AppendChild(dec);
+			doc.AppendChild(root);
+
+            foreach (DSCFunc func in funcs)
+            {
+                doc.DocumentElement.AppendChild(func.ToXml(doc));
+            }
+
+            return doc;
+        }
+
+        public void Serialize(Stream s, bool close=true)
+        {
+			XmlSerializer serializer = new XmlSerializer(typeof(DscFile));
+			serializer.Serialize(s, this);
+            if (!close) { s.Close(); }
+        }
+
+        public static DscFile Deserialize(Stream s, bool close = true)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(DscFile));
+            DscFile dsc = serializer.Deserialize(s) as DscFile;
+            if (!close) { s.Close(); }
+            return dsc;
         }
     }
 
 	/// <summary>  
 	///  Generic parent class for all Dsc functions
 	/// </summary>  
+    [Serializable]
 	public class DSCFunc
     {
 		/// <summary>  
-		///  The number that specifies which function to use
+		///  The number that specifies which function to be used
 		/// </summary>  
-		public uint func_id;
+		protected uint functionID;
 
         public DSCFunc() { }
 
         public DSCFunc(Stream s, uint id)
         {
-            func_id = id;
-            if (DataStream.ReadUInt32(s) != func_id)
+            functionID = id;
+            if (DataStream.ReadUInt32(s) != functionID)
             {
                 return;
             }
@@ -80,23 +136,27 @@ namespace DscOp
 		/// </summary>  
 		public virtual void Write(Stream s)
         {
-            DataStream.WriteUInt32(s, func_id);
+            DataStream.WriteUInt32(s, functionID);
         }
 
-        public override string ToString()
+		/// <summary>  
+		///  The string representation of a DSC function
+		/// </summary>  
+		public override string ToString()
         {
-            return string.Format(string.Format("[DSC Function] #{0:x}: {1}\n", func_id, this.GetType().Name));
+            return string.Format(string.Format("[DSC Function] 0x{0:X}: {1}\n", functionID, this.GetType().Name));
         }
     }
 
 	/// <summary>  
 	///  Ends the song
 	/// </summary>  
+    ///[XmlElement("End")]
 	public class FEnd : DSCFunc
     {
         public uint unk;
 
-        public FEnd() { func_id = 0x00; }
+        public FEnd() { functionID = 0x00; }
         public FEnd(Stream s) : base(s, 0x00)
         {
             unk = DataStream.ReadUInt32(s);
@@ -104,6 +164,7 @@ namespace DscOp
 
         public override void Write(Stream s)
         {
+            base.Write(s);
             DataStream.WriteUInt32(s, unk);
         }
     }
@@ -116,16 +177,17 @@ namespace DscOp
 		/// <summary>  
 		/// Time in milliseconds
 		/// </summary>  
-		public float timestamp;
+		public double timestamp;
 
-        public FTime() { func_id = 0x01; }
+        public FTime() { functionID = 0x01; }
         public FTime(Stream s) : base(s, 0x01)
         {
-            timestamp = DataStream.ReadUInt32(s) / 100.0f;
+            timestamp = DataStream.ReadUInt32(s) / 100.0;
         }
 
         public override void Write(Stream s)
         {
+            base.Write(s);
             DataStream.WriteUInt32(s, (uint)(timestamp * 100) );
         }
     }
@@ -138,20 +200,20 @@ namespace DscOp
         public uint  playerID;
         public Vector3 position;
 
-		public FMikuMove() { func_id = 0x02; }
+		public FMikuMove() { functionID = 0x02; }
 		public FMikuMove(Stream s) : base(s, 0x02)
 		{
             playerID = DataStream.ReadUInt32(s);
-            position = new Vector3(DataStream.ReadInt32(s), DataStream.ReadInt32(s), DataStream.ReadInt32(s));
+            position = new Vector3(DataStream.ReadUInt32(s), DataStream.ReadUInt32(s), DataStream.ReadUInt32(s));
 		}
 
 		public override void Write(Stream s)
 		{
+            base.Write(s);
 			DataStream.WriteUInt32(s, playerID);
-            foreach (float component in position)
-            {
-                DataStream.WriteInt32(s, (int)component);
-            }
+            DataStream.WriteInt32(s, (int)position.x);
+            DataStream.WriteInt32(s, (int)position.y);
+            DataStream.WriteInt32(s, (int)position.z);
 		}
 	}
 
@@ -166,7 +228,7 @@ namespace DscOp
         /// </summary>  
         public int orientation;
 
-		public FMikuRotate() { func_id = 0x03; }
+		public FMikuRotate() { functionID = 0x03; }
 		public FMikuRotate(Stream s) : base(s, 0x03)
 		{
 			playerID = DataStream.ReadUInt32(s);
@@ -175,6 +237,7 @@ namespace DscOp
 
 		public override void Write(Stream s)
 		{
+            base.Write(s);
 			DataStream.WriteUInt32(s, playerID);
 			DataStream.WriteInt32(s, orientation);
 		}
@@ -188,7 +251,7 @@ namespace DscOp
 		public uint playerID;
         public bool state;
 
-		public FMikuDisplay() { func_id = 0x04; }
+		public FMikuDisplay() { functionID = 0x04; }
 		public FMikuDisplay(Stream s) : base(s, 0x04)
 		{
 			playerID = DataStream.ReadUInt32(s);
@@ -197,6 +260,7 @@ namespace DscOp
 
 		public override void Write(Stream s)
 		{
+            base.Write(s);
 			DataStream.WriteUInt32(s, playerID);
             DataStream.WriteUInt32(s, (uint)((state) ? 1 : 0));
 		}
@@ -210,7 +274,7 @@ namespace DscOp
 		public uint playerID;
         public bool state;
 
-		public FMikuShadow() { func_id = 0x05; }
+		public FMikuShadow() { functionID = 0x05; }
 		public FMikuShadow(Stream s) : base(s, 0x05)
 		{
 			playerID = DataStream.ReadUInt32(s);
@@ -219,6 +283,7 @@ namespace DscOp
 
 		public override void Write(Stream s)
 		{
+            base.Write(s);
 			DataStream.WriteUInt32(s, playerID);
 			DataStream.WriteUInt32(s, (uint)((state) ? 1 : 0));
 		}
@@ -248,26 +313,27 @@ namespace DscOp
             CHANCE_STAR = 15
         };
 
-        const int ud_pos = 100_000;
-        const int ud_rot = 100_000;
+        const double ud_pos =  10_000.0;
+        const double ud_rot = 100_000.0;
 
         public EType type;
-        public float holdLength;
+        public double holdLength;
         public bool isHoldEnd;
         public Vector2 position;
-        public float oscillateAngle;
+        public double oscillateAngle;
         public int oscillateFrequency;
-        public float entryAngle;
+        public double entryAngle;
         public uint oscillateAmplitude;
         public uint timeOut;
 		
 
-		public FTarget() { func_id = 0x06; }
+		public FTarget() { functionID = 0x06; }
 		public FTarget(Stream s) : base(s, 0x06)
 		{
             type = (EType)DataStream.ReadUInt32(s);
-            holdLength = DataStream.ReadInt32(s) / 100.0f;
-            isHoldEnd = DataStream.ReadInt32(s) != 1;
+            holdLength = DataStream.ReadInt32(s) / 100.0;
+            holdLength = (holdLength == -0.01) ? -1 : holdLength;
+            isHoldEnd = DataStream.ReadInt32(s) == 0;
             position = new Vector2(DataStream.ReadUInt32(s) / ud_pos, DataStream.ReadUInt32(s) / ud_pos);
             oscillateAngle = DataStream.ReadInt32(s) / ud_rot;
             oscillateFrequency = DataStream.ReadInt32(s);
@@ -276,11 +342,12 @@ namespace DscOp
             timeOut = DataStream.ReadUInt32(s);
 		}
 
-		public override void Write(Stream s)
+        public override void Write(Stream s)
 		{
+            base.Write(s);
 			DataStream.WriteUInt32(s, (uint)type);
-            DataStream.WriteInt32(s, (int)(holdLength * 100));
-            DataStream.WriteInt32(s, isHoldEnd ? 0 : -1);
+            DataStream.WriteInt32(s, (int)((holdLength == -1) ? -1 : holdLength * 100));
+            DataStream.WriteInt32(s, (isHoldEnd) ? 0 : -1);
             DataStream.WriteUInt32(s, (uint)(position.x * ud_pos)); DataStream.WriteUInt32(s, (uint)(position.y * ud_pos));
             DataStream.WriteInt32(s, (int)(oscillateAngle * ud_rot));
             DataStream.WriteInt32(s, oscillateFrequency);
