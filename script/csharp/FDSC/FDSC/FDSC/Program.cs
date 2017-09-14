@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using DscOp;
-using System.Linq;
 
 namespace FDSC
 {
@@ -9,7 +8,7 @@ namespace FDSC
     {
         static void Main(string[] args)
         {
-            if (args.Count() != 1)
+            if (args.Length != 1)
             {
                 throw new ArgumentException("Needs directory");
             }

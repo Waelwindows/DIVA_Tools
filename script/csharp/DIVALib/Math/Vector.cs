@@ -7,25 +7,30 @@ using System.Xml;
 
 namespace DIVALib.Math
 {
-    public class Vector2
+    public class Vector2 : IEnumerator, IEnumerable, IXmlSerializable
     {
         public double x;
         public double y;
+        int position = 0;
+        double[] components;
 
         public Vector2()
         {
             x = y = 0;
+            components = new double[] {x, y};
         }
 
         public Vector2(double value)
         {
             x = y = value;
+            components = new double[] { x, y };
         }
 
         public Vector2(double x_value, double y_value)
         {
             x = x_value;
             y = y_value;
+            components = new double[] { x, y };
         }
 
         public double Dot(Vector2 other)
@@ -37,7 +42,63 @@ namespace DIVALib.Math
         {
             return string.Format(string.Format("({0}, {1})", x, y));
         }
-    }
+
+		public XmlSchema GetSchema()
+		{
+			return null;
+		}
+
+		public static Vector2 Parse(string str)
+		{
+			if (String.IsNullOrWhiteSpace(str)) throw new ArgumentException(str);
+
+			Match data = Regex.Match(str, @"\W*(\d+\.?\d*)\W+(\d+\.?\d*)\W*");
+
+			return new Vector2(double.Parse(data.Groups[1].Value), double.Parse(data.Groups[2].Value));
+		}
+
+		public void ReadXml(XmlReader reader)
+		{
+			reader.ReadStartElement();
+			var c = Parse(reader.ReadContentAsString()).components;
+			x = c[0]; y = c[1];
+			reader.ReadEndElement();
+		}
+
+		public void WriteXml(XmlWriter writer)
+		{
+            writer.WriteAttributeString("type", "vec2");
+			writer.WriteString(ToString());
+		}
+
+		//IEnumerator and IEnumerable require these methods.
+		public IEnumerator GetEnumerator()
+		{
+			return this;
+		}
+
+		//IEnumerator
+		public bool MoveNext()
+		{
+			position++;
+			return (position < components.Length);
+		}
+
+		//IEnumerable
+		public void Reset() { position = 0; }
+
+		//IEnumerable
+		public object Current
+		{
+			get { return components[position]; }
+		}
+
+		public void Add(System.Object o)
+		{
+			throw new NotSupportedException("Can't add more components to a Vector2");
+		}
+
+	}
 
     public class Vector3 : IEnumerator, IEnumerable, IXmlSerializable
     {
@@ -79,7 +140,7 @@ namespace DIVALib.Math
         {
             if (String.IsNullOrWhiteSpace(str)) throw new ArgumentException(str);
 
-            Match data = Regex.Match(str, @"\W*(\d+)\W+(\d+)\W+(\d+)\W*");
+            Match data = Regex.Match(str, @"\W*(\d+\.?\d*)\W+(\d+\.?\d*)\W+(\d+\.?\d*)\W*");
 
             return new Vector3(double.Parse(data.Groups[1].Value), double.Parse(data.Groups[2].Value), double.Parse(data.Groups[3].Value));
         }
@@ -99,6 +160,7 @@ namespace DIVALib.Math
 
 		public void WriteXml(XmlWriter writer)
         {
+            writer.WriteAttributeString("type", "vec3");
             writer.WriteString(ToString());
         }
 

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Serialization;
 namespace DIVALib.Math
 {
     public class Angle
@@ -34,11 +37,11 @@ namespace DIVALib.Math
         {
             switch(newUnit)
             {
-                case EUnit.DEGREE: return this; break;
-                case EUnit.RADIAN: return new Angle(angle * degreeRadian); break;
-                case EUnit.GRADIAN: return new Angle((angle * radianGradian) * degreeRadian); break;
-                case EUnit.QUADRANT: return new Angle(angle * quadDegree); break;
-                default: return this; break;
+                case EUnit.DEGREE: return this; 
+                case EUnit.RADIAN: return new Angle(angle * degreeRadian);
+                case EUnit.GRADIAN: return new Angle((angle * radianGradian) * degreeRadian); 
+                case EUnit.QUADRANT: return new Angle(angle * quadDegree);
+                default: return this;
             }
         }
 
@@ -46,11 +49,11 @@ namespace DIVALib.Math
         {
 			switch (newUnit)
 			{
-				case EUnit.DEGREE: return new Angle(angle / degreeRadian, EUnit.RADIAN); break;
-                case EUnit.RADIAN: return this; break;
-                case EUnit.GRADIAN: return new Angle(angle / radianGradian, EUnit.RADIAN); break;
-                case EUnit.QUADRANT: return new Angle((angle * quadDegree) / degreeRadian, EUnit.RADIAN); break;
-                default: return this; break;
+				case EUnit.DEGREE: return new Angle(angle / degreeRadian, EUnit.RADIAN);
+                case EUnit.RADIAN: return this;
+                case EUnit.GRADIAN: return new Angle(angle / radianGradian, EUnit.RADIAN);
+                case EUnit.QUADRANT: return new Angle((angle * quadDegree) / degreeRadian, EUnit.RADIAN);
+                default: return this;
 			}
         }
     }

@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 using System.Collections.Generic;
 using DIVALib.IO;
 using DIVALib.Math;
-using DIVALib.XmlHelper;
 
 namespace DscOp
 {
@@ -69,28 +68,6 @@ namespace DscOp
             {
                 func.Write(s);
             }
-        }
-
-        public XmlDocument ToXml() 
-        {
-            var doc = new XmlDocument();
-
-			XmlDeclaration dec = doc.CreateXmlDeclaration("1.0", "utf-8", null);
-			XmlNode root = doc.CreateElement("pd_dsc");
-            XmlAttribute dscVersion = doc.CreateAttribute("dsc_version");
-            dscVersion.Value = "f|dt";
-
-            root.Attributes.Append(dscVersion);
-
-            doc.AppendChild(dec);
-			doc.AppendChild(root);
-
-            foreach (DSCFunc func in funcs)
-            {
-                doc.DocumentElement.AppendChild(func.ToXml(doc));
-            }
-
-            return doc;
         }
 
         public void Serialize(Stream s, bool close=true)
@@ -174,21 +151,18 @@ namespace DscOp
 	/// </summary>  
 	public class FTime : DSCFunc 
     {
-		/// <summary>  
-		/// Time in milliseconds
-		/// </summary>  
-		public double timestamp;
+		public Time timestamp;
 
         public FTime() { functionID = 0x01; }
         public FTime(Stream s) : base(s, 0x01)
         {
-            timestamp = DataStream.ReadUInt32(s) / 100.0;
+            timestamp = new Time(DataStream.ReadUInt32(s), Time.EUnit.ME5SECOND).ToMilliseconds();
         }
 
         public override void Write(Stream s)
         {
             base.Write(s);
-            DataStream.WriteUInt32(s, (uint)(timestamp * 100) );
+            DataStream.WriteUInt32(s, (uint)(timestamp.ToME5Seconds().time));
         }
     }
 
@@ -317,43 +291,43 @@ namespace DscOp
         const double ud_rot = 100_000.0;
 
         public EType type;
-        public double holdLength;
+        public Time holdLength;
         public bool isHoldEnd;
         public Vector2 position;
         public double oscillateAngle;
         public int oscillateFrequency;
         public double entryAngle;
         public uint oscillateAmplitude;
-        public uint timeOut;
+        public Time timeOut;
 		
 
 		public FTarget() { functionID = 0x06; }
 		public FTarget(Stream s) : base(s, 0x06)
 		{
             type = (EType)DataStream.ReadUInt32(s);
-            holdLength = DataStream.ReadInt32(s) / 100.0;
-            holdLength = (holdLength == -0.01) ? -1 : holdLength;
+            holdLength = new Time(DataStream.ReadInt32(s), Time.EUnit.ME5SECOND).ToMilliseconds();
+            holdLength.time = (holdLength.time == -0.01) ? -1 : holdLength.time;
             isHoldEnd = DataStream.ReadInt32(s) == 0;
             position = new Vector2(DataStream.ReadUInt32(s) / ud_pos, DataStream.ReadUInt32(s) / ud_pos);
             oscillateAngle = DataStream.ReadInt32(s) / ud_rot;
             oscillateFrequency = DataStream.ReadInt32(s);
             entryAngle = DataStream.ReadInt32(s) / ud_rot;
             oscillateAmplitude = DataStream.ReadUInt32(s);
-            timeOut = DataStream.ReadUInt32(s);
+            timeOut = new Time(DataStream.ReadUInt32(s), Time.EUnit.MILLISECOND);
 		}
 
         public override void Write(Stream s)
 		{
             base.Write(s);
 			DataStream.WriteUInt32(s, (uint)type);
-            DataStream.WriteInt32(s, (int)((holdLength == -1) ? -1 : holdLength * 100));
+            DataStream.WriteInt32(s, (int)((holdLength.ToME5Seconds().time == -1) ? -1 : holdLength.ToME5Seconds().time));
             DataStream.WriteInt32(s, (isHoldEnd) ? 0 : -1);
             DataStream.WriteUInt32(s, (uint)(position.x * ud_pos)); DataStream.WriteUInt32(s, (uint)(position.y * ud_pos));
             DataStream.WriteInt32(s, (int)(oscillateAngle * ud_rot));
             DataStream.WriteInt32(s, oscillateFrequency);
             DataStream.WriteInt32(s, (int)(entryAngle * ud_rot));
             DataStream.WriteUInt32(s, oscillateAmplitude);
-            DataStream.WriteUInt32(s, timeOut);
+            DataStream.WriteUInt32(s, (uint)timeOut.ToMilliseconds().time);
 		}
 	}
 }
