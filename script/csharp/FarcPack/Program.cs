@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
+using System.Security.Cryptography;
 
 using DIVALib.Archives;
 using DIVALib.IO;
@@ -76,11 +77,6 @@ namespace FarcPack
                 FarcArchive archive = new FarcArchive();
                 archive.Load(sourcePath);
 
-                if (archive.IsEncrypted)
-                {
-                    throw new NotSupportedException("Encrypted FARC files aren't supported yet.");
-                }
-
                 if (destinationPath == null)
                 {
                     destinationPath = Path.ChangeExtension(sourcePath, null);
@@ -92,10 +88,41 @@ namespace FarcPack
                 {
                     foreach (FarcEntry entry in archive)
                     {
-                        using (Stream entrySource = new SubStream(source, entry.Position, entry.UncompressedLength))
+                        using (Stream entrySource = new SubStream(source, entry.Position, entry.Length))
                         using (Stream destination = File.Create(Path.Combine(destinationPath, entry.FileName)))
                         {
-                            if (archive.IsCompressed)
+                            if (archive.IsEncrypted)
+                            {
+                                using (AesManaged aes = new AesManaged
+                                {
+                                    KeySize = 128,
+                                    Key = FarcArchive.FarcEncryptionKeyBytes,
+                                    BlockSize = 128,
+                                    Mode = CipherMode.ECB,
+                                    Padding = PaddingMode.Zeros,
+                                    IV = new byte[16],
+                                })
+                                using (CryptoStream cryptoStream = new CryptoStream(
+                                    entrySource,
+                                    aes.CreateDecryptor(),
+                                    CryptoStreamMode.Read))
+                                {
+                                    if (archive.IsCompressed && entry.Length != entry.CompressedLength)
+                                    {
+                                        using (GZipStream gzipStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
+                                        {
+                                            gzipStream.CopyTo(destination);
+                                        }
+                                    }
+
+                                    else
+                                    {
+                                        cryptoStream.CopyTo(destination);
+                                    }
+                                }
+                            }
+
+                            else if (archive.IsCompressed && entry.Length != entry.CompressedLength)
                             {
                                 using (GZipStream gzipStream = new GZipStream(entrySource, CompressionMode.Decompress))
                                 {
