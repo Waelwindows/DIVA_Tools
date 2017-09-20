@@ -1,17 +1,21 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Xml.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml.Schema;
 using System.Xml;
+using BinarySerialization;
 
 namespace DIVALib.Math
 {
     public class Vector2 : IEnumerator, IEnumerable, IXmlSerializable
     {
+        [FieldOrder(0), FieldScale(10_000), SerializeAs(SerializedType.Int4)]
         public double x;
+        [FieldOrder(1), FieldScale(10_000), SerializeAs(SerializedType.Int4)]
         public double y;
-        int position = 0;
+        int position;
         double[] components;
 
         public Vector2()
@@ -88,6 +92,7 @@ namespace DIVALib.Math
 		public void Reset() { position = 0; }
 
 		//IEnumerable
+        [FieldOrder(3), Ignore]
 		public object Current
 		{
 			get { return components[position]; }
@@ -97,13 +102,15 @@ namespace DIVALib.Math
 		{
 			throw new NotSupportedException("Can't add more components to a Vector2");
 		}
-
 	}
 
     public class Vector3 : IEnumerator, IEnumerable, IXmlSerializable
     {
+        [FieldOrder(0), FieldScale(10_000), SerializeAs(SerializedType.Int4)]
         public double x;
+        [FieldOrder(1), FieldScale(10_000), SerializeAs(SerializedType.Int4)]
         public double y;
+        [FieldOrder(2), FieldScale(10_000), SerializeAs(SerializedType.Int4)]
         public double z;
         int position;
         double[] components;
@@ -181,6 +188,7 @@ namespace DIVALib.Math
         public void Reset() { position = 0; }
 
         //IEnumerable
+        [FieldOrder(3), Ignore]
         public object Current
         {
             get { return components[position]; }

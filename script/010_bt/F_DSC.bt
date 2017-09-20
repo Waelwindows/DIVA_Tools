@@ -8,17 +8,18 @@
 //  ID Bytes: 20 02 02 12
 //------------------------------------------------
 
-typedef uint uintbool <read=uintbool_read, write=uintbool_write>;
-typedef int intbool <read=intbool_read, write=intbool_write>;
-typedef uint msec <read=msec_read, write=msec_write, open=suppress>;
+typedef uint  uintbool <read=uintbool_read, write=uintbool_write>;
+typedef int   intbool <read=intbool_read, write=intbool_write>;
+typedef uint  msec <read=msec_read, write=msec_write, open=suppress>;
 typedef ubyte ub_bgra[4] <read=ub_bgra_read, write=ub_bgra_write, comment=ub_bgra_comment>;
-typedef int timeLength <read=tl_read, write=tl_write>;
-typedef uint hex_id <read=hexid_read, write=hexid_write>;
+typedef int   timeLength <read=tl_read, write=tl_write>;
+typedef uint  hex_id <read=hexid_read, write=hexid_write>;
+typedef int   vector3[3] <read=vec3_read, write=vec3_write>;
 
 const local float screenpos_unit = 10000.0;
-typedef uint screenpos <read=pos_read, write=pos_write>;
+typedef uint      screenpos <read=pos_read, write=pos_write>;
 const local float sub_degrees = 100000;
-typedef int degrees <read=degree_read, write=degree_write, comment="Radians, Starts clockwise">;
+typedef int       degrees <read=degree_read, write=degree_write, comment="Radians, Starts clockwise">;
 
 enum <uint> note_type {
     TRIANGLE        = 0,
@@ -211,8 +212,21 @@ void hexid_write(hex_id &hid, string s){
     hid = id;
 }
 
+string vec3_read(vector3 vec)
+{
+    string rslt;
+    SPrintf(rslt, "(%i, %i, %i)", vec[0], vec[1], vec[1]);
+    return rslt;
+}
+
+void vec3_write(vector3 &vec, string s)
+{
+    SScanf(s, "(%i, %i, %i)", vec[0], vec[1], vec[2]);
+}
+
 typedef struct {
     char magic[4] <name="Magic", format=hex>;
+    //int magic <name="Magic", format=hex>;
 } HEADER <name="Header", bgcolor=cRed>;
 
 //0x00
@@ -271,6 +285,7 @@ typedef struct {
     degrees       entry_angle <name="Entry angle">;
     uint          oscil_altitude <name="Oscillation Altitude">;
     uint          timeOut <name="Timeout">;
+    int           unk <name="UNK">;
 } TARGET <name="Note", bgcolor=cGreen>;
 
 //0x07
@@ -279,7 +294,7 @@ typedef struct {
     uint playerID <name="Player ID">;
     hex_id anim_id <name="Animation ID", comment="Based on", format=hex>;
     timeLength time <name="Animation Start time">;
-    uint speed <name="Speed">;
+    int speed <name="Speed">;
 } SET_MOTION <name="Set Motion", bgcolor=cBlue>;
 
 //0x08
@@ -358,7 +373,9 @@ typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
     hex_id anim_id <name="Anim ID">;
-    uint unk[3] <hidden=1>;
+    int unk;
+    int start <name="Start Time">;
+    int speed <name="Speed", comment="Disabled when -1?">;
 } MOUTH_ANIM <name="Mouth Animation", bgcolor=cBlue>;
 
 //0x14
@@ -366,7 +383,9 @@ typedef struct {
     uint id <hidden=1>;
     uint player_id <name="Player ID">;
     hex_id anim_id <name="Anim ID">;
-    uint unk[3] <hidden=1>;
+    int unk;
+    int start <name="Start Time">;
+    int speed <name="Speed", comment="Disabled when -1?">;
 } HAND_ANIM <name="Hand Animation", bgcolor=cBlue>;
 
 //0x15
@@ -415,7 +434,7 @@ typedef struct {
     hex_id anim_id <name="Animation ID", comment="Based on", format=hex>;
     timeLength time <name="Animation Start time">;
     uint speed <name="Speed">;
-} EDIT_MOTION <name="EDIT - Motion", bgcolor=cBlue, comment="Unused">;
+} EDIT_MOTION <name="EDIT - Motion", bgcolor=cLtBlue, comment="Unused">;
 
 //0x1C
 typedef struct {
@@ -433,7 +452,7 @@ typedef struct {
 //0x1E
 typedef struct {
     uint id <hidden=1>;
-} EDIT_FACE <name="Edit - Face", bgcolor=cBlue>;
+} EDIT_FACE <name="Edit - Face", bgcolor=cLtBlue>;
 
 //0x1F
 typedef struct {
@@ -456,27 +475,27 @@ typedef struct {
     uint id <hidden=1>;
     hex_id lyric_id <name="Lyric ID">;
     ub_bgra color <name="Color">;
-} EDIT_LYRIC <name="EDIT - Lyrics", bgcolor=cBlue>;
+} EDIT_LYRIC <name="EDIT - Lyrics", bgcolor=cLtBlue>;
 
 //0x23
 typedef struct {
     uint id <hidden=1>;
     hex_id lyric_id <name="Lyric ID">;
     ub_bgra color <name="Color">;
-} EDIT_TARGET <name="EDIT - Target", bgcolor=cBlue, comment="Crashes the game">;
+} EDIT_TARGET <name="EDIT - Target", bgcolor=cLtBlue, comment="Crashes the game">;
 
 //0x24
 typedef struct {
     uint id <hidden=1>;
     hex_id anim_id <name="Anim ID">;
     uint unk[3] <hidden=1>;
-} EDIT_MOUTH <name="EDIT - Mouth", bgcolor=cBlue>;
+} EDIT_MOUTH <name="EDIT - Mouth", bgcolor=cLtBlue>;
 
 //0x25
 typedef struct {
     uint id <hidden=1>;
     uint playerID<name="Player ID", comment="Only used in edit mode">;
-} SET_CHARA <name="EDIT - Set Character", bgcolor=cBlue>;
+} SET_CHARA <name="EDIT - Set Character", bgcolor=cLtBlue>;
 
 //0x26
 typedef struct {
@@ -484,51 +503,52 @@ typedef struct {
     uint xtrans <name="X Transform">;
     uint ytrans <name="Y Transform">;
     uint ztrans <name="Z Transform">;
-} EDIT_MOVE <name="EDIT - Move", bgcolor=cBlue>;
+} EDIT_MOVE <name="EDIT - Move", bgcolor=cLtBlue>;
 
 //0x27
 typedef struct {
     uint id <hidden=1>;
     uintbool shadowState <name="State">;
-} EDIT_SHADOW <name="EDIT - Shadow", bgcolor=cBlue>;
+} EDIT_SHADOW <name="EDIT - Shadow", bgcolor=cLtBlue>;
 
 //0x28
 typedef struct {
     uint id <hidden=1>;
     uintbool shadowState <name="State">;
-} EDIT_EYELID <name="EDIT - Eyelid", bgcolor=cBlue>;
+} EDIT_EYELID <name="EDIT - Eyelid", bgcolor=cLtBlue>;
 
 //0x29
 typedef struct {
     uint id <hidden=1>;
     hex_id anim_id <name="Anim ID", comment="Bool, just for blinking">;
     uint unk <hidden=1>;
-} EDIT_EYE <name="EDIT - Eye", bgcolor=cBlue>;
+} EDIT_EYE <name="EDIT - Eye", bgcolor=cLtBlue>;
 
 //0x2A
 typedef struct {
     uint id <hidden=1>;
     hex_id item <name="Item ID">;
-} EDIT_ITEM <name="EDIT - Set Character Item", bgcolor=cBlue>;
+} EDIT_ITEM <name="EDIT - Set Character Item", bgcolor=cLtBlue>;
 
 //0x2B
 typedef struct {
     uint id <hidden=1>;
     uint fxID <name="Effect ID">;
-} EDIT_EFFECT <name="EDIT - Set Effect", bgcolor=cBlue>;
+    uint speed <name="Speed?">;
+} EDIT_EFFECT <name="EDIT - Set Effect", bgcolor=cLtBlue>;
 
 //0x2C
 typedef struct {
     uint id <hidden=1>;
     uintbool display_state <name="Display State">;
-} EDIT_DISP <name="EDIT - Set Character Display State", bgcolor=cBlue>;
+} EDIT_DISP <name="EDIT - Set Character Display State", bgcolor=cLtBlue>;
 
 //0x2D
 typedef struct {
     uint id <hidden=1>;
     hex_id anim_id <name="Anim ID">;
     uint unk[3] <hidden=1>;
-} EDIT_HAND_ANIM <name="EDIT - Hand Animation", bgcolor=cBlue>;
+} EDIT_HAND_ANIM <name="EDIT - Hand Animation", bgcolor=cLtBlue>;
 
 //0x2E
 typedef struct {
@@ -546,7 +566,7 @@ typedef struct {
 typedef struct {
     uint id <hidden=1>;
     uint blushID <name="Blush ID", comment="Based on", format=hex>;
-} EDIT_BLUSH <name="EDIT - Set Character Blush", bgcolor=cBlue>;
+} EDIT_BLUSH <name="EDIT - Set Character Blush", bgcolor=cLtBlue>;
 
 //0x31
 typedef struct {
@@ -565,11 +585,31 @@ typedef struct {
     uint blue <name="Blue">;
 } SCENE_FADE <name="Scene Fade", bgcolor=cBlue>;
 
+//0x36
+typedef struct {
+    uint id <hidden=1>;
+    uint amount <name="Saturation amount?">;
+} SATURATE <name="Saturate", bgcolor=cBlue, comment="FT only">;
+
 //0x3A
 typedef struct {
     uint id <hidden=1>;
     uint bpm <name="BPM">;
 } TARGET_FLYING_TIME <name="Note Fly Time", bgcolor=cBlue, comment="Same as Bar time set, only used in FT">;
+
+//0x3B
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint size <name="Size?">;
+} CHARA_SIZE <name="Character - Size", bgcolor=cBlue>;
+
+//0x3B
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    uint size <name="Size?">;
+} CHARA_HEIGHT_ADJUST <name="Character - Height Adjust", bgcolor=cBlue>;
 
 //0x3D
 typedef struct {
@@ -580,13 +620,20 @@ typedef struct {
 //0x41
 typedef struct {
     uint id <hidden=1>;
+    uint unk[2] <name="Unknown">;
+} EDIT_MOT_SMOOTH_LEN <name="EDIT - Motion Smooth LEN", bgcolor=cLtBlue>;
+
+//0x41
+typedef struct {
+    uint id <hidden=1>;
     uint mode <name="Mode">;
 } PV_BRANCH_MODE <name="PV - Branch Mode", bgcolor=cYellow>;
 
 //0x42
 typedef struct {
-    uint id <hidden=1>;
-    uint unk[3];
+    uint    id <hidden=1>;
+    vector3 position <name="Position?">;
+    int     unk[21];
 } DATA_CAMERA_START <name="Data - Camera Start", bgcolor=cBlue>;
 
 //0x43
@@ -604,7 +651,7 @@ typedef struct {
 //0x47
 typedef struct {
     uint id <hidden=1>;
-    uint unk[3];
+    vector3 position <name="Position?">;
 } OSAGE_MV_CCL <name="Osage move collider", bgcolor=cBlue>;
 
 //0x48
@@ -620,11 +667,49 @@ typedef struct {
     uint seID <name="Sound ID">;
 } SE_EFFECT <name="Chance Time Success Sound", bgcolor=cBlue>;
 
-//0x51
+//0x4A
 typedef struct {
     uint id <hidden=1>;
-    uint unk[24];
-} EDIT_CAMERA <name="EDIT - Camera", bgcolor=cBlue>;
+    vector3 plr1_pos <name="Player 1 - Position">;
+    vector3 plr2_pos <name="Player 2 - Position">;
+    vector3 plr3_pos <name="Player 3 - Position">;
+} EDIT_MOVE_XYZ <name="EDIT - Move XYZ", bgcolor=cLtBlue>;
+
+//0x4B
+typedef struct {
+    uint id <hidden=1>;
+    uint unk[3];
+} EDIT_EYELID_ANIM <name="EDIT - Eyelid animation", bgcolor=cLtBlue>;
+
+//0x4C
+typedef struct {
+    uint id <hidden=1>;
+    int  unk <name="Unk">;
+    uint unk <name="Unk">;
+} EDIT_INSTRUMENT_ITEM <name="EDIT - Insturment Item", bgcolor=cLtBlue>;
+
+//0x4D
+typedef struct {
+    uint id <hidden=1>;
+    uint playerID <name="Player ID">;
+    hex_id anim_id <name="Animation ID", comment="Based on", format=hex>;
+    timeLength time <name="Animation Start time">;
+    int speed <name="Speed">;
+} EDIT_MOTION_LOOP <name="EDIT - Motion Loop", bgcolor=cLtBlue>;
+
+//0x4F
+typedef struct {
+    uint id <hidden=1>;
+    hex_id anim_id <name="Anim ID", comment="Bool, just for blinking">;
+    uint unk[2] <hidden=1>;
+} EDIT_EYE_ANIM <name="EDIT - Eye Animation", bgcolor=cBlue>;
+
+//0x51
+typedef struct {
+    uint    id <hidden=1>;
+    vector3 position <name="Position?">;
+    int     unk[21];
+} EDIT_CAMERA <name="EDIT - Camera", bgcolor=cLtBlue>;
 
 //0x4
 typedef struct {
@@ -652,7 +737,7 @@ typedef struct {
             case 0x04: MIKU_DISP mikdisp; break;
             case 0x05: MIKU_SHADOW mshadow; break;
             case 0x06: TARGET note; break;
-            case 0x07: SET_MOTION smotion; break;
+            case 0x07: SET_MOTION smotion; break;;
             case 0x08: SET_PLAYDATA splaydata; break;
             case 0x09: EFFECT fx; break;
             case 0x0A: FADEIN_FIELD fadeinf; break;
@@ -693,8 +778,12 @@ typedef struct {
             case 0x30: EDIT_BLUSH eblush; break;
             case 0x31: NEAR_CLIP nclip; break;
             case 0x34: SCENE_FADE sfade; break;
+            case 0x36: SATURATE sat; break;
             case 0x3A: TARGET_FLYING_TIME tft; break;
+            case 0x3B: CHARA_SIZE charsize; break;
+            case 0x3C: CHARA_HEIGHT_ADJUST charheight; break;
             case 0x3D: ITEM_ANIM itmanim; break;
+            case 0x40: EDIT_MOT_SMOOTH_LEN smoothlen; break;
             case 0x41: PV_BRANCH_MODE pbm; break;
             case 0x42: DATA_CAMERA_START dcs; break;
             case 0x43: MOVIE_PLAY mplay; break;
@@ -702,6 +791,11 @@ typedef struct {
             case 0x47: OSAGE_MV_CCL omvccl; break;
             case 0x48: CHARA_COLOR ccolor; break;
             case 0x49: SE_EFFECT sefx; break;
+            case 0x4A: EDIT_MOVE_XYZ mov_xyz; break;
+            case 0x4B: EDIT_EYELID_ANIM edit_eyelidanim; break;
+            case 0x4C: EDIT_INSTRUMENT_ITEM inst_item; break;
+            case 0x4D: EDIT_MOTION_LOOP motloop; break;
+            case 0x4F: EDIT_EYE_ANIM editeyeanim; break;
             case 0x51: EDIT_CAMERA ecam; break;
             default: Printf("Unimplemented func_id (0x%X) at *0x%X offset \n", func_id, pos); isbreak = 1; break;
         }
