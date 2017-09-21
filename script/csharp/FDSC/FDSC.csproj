@@ -13,20 +13,20 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>anycpu</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\debug\</OutputPath>
+    <OutputPath>..\..\..\bin\FDSC\Debug</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>anycpu</PlatformTarget>
+    <DebugType></DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\release\</OutputPath>
+    <OutputPath>..\..\..\bin\FDSC\Release</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -40,14 +40,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-<<<<<<< HEAD:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
     <Reference Include="DIVALib">
       <HintPath>..\..\..\..\..\bin\DIVALib\Release\DIVALib.dll</HintPath>
     </Reference>
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
     <Reference Include="Microsoft.Win32.Primitives">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
     </Reference>
@@ -136,16 +131,9 @@
     <Reference Include="BinarySerializer">
       <HintPath>..\packages\BinarySerializer.7.5.7\lib\netstandard1.3\BinarySerializer.dll</HintPath>
     </Reference>
-=======
->>>>>>> 78e6f7b7adb3a6af429e2d821592ec34d86f8720:script/csharp/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
+    <Reference Include="DIVALib">
+      <HintPath>..\..\..\bin\DIVALib\Release\DIVALib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DscOp.cs" />
@@ -154,21 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DIVALib\DIVALib.csproj">
-      <Project>{0777cd4f-2d6b-4e46-9f55-ec4dcc1ab59b}</Project>
-      <Name>DIVALib</Name>
-    </ProjectReference>
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
-=======
->>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -271,6 +271,7 @@ typedef struct {
     degrees       entry_angle <name="Entry angle">;
     uint          oscil_altitude <name="Oscillation Altitude">;
     uint          timeOut <name="Timeout">;
+    uint          unk;
 } TARGET <name="Note", bgcolor=cGreen>;
 
 //0x07

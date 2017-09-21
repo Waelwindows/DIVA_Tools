@@ -11,6 +11,36 @@
 //    List can be exported to a CSV spreadsheet.
 //--------------------------------------
 
+typedef uint vec2[2] <read=vec2_read, write=vec2_write>;
+typedef int  rad <read=rad_read, write=rad_write>;
+
+string vec2_read(vec2 vec)
+{
+    string rslt;
+    SPrintf(rslt, "(%.1f, %.1f)", vec[0] / 10000.0, vec[1] / 10000.0);
+    return rslt;
+    //return "(1, 2)";
+}
+
+void vec2_write(vec2 &vec, string str)
+{
+    SScanf(str, "(%u, %u)", vec[0], vec[1]);
+}
+
+string rad_read(rad r)
+{
+    string rslt;
+    SPrintf(rslt, "%.2f radians", r / 100000.0);
+    return rslt;
+}
+
+void rad_write(rad &r, string str)
+{
+    float value;
+    SScanf(str, "%f", value);
+    r = value * 100000;
+}
+
 uint conv_to_ms(uint t)
 {
     t /= 10;
@@ -18,30 +48,28 @@ uint conv_to_ms(uint t)
         { t = ((t-(t%10))+10) / 10; }
     else
         { t /= 10; }
-    //if (t%10 == 1)
-    //    { --t; }
-    //else if (t%10 == 9)
-    //    { ++t; }
-
     return t;
 }
 
 typedef struct {
-    UINT    unkUInt1 <name="Start ID?", bgcolor=cGray>; //, hidden=true>;
-    UINT    timeStamp <name="Timestamp", bgcolor=cLtRed>;
-    UINT    nOpcode <name="struct opcode", bgcolor=0xf0aaf0>; //, hidden=fals>;
-    UINT    noteType <name="Note Type", bgcolor=cAqua, comment=GetNoteType>;
-    INT     holdLenth <name="Hold Time", bgcolor=cLtRed>;
+        UINT    functionID <name="Function ID", bgcolor=cGray>;
+        UINT    timeStamp <name="Timestamp", bgcolor=cLtRed>;
+} TIME <name="0x01, TIME">;
+
+typedef struct {
+    TIME    time;
+    UINT    functionID <name="Function ID", bgcolor=cGray>;
+    UINT    type <name="Note Type", bgcolor=cAqua, comment=GetNoteType>;
+    INT     holdLentgh <name="Hold Time", bgcolor=cLtRed>;
     INT     isHoldEnd <name="Is Hold End?", bgcolor=cDkYellow>;
-    UINT    nXcoord <name="X-Coord", bgcolor=cLtBlue>;
-    UINT    nYcoord <name="Y-Coord", bgcolor=cGreen>;
-    INT     curveAngle1 <name="Angle 1?", bgcolor=cSilver>;
-    INT     unkUInt2 <name="Wavecount?", comment="Could also be X Pi Radians", bgcolor=cLtGreen>;
-    INT     curveAngle2 <name="Angle 2?", bgcolor=cSilver>; //, hidden=true>;
-    UINT    amplitude <name="Amplitude", bgcolor=cLtBlue>;
+    vec2    position <name="Position">;
+    rad     oscilAngle <name="Oscillation Entry Angle", bgcolor=cSilver>;
+    INT     oscilFrequency <name="Oscillation Frequency", comment="Could also be X Pi Radians", bgcolor=cLtGreen>;
+    rad     entryAngle <name="Entry Angle", bgcolor=cSilver>; //, hidden=true>;
+    UINT    oscilAmplitude <name="Oscillation Amplitude", bgcolor=cLtBlue>;
     UINT    noteTimeoutMS <name="Note Timer (ms)", bgcolor=cLtRed>;
-    UINT    unkUInt4 <name="Unknown Variable", bgcolor=cRed>; //, hidden=true>;
-    INT     endInt <name="END", bgcolor=cYellow, hidden=true>;
+    UINT    unk <name="Unknown Variable", bgcolor=cRed>; //, hidden=true>;
+    INT     pad <name="Padding", bgcolor=cYellow, hidden=true>;
 } NOTE_STRUCT;
 
 typedef struct {
@@ -49,19 +77,26 @@ typedef struct {
     struct HEADER {
         char   divaType[4]<name="Content File Type">;
         uint   contentsLength <name="Byte Length of File">;
-        uint   unkUInt1 <name="Unknown UInt32 #1", hidden=true>;
-        byte   unkRange1[8] <name="Unknown Range #1", hidden=true>;
-        uint   contentsLength2 <name="Byte Length of File", comment="Again", hidden=true>;
-        byte   unkRange2[8] <name="Unknown Range #2", hidden=true>;
+        uint   headerSize <name="Header size">;
+        uint   version <name="File version", format=hex>;
+        uint   ebr <hidden=true>;
+        uint   subBytesize <name="Byte Length of File">;
+        uint   ebr1[2] <hidden=true>;
+        uint   unk1 <name="UNK1">;
+        uint   ebr2[3] <hidden=true>;
         uint   unkUInt2 <name="Unknown UInt32 #2", comment="This is the same between PVs of the same song. But it isn't length.">;
-        byte   unkRange3[28] <name="Unknown Range #3", hidden=true>;
+        uint   ebr3[3] <hidden=true>;
     } header <name="Header", bgcolor=cGreen>;
     
     BigEndian();
+    struct UNK {
+        uint unk[2];
+    } unk <bgcolor=cLtBlue>;
+
     struct NOTE_TABLE {
-        byte start[8] <hidden=true>;
+        //byte start[8] <hidden=true>;
         local uint counter = 8;
-        while (counter <= header.contentsLength-60)
+        while (counter <= header.subBytesize-60)
         {
             NOTE_STRUCT entry <name="Note Entry", read=ReadNoteType>;
             counter += 60;
@@ -111,9 +146,9 @@ string GetNoteType (uint note)
 
 string ReadNoteType(NOTE_STRUCT &tbl)
 {
-    local uint note = tbl.noteType;
+    local uint note = tbl.type;
     local string s;
-    SPrintf(s, "Seconds: %.3f  ;   Note: %s", (float) (conv_to_ms(tbl.timeStamp) + tbl.noteTimeoutMS) / 1000, GetNoteType(note));
+    SPrintf(s, "Seconds: %.3f  ;   Note: %s", (float) (conv_to_ms(tbl.time.timeStamp) + tbl.noteTimeoutMS) / 1000, GetNoteType(note));
     return s;
 }
 

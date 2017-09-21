@@ -1,0 +1,700 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FDSC</name>
+    </assembly>
+    <members>
+        <member name="T:DscOp.DSCFunc">
+            <summary>  
+             Generic parent class for all Dsc functions
+            </summary>  
+        </member>
+        <member name="F:DscOp.DSCFunc.functionId">
+            <summary>  
+             The number that specifies which function to be used
+            </summary>  
+        </member>
+        <member name="M:DscOp.DSCFunc.ToString">
+            <summary>  
+             The string representation of a DSC function
+            </summary>  
+        </member>
+        <member name="T:DscOp.FEnd">
+            <summary>  
+             Ends the song
+            </summary>  
+        </member>
+        <member name="T:DscOp.FTime">
+            <summary>  
+             Makes the next function activate after set time
+            </summary>  
+        </member>
+        <member name="T:DscOp.FMikuMove">
+            <summary>  
+             Moves the selected character to a specific position
+            </summary>  
+        </member>
+        <member name="T:DscOp.FMikuRotate">
+            <summary>  
+             Changes the selected character's orientation
+            </summary>  
+        </member>
+        <member name="F:DscOp.FMikuRotate.orientation">
+            <summary>  
+            The character's rotation on the Z axis
+            </summary> 
+        </member>
+        <member name="T:DscOp.FMikuDisplay">
+            <summary>  
+             Changes the selected character's display state
+            </summary>  
+        </member>
+        <member name="T:DscOp.FMikuShadow">
+            <summary>  
+             Changes the selected character's shadow display state
+            </summary>  
+        </member>
+        <member name="T:DscOp.FTarget">
+            <summary>  
+             Creates a new target with the specified paramaters
+            </summary>  
+        </member>
+        <member name="T:DscOp.F2Target">
+            <summary>  
+             Creates a new target with the specified paramaters
+            </summary>  
+        </member>
+        <member name="T:DscOp.FSetMotion">
+            <summary> Plays an animation on the character </summary>
+        </member>
+        <member name="F:DscOp.FSetMotion.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FSetMotion.animID">
+            <summary> Which animation to play </summary>
+        </member>
+        <member name="F:DscOp.FSetMotion.time">
+            <summary> Which frame the animation should start on </summary>
+        </member>
+        <member name="F:DscOp.FSetMotion.speed">
+            <summary> Animation speed </summary>
+        </member>
+        <member name="T:DscOp.FSetPlaydata">
+            <summary> Unknown </summary>
+        </member>
+        <member name="F:DscOp.FSetPlaydata.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FSetPlaydata.mode">
+            <summary> ??? </summary>
+        </member>
+        <member name="T:DscOp.FEffect">
+            <summary> Displays an Effect? </summary>
+            <remark> From old DIVA, Doesn't do anything in new games </remark>
+        </member>
+        <member name="F:DscOp.FEffect.unk1">
+            <summary> ???? </summary>
+        </member>
+        <member name="F:DscOp.FEffect.unk2">
+            <summary> ???? </summary>
+        </member>
+        <member name="T:DscOp.FFadeinField">
+            <summary> ??? </summary>
+            <remark> From old DIVA, Doesn't do anything in new games </remark>
+        </member>
+        <member name="T:DscOp.FEffectOff">
+            <summary> Hides an Effect? </summary>
+            <remark> From old DIVA, Doesn't do anything in new games </remark>
+        </member>
+        <member name="F:DscOp.FEffectOff.unk1">
+            <summary> ???? </summary>
+        </member>
+        <member name="F:DscOp.FEffectOff.unk2">
+            <summary> ???? </summary>
+        </member>
+        <member name="T:DscOp.FSetCamera">
+            <summary>  ?? </summary>
+            <remark> Something with the cameras. Haven't looked into it </remark>
+        </member>
+        <member name="T:DscOp.FDataCamera">
+            <summary> Works the same as FSetCamera? </summary>
+        </member>
+        <member name="T:DscOp.FChangeField">
+            <summary> Changes the stage </summary>
+        </member>
+        <member name="F:DscOp.FChangeField.fieldID">
+            <summary> New stage to set. goes by pv_db / pv_field </summary>
+        </member>
+        <member name="T:DscOp.FHideField">
+            <summary> Hides the field </summary>
+            <remark> Haven't looked into it </remark>
+        </member>
+        <member name="F:DscOp.FHideField.state">
+            <summary> Visibility toggle? </summary>
+        </member>
+        <member name="T:DscOp.FMoveField">
+            <summary> Moves the field </summary>
+            <remark> Haven't looked into it </remark>
+        </member>
+        <member name="T:DscOp.FFadeoutField">
+            <summary> Acts the same as FFadeInField </summary>
+            <remark> From old DIVA, Doesn't do anything in new games </remark>
+        </member>
+        <member name="T:DscOp.FEyeAnim">
+            <summary> Plays an animation on the character's eyes </summary>
+            <remark> Only does blinking? </remark>
+        </member>
+        <member name="F:DscOp.FEyeAnim.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FEyeAnim.animID">
+            <summary> Which animation to play? </summary>
+        </member>
+        <member name="F:DscOp.FEyeAnim.unk">
+            <summary> ???? </summary>
+        </member>
+        <member name="T:DscOp.FMouthAnim">
+            <summary> Plays mouth animations </summary>
+            <remark> Isn't completely researched </remark>
+        </member>
+        <member name="F:DscOp.FMouthAnim.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FMouthAnim.animID">
+            <summary> Which animation to play? </summary>
+        </member>
+        <member name="F:DscOp.FMouthAnim.unk">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FMouthAnim.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FMouthAnim.speed">
+            <summary> The animation speed, disabled if -1  </summary>
+        </member>
+        <member name="T:DscOp.FHandAnim">
+            <summary> Hand motions, but haven't looked much into it </summary>
+        </member>
+        <member name="F:DscOp.FHandAnim.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FHandAnim.animID">
+            <summary> Which animation to play? </summary>
+        </member>
+        <member name="F:DscOp.FHandAnim.unk">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FHandAnim.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FHandAnim.speed">
+            <summary> The animation speed, disabled if - </summary>
+        </member>
+        <member name="T:DscOp.FLookAnim">
+            <summary> Makes the character move their eyes, but haven't looked much into it </summary>
+        </member>
+        <member name="F:DscOp.FLookAnim.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FExpression">
+            <summary> Expessions for the face, but haven't looked much into it </summary>
+        </member>
+        <member name="F:DscOp.FExpression.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FExpression.expID">
+            <summary> Which expression to play </summary>
+        </member>
+        <member name="F:DscOp.FExpression.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FExpression.speed">
+            <summary> The animation speed, disabled if - </summary>
+        </member>
+        <member name="T:DscOp.FLookCamera">
+            <summary> No idea what this is for </summary>
+        </member>
+        <member name="F:DscOp.FLookCamera.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FLyric">
+            <summary> Displays a lyric with the specified color </summary>
+        </member>
+        <member name="F:DscOp.FLyric.lyricID">
+            <summary> "Which lyric to display, Goes by pv_db" </summary>
+        </member>
+        <member name="F:DscOp.FLyric.color">
+            <summary> "Color per byte" </summary>
+        </member>
+        <member name="T:DscOp.FMusicPlay">
+            <summary> Plays the music </summary>
+        </member>
+        <member name="T:DscOp.FModeSelect">
+            <summary> Sets the mode. e.g. Chance Time </summary>
+            <remark> 4 in a row makes it playable in every difficulty </remark>
+        </member>
+        <member name="F:DscOp.FModeSelect.unk">
+            <summary> DESC </summary>
+        </member>
+        <member name="F:DscOp.FModeSelect.modeID">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditMotion">
+            <summary> This doesn't work anymore. It was used in PSP's edit mode and in FT. However, the speed values still work. The motion ID is unfunctional </summary>
+        </member>
+        <member name="F:DscOp.FEditMotion.animID">
+            <summary> Which animation to play </summary>
+        </member>
+        <member name="F:DscOp.FEditMotion.start">
+            <summary> When to start the animation </summary>
+        </member>
+        <member name="F:DscOp.FEditMotion.speed">
+            <summary> Speed of the animation </summary>
+        </member>
+        <member name="T:DscOp.FBarTimeSet">
+            <summary> First 4 bytes = bpm. This set the actual bpm number rather than time, like CD 00 00 00, which is 205 bpm. This doesn't do anything in Sega's dscs because of the bpm time in the notes. </summary>
+        </member>
+        <member name="F:DscOp.FBarTimeSet.bpm">
+            <summary> Actual BPM value </summary>
+        </member>
+        <member name="F:DscOp.FBarTimeSet.noteSpeed">
+            <summary> The speed of the notes </summary>
+        </member>
+        <member name="T:DscOp.FShadowheight">
+            <summary> ???? </summary>
+        </member>
+        <member name="F:DscOp.FShadowheight.unk1">
+            <summary> ???? </summary>
+        </member>
+        <member name="F:DscOp.FShadowheight.unk2">
+            <summary> ???? </summary>
+        </member>
+        <member name="T:DscOp.FEditFace">
+            <summary> Haven't looked into this </summary>
+        </member>
+        <member name="F:DscOp.FEditFace.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FMoveCamera">
+            <summary> Moves camera. Doesn't reposition around character </summary>
+            <remark> Values Not Researched </remark>
+        </member>
+        <member name="T:DscOp.FPvEnd">
+            <summary> The point where the song ends </summary>
+        </member>
+        <member name="F:DscOp.FPvEnd.pad">
+            <summary> Doesn't really exist, made up to please Deserializing </summary>
+        </member>
+        <member name="T:DscOp.FShadowpos">
+            <summary> ???? </summary>
+        </member>
+        <member name="F:DscOp.FShadowpos.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditLyric">
+            <summary>   </summary>
+            <remark> From old DIVA, Doesn't do anything in new games </remark>
+        </member>
+        <member name="T:DscOp.FEditTarget">
+            <summary>   </summary>
+            <remark>  </remark>
+        </member>
+        <member name="F:DscOp.FEditTarget.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditMouth">
+            <summary> Edit variant of FMouthAnim </summary>
+        </member>
+        <member name="F:DscOp.FEditMouth.unk">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditMouth.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FEditMouth.speed">
+            <summary> The animation speed, disabled if -1  </summary>
+        </member>
+        <member name="T:DscOp.FSetCharacter">
+            <summary> Sets the character for edit functions </summary>
+        </member>
+        <member name="F:DscOp.FSetCharacter.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="T:DscOp.FEditMove">
+            <summary> Edit variant of FMikuMove </summary>
+        </member>
+        <member name="F:DscOp.FEditMove.position">
+            <summary> New position </summary>
+        </member>
+        <member name="T:DscOp.FEditShadow">
+            <summary> Edit variant of FMikuShadow </summary>
+        </member>
+        <member name="F:DscOp.FEditShadow.state">
+            <summary> Visiblity toggle </summary>
+        </member>
+        <member name="T:DscOp.FEditEyelid">
+            <summary> Haven't looked into this </summary>
+        </member>
+        <member name="F:DscOp.FEditEyelid.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditEye">
+            <summary> Same as above </summary>
+        </member>
+        <member name="F:DscOp.FEditEye.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditItem">
+            <summary> First 4 bytes = I guess what hand it goes on for the player. For the player, it goes by SET_CHARA </summary>
+        </member>
+        <member name="F:DscOp.FEditItem.itemID">
+            <summary> Which item to use, Goes by ???? </summary>
+        </member>
+        <member name="T:DscOp.FEditEffect">
+            <summary> EDIT Function: Sets an effect </summary>
+        </member>
+        <member name="F:DscOp.FEditEffect.fxID">
+            <summary> Which effect to display </summary>
+        </member>
+        <member name="F:DscOp.FEditEffect.speed">
+            <summary> How fast should the effect play </summary>
+        </member>
+        <member name="T:DscOp.FEditDisp">
+            <summary> Basically MIKU_DISP with 4 less bytes </summary>
+        </member>
+        <member name="F:DscOp.FEditDisp.state">
+            <summary> Visibility toggle </summary>
+        </member>
+        <member name="T:DscOp.FEditHandAnim">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FEditHandAnim.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FAim">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FAim.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FHandItem">
+            <summary> I've looked into it, but I forgot what they were </summary>
+        </member>
+        <member name="F:DscOp.FHandItem.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditBlush">
+            <summary> First 4 bytes = Blush ID </summary>
+        </member>
+        <member name="F:DscOp.FEditBlush.blushID">
+            <summary> Which blush to display </summary>
+        </member>
+        <member name="T:DscOp.FNearClip">
+            <summary> Sets the camera's near clip </summary>
+            <remark> Speculation! </remark>
+        </member>
+        <member name="F:DscOp.FNearClip.value">
+            <summary> The new near clip value </summary>
+        </member>
+        <member name="T:DscOp.FClothWet">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FClothWet.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FLightRot">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FLightRot.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FSceneFade">
+            <summary> First 4 bytes = Fade speed </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.speed">
+            <summary> How fast the fade should play </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.fade_in">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.fade_out">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.red">
+            <summary> Fade's Red Channel </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.green">
+            <summary> Fade's Green Channel </summary>
+        </member>
+        <member name="F:DscOp.FSceneFade.blue">
+            <summary> Fade's Blue Channel </summary>
+        </member>
+        <member name="T:DscOp.FToneTrans">
+            <summary> This does load, but always crashes when the function starts. It was used in FT </summary>
+        </member>
+        <member name="F:DscOp.FToneTrans.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FSaturate">
+            <summary> De/saturates the screen </summary>
+        </member>
+        <member name="F:DscOp.FSaturate.amount">
+            <summary> Saturation amount </summary>
+        </member>
+        <member name="T:DscOp.FFadeMode">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FFadeMode.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FAutoBlink">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FAutoBlink.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FPartsDisp">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FPartsDisp.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FTargetFlyingTime">
+            <summary> Sets the BPM for every incoming note </summary>
+            <remark>  FT Exclusive </remark>
+        </member>
+        <member name="F:DscOp.FTargetFlyingTime.bpm">
+            <summary> New BPM value </summary>
+        </member>
+        <member name="T:DscOp.FCharacterSize">
+            <summary> Sets the character's scaling </summary>
+        </member>
+        <member name="F:DscOp.FCharacterSize.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FCharacterSize.size">
+            <summary> New size </summary>
+        </member>
+        <member name="T:DscOp.FCharacterHeightAdjust">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FCharacterHeightAdjust.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FCharacterHeightAdjust.height">
+            <summary> New height </summary>
+        </member>
+        <member name="T:DscOp.FItemAnim">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FItemAnim.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FCharacterPosAdjust">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FCharacterPosAdjust.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FSceneRot">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FSceneRot.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditMotSmoothLen">
+            <summary>   </summary>
+            <remark> Not Researched </remark>
+        </member>
+        <member name="F:DscOp.FEditMotSmoothLen.unk1">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditMotSmoothLen.unk2">
+            <summary> ??? </summary>
+        </member>
+        <member name="T:DscOp.FPvBranchMode">
+            <summary> Sets the mode for the rest of the dsc </summary>
+        </member>
+        <member name="F:DscOp.FPvBranchMode.mode">
+            <summary> Which mode to use </summary>
+        </member>
+        <member name="T:DscOp.FDataCameraStart">
+            <summary> I guess starts the camera </summary>
+        </member>
+        <member name="F:DscOp.FDataCameraStart.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FMoviePlay">
+            <summary> Plays the movie, but doesn't display it </summary>
+        </member>
+        <member name="F:DscOp.FMoviePlay.state">
+            <summary> Play movie? </summary>
+        </member>
+        <member name="T:DscOp.FMovieDisplay">
+            <summary> Displays the movie, but doesn't play it </summary>
+        </member>
+        <member name="F:DscOp.FMovieDisplay.state">
+            <summary> Display movie? </summary>
+        </member>
+        <member name="T:DscOp.FWind">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FWind.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FOsageStep">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FOsageStep.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FOsageMoveCollider">
+            <summary> Moves the hair colliders </summary>
+            <remark> Speculation! </remark>
+        </member>
+        <member name="F:DscOp.FOsageMoveCollider.position">
+            <summary> New position for the colliders </summary>
+        </member>
+        <member name="T:DscOp.FCharacterColor">
+            <summary> First 4 bytes = Player ID </summary>
+        </member>
+        <member name="F:DscOp.FCharacterColor.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FCharacterColor.r">
+            <summary> Red channel </summary>
+        </member>
+        <member name="F:DscOp.FCharacterColor.g">
+            <summary> Green channel </summary>
+        </member>
+        <member name="F:DscOp.FCharacterColor.b">
+            <summary> Blue channel </summary>
+        </member>
+        <member name="F:DscOp.FCharacterColor.a">
+            <summary> Alpha channel </summary>
+        </member>
+        <member name="T:DscOp.FSeEffect">
+            <summary> Plays the bonus effect sounds, but I haven't looked into the values </summary>
+        </member>
+        <member name="F:DscOp.FSeEffect.sfxID">
+            <summary> Which sound to play </summary>
+        </member>
+        <member name="T:DscOp.FEditMoveXYZ">
+            <summary> Moves all 3 characters </summary>
+            <remark> Speculation! </remark>
+        </member>
+        <member name="F:DscOp.FEditMoveXYZ.player1Position">
+            <summary> Player 1's new position </summary>
+        </member>
+        <member name="F:DscOp.FEditMoveXYZ.player2Position">
+            <summary> Player 2's new position </summary>
+        </member>
+        <member name="F:DscOp.FEditMoveXYZ.player3Position">
+            <summary> Player 3's new position </summary>
+        </member>
+        <member name="T:DscOp.FEditEyelidAnim">
+            <summary> No idea </summary>
+        </member>
+        <member name="F:DscOp.FEditEyelidAnim.unk1">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditEyelidAnim.unk2">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditEyelidAnim.unk3">
+            <summary> ??? </summary>
+        </member>
+        <member name="T:DscOp.FEditInstrumentItem">
+            <summary> Sets the instrument the character uses </summary>
+        </member>
+        <member name="F:DscOp.FEditInstrumentItem.unk">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditInstrumentItem.unk1">
+            <summary> ??? </summary>
+        </member>
+        <member name="T:DscOp.FEditMotionLoop">
+            <summary> Loops the motion the player uses </summary>
+            <remark>  Has to have a FSetMotion after it </remark>
+        </member>
+        <member name="F:DscOp.FEditMotionLoop.playerID">
+            <summary> Which player to affect </summary>
+        </member>
+        <member name="F:DscOp.FEditMotionLoop.animID">
+            <summary> Which animation to play </summary>
+        </member>
+        <member name="F:DscOp.FEditMotionLoop.time">
+            <summary> Which frame the animation should start on </summary>
+        </member>
+        <member name="F:DscOp.FEditMotionLoop.speed">
+            <summary> Animation speed </summary>
+        </member>
+        <member name="T:DscOp.FEditExpression">
+            <summary> Edit variant of FExpression </summary>
+        </member>
+        <member name="F:DscOp.FEditExpression.expID">
+            <summary> Which expression to play </summary>
+        </member>
+        <member name="F:DscOp.FEditExpression.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FEditExpression.speed">
+            <summary> The animation speed, disabled if - </summary>
+        </member>
+        <member name="T:DscOp.FEditEyeAnim">
+            <summary> Basically EYE_ANIM with less values </summary>
+        </member>
+        <member name="F:DscOp.FEditEyeAnim.var">
+            <summary> DESC </summary>
+        </member>
+        <member name="T:DscOp.FEditMouthAnim">
+            <summary> Edit variant of FMouthAnim </summary>
+        </member>
+        <member name="F:DscOp.FEditMouthAnim.animID">
+            <summary> Which animation to play? </summary>
+        </member>
+        <member name="F:DscOp.FEditMouthAnim.unk">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditMouthAnim.start">
+            <summary> When the animation should start </summary>
+        </member>
+        <member name="F:DscOp.FEditMouthAnim.speed">
+            <summary> The animation speed, disabled if -1  </summary>
+        </member>
+        <member name="T:DscOp.FEditCamera">
+            <summary> Acts like FMoveCamera but repositions around the player </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.position">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk1">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk2">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk3">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk4">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk5">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk6">
+            <summary> ??? </summary>
+        </member>
+        <member name="F:DscOp.FEditCamera.unk7">
+            <summary> ??? </summary>
+        </member>
+        <member name="T:DscOp.FEditModeSelect">
+            <summary> Edit variant of FModeSelect </summary>
+            <remark> Does nothing </remark>
+        </member>
+        <member name="F:DscOp.FEditModeSelect.var">
+            <summary> DESC </summary>
+        </member>
+    </members>
+</doc>
