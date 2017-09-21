@@ -10,7 +10,7 @@ namespace DIVALib.Archives
     public class FarcEntry : EntryBase
     {
         public string FileName { get; set; }
-        public long UncompressedLength { get; set; }
+        public long CompressedLength { get; set; }
     }
 
     public class FarcArchive : ArchiveBase<FarcEntry>
@@ -53,12 +53,13 @@ namespace DIVALib.Archives
                 var entry = new FarcEntry();
                 entry.FileName = DataStream.ReadCString(source, Encoding.UTF8);
                 entry.Position = DataStream.ReadUInt32BE(source);
-                entry.Length = DataStream.ReadUInt32BE(source);
 
                 if (IsCompressed)
                 {
-                    entry.UncompressedLength = DataStream.ReadUInt32BE(source);
+                    entry.CompressedLength = DataStream.ReadUInt32BE(source);
                 }
+
+                entry.Length = DataStream.ReadUInt32BE(source);
 
                 entries.Add(entry);
             }
