@@ -46,6 +46,7 @@
     </Reference>
 <<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
 <<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
+<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
     <Reference Include="Microsoft.Win32.Primitives">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
     </Reference>
@@ -140,6 +141,8 @@
 >>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
 =======
 >>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
+=======
+>>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DscOp.cs" />
@@ -149,12 +152,15 @@
   <ItemGroup>
     <None Include="App.config" />
 <<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
+<<<<<<< HEAD:script/csharp/FDSC/FDSC.csproj
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DIVALib\DIVALib.csproj">
       <Project>{0777cd4f-2d6b-4e46-9f55-ec4dcc1ab59b}</Project>
       <Name>DIVALib</Name>
     </ProjectReference>
+=======
+>>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
 =======
 >>>>>>> parent of 553bd68... FDSC v1.0:script/csharp/FDSC/FDSC/FDSC/FDSC.csproj
   </ItemGroup>

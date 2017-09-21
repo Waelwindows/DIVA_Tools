@@ -63,12 +63,15 @@
   </ItemGroup>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
 =======
   <ItemGroup />
 >>>>>>> 78e6f7b7adb3a6af429e2d821592ec34d86f8720
+=======
+>>>>>>> parent of 553bd68... FDSC v1.0
 =======
 >>>>>>> parent of 553bd68... FDSC v1.0
 =======
