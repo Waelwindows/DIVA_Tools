@@ -133,6 +133,7 @@
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />
+    <Compile Include="ImageUtils\DdsTools.cs" />
     <Compile Include="IO\DataPool.cs" />
     <Compile Include="Databases\SpriteDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />

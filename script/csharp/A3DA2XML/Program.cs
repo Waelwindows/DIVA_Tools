@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
-using DIVALib.IO;
 using A3daFunc;
 
 namespace A3DA2XML

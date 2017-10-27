@@ -1,60 +1,55 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Serialization;
-namespace DIVALib.Math
+﻿namespace DIVALib.Math
 {
-    public class Angle
-    {
+	public class Angle
+	{
 		public enum EUnit
 		{
-			DEGREE,
-			RADIAN,
-			GRADIAN,
-            QUADRANT
+			Degree,
+			Radian,
+			Gradian,
+			Quadrant
 		};
 
-        const float degreeRadian = 57.2957f;
-        const float radianGradian = 0.01570f;
-        const float quadDegree = 90.0f;
+	    public const float Degree2Radian = 57.2957f;
+	    public const float Radian2Gradian = 0.01570f;
+	    public const float Quad2Degree = 90.0f;
 
+		public EUnit Unit;
+		public float Value;
 
-		public EUnit unit;
-        public float angle;
+		public Angle()
+		{
+			Value = 0;
+		}
 
-        public Angle()
-        {
-            angle = 0;
-        }
+		public Angle(float value, EUnit valueUnit=EUnit.Degree)
+		{
+			Unit = valueUnit;
+			Value = value;
+		}
 
-        public Angle(float value, EUnit valueUnit=EUnit.DEGREE)
-        {
-            unit = valueUnit;
-            angle = value;
-        }
+		public Angle ToDegree(EUnit newUnit)
+		{
+			switch(newUnit)
+			{
+				case EUnit.Degree: return this; 
+				case EUnit.Radian: return new Angle(Value * Degree2Radian);
+				case EUnit.Gradian: return new Angle((Value * Radian2Gradian) * Degree2Radian); 
+				case EUnit.Quadrant: return new Angle(Value * Quad2Degree);
+				default: return this;
+			}
+		}
 
-        public Angle ToDegree(EUnit newUnit)
-        {
-            switch(newUnit)
-            {
-                case EUnit.DEGREE: return this; 
-                case EUnit.RADIAN: return new Angle(angle * degreeRadian);
-                case EUnit.GRADIAN: return new Angle((angle * radianGradian) * degreeRadian); 
-                case EUnit.QUADRANT: return new Angle(angle * quadDegree);
-                default: return this;
-            }
-        }
-
-        public Angle ToRadian(EUnit newUnit)
-        {
+		public Angle ToRadian(EUnit newUnit)
+		{
 			switch (newUnit)
 			{
-				case EUnit.DEGREE: return new Angle(angle / degreeRadian, EUnit.RADIAN);
-                case EUnit.RADIAN: return this;
-                case EUnit.GRADIAN: return new Angle(angle / radianGradian, EUnit.RADIAN);
-                case EUnit.QUADRANT: return new Angle((angle * quadDegree) / degreeRadian, EUnit.RADIAN);
-                default: return this;
+				case EUnit.Degree: return new Angle(Value / Degree2Radian, EUnit.Radian);
+				case EUnit.Radian: return this;
+				case EUnit.Gradian: return new Angle(Value / Radian2Gradian, EUnit.Radian);
+				case EUnit.Quadrant: return new Angle((Value * Quad2Degree) / Degree2Radian, EUnit.Radian);
+				default: return this;
 			}
-        }
-    }
+		}
+	}
 }

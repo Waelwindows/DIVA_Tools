@@ -3,10 +3,9 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
-using DIVALib.IO;
 using DdsTools;
+using DIVALib.IO;
 
 namespace TxpFunc
 {
