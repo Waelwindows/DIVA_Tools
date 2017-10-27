@@ -3,8 +3,12 @@ skip_tags: true
 image: Visual Studio 2017
 before_build:
   - git submodule update --init --recursive
+  - nuget restore
 build_script:
-  - .\build.release.bat
+  #- .\build.release.bat
+  - dotnet restore script\csharp\DIVATools.sln
+  - dotnet clean script\csharp\DIVATools.sln
+  - dotnet build script\csharp\DIVATools.sln
 test_script:
   - cd Tests
   - dotnet test
