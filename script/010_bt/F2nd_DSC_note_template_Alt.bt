@@ -1,0 +1,120 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: *.dsc
+// Author: Brolijah
+// Contact: brolijahrh@gmail.com
+//    Discord: Brolijah#8502
+// Revision: 0.8   March-04-2017
+// Purpose: PVSC (*.dsc) files for Project DIVA F 2nd.
+//    Parses the contained note table into a list. This
+//    List can be exported to a CSV spreadsheet.
+//--------------------------------------
+
+uint conv_to_ms(uint t)
+{
+    t /= 10;
+    if (t%10 >= 5)
+        { t = ((t-(t%10))+10) / 10; }
+    else
+        { t /= 10; }
+    //if (t%10 == 1)
+    //    { --t; }
+    //else if (t%10 == 9)
+    //    { ++t; }
+
+    return t;
+}
+
+typedef struct {
+    UINT    unkUInt1 <name="Start ID?", bgcolor=cGray>; //, hidden=true>;
+    UINT    timeStamp <name="Timestamp", bgcolor=cLtRed>;
+    UINT    nOpcode <name="struct opcode", bgcolor=0xf0aaf0>; //, hidden=fals>;
+    UINT    noteType <name="Note Type", bgcolor=cAqua, comment=GetNoteType>;
+    INT     holdLenth <name="Hold Time", bgcolor=cLtRed>;
+    INT     isHoldEnd <name="Is Hold End?", bgcolor=cDkYellow>;
+    UINT    nXcoord <name="X-Coord", bgcolor=cLtBlue>;
+    UINT    nYcoord <name="Y-Coord", bgcolor=cGreen>;
+    INT     curveAngle1 <name="Angle 1?", bgcolor=cSilver>;
+    INT     unkUInt2 <name="Wavecount?", comment="Could also be X Pi Radians", bgcolor=cLtGreen>;
+    INT     curveAngle2 <name="Angle 2?", bgcolor=cSilver>; //, hidden=true>;
+    UINT    amplitude <name="Amplitude", bgcolor=cLtBlue>;
+    UINT    noteTimeoutMS <name="Note Timer (ms)", bgcolor=cLtRed>;
+    UINT    unkUInt4 <name="Unknown Variable", bgcolor=cRed>; //, hidden=true>;
+    INT     endInt <name="END", bgcolor=cYellow, hidden=true>;
+} NOTE_STRUCT;
+
+typedef struct {
+    LittleEndian();
+    struct HEADER {
+        char   divaType[4]<name="Content File Type">;
+        uint   contentsLength <name="Byte Length of File">;
+        uint   unkUInt1 <name="Unknown UInt32 #1", hidden=true>;
+        byte   unkRange1[8] <name="Unknown Range #1", hidden=true>;
+        uint   contentsLength2 <name="Byte Length of File", comment="Again", hidden=true>;
+        byte   unkRange2[8] <name="Unknown Range #2", hidden=true>;
+        uint   unkUInt2 <name="Unknown UInt32 #2", comment="This is the same between PVs of the same song. But it isn't length.">;
+        byte   unkRange3[28] <name="Unknown Range #3", hidden=true>;
+    } header <name="Header", bgcolor=cGreen>;
+    
+    BigEndian();
+    struct NOTE_TABLE {
+        byte start[8] <hidden=true>;
+        local uint counter = 8;
+        while (counter <= header.contentsLength-60)
+        {
+            NOTE_STRUCT entry <name="Note Entry", read=ReadNoteType>;
+            counter += 60;
+        }
+        byte padding[header.contentsLength-counter] <bgcolor=cPurple, hidden=true>;
+    } note_table <name="Note Chart", open=true>;
+} DSC_FILE;
+
+string GetNoteType (uint note)
+{
+    if (note == 0)
+        {return "Triangle";}
+    else if (note == 1)
+        {return "Circle";}
+    else if (note == 2)
+        {return "Cross";}
+    else if (note == 3)
+        {return "Square";}
+    else if (note == 4)
+        {return "Triangle-Up";}
+    else if (note == 5)
+        {return "Circle-Right";}
+    else if (note == 6)
+        {return "Cross-Down";}
+    else if (note == 7)
+        {return "Square-Left";}
+    else if (note == 8)
+        {return "Triangle Hold";}
+    else if (note == 9)
+        {return "Circle Hold";}
+    else if (note == 10)
+        {return "Cross Hold";}
+    else if (note == 11)
+        {return "Square Hold";}
+    else if (note == 12)
+        {return "Star";}
+    else if (note == 14)
+        {return "Double Star";}
+    else if (note == 15)
+        {return "Chance Star";}
+    else if (note == 22)
+        {return "Linked Star";}
+    else if (note == 23)
+        {return "Linked Star End";}
+    else {return "What the fuck?";}
+}
+
+string ReadNoteType(NOTE_STRUCT &tbl)
+{
+    local uint note = tbl.noteType;
+    local string s;
+    SPrintf(s, "Seconds: %.3f  ;   Note: %s", (float) (conv_to_ms(tbl.timeStamp) + tbl.noteTimeoutMS) / 1000, GetNoteType(note));
+    return s;
+}
+
+DSC_FILE dsc <name="DSC Decrypted Contents", open=true>;
