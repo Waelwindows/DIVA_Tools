@@ -1,1 +1,0 @@
-copy script\csharp\DIVATools.sln .
