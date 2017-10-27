@@ -15,4 +15,4 @@ A global host of tools used to mod/parse Project DIVA games.
 
 + `DSCTools`: Complete, onto polishing stage. **(100.0%)**
 + `F2DSC`: Complete **(100.0%)**
-+ `FDSC`: Complete support for F/DT dscs. Onto addding support for F2nd **(100.0%)**
++ `FDSC`: Complete support for F/DT and F2 dscs. **(100.0%)**

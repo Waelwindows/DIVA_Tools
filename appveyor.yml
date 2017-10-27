@@ -12,6 +12,12 @@ build_script:
   - dotnet clean script\csharp\DIVATools.sln
   - dotnet build script\csharp\DIVATools.sln
 artifacts:
+  - path: bin\A3DA2XML\$(configuration)
+    name: A3DA2XML
+  
+  - path: bin\DBTools\$(configuration)
+    name: DBTools
+
   - path: bin\FarcPack\$(configuration)
     name: FarcPack
 
