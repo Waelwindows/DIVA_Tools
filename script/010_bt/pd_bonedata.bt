@@ -34,6 +34,16 @@ typedef struct
 	float matElement[3];
 } MATRIX <name="Matrix">;
 
+typedef struct
+{
+	string name;
+} BONENAME <name="Bone Name", read=read_bonename>;
+
+string read_bonename(BONENAME &bone)
+{
+	return bone.name;
+}
+
 typedef struct (int skelOffset)
 {
 	FSeek(skelOffset);
@@ -66,11 +76,12 @@ typedef struct (int skelOffset)
 			current = FTell() + 4;
 			int boneNameOffset <hidden=1>;
 			FSeek(boneNameOffset);
-			struct { string boneNames; } BONENAME <name="Bone Name">;
+			BONENAME boneNames;
 		}
 	} CHARNAMES1(skelCount2) <name="Character Names 1">;
 } CHARSKEL <name="Character Skeleton", bgcolor=cGreen>;
 
+LittleEndian();
 HEADER hd;
 FSeek(hd.skeletonsOffset);
 local int counter = 0;

@@ -50,8 +50,8 @@ typedef struct(int animDataStart){
 
 } ANIMUNK <name="Animation Settings?", comment="Size is game dependant", bgcolor=cLtBlue>;
 
-typedef struct(int boneDataStart){
-    //uint ebr <hidden=true>;
+typedef struct(int boneDataStart, int flagCount){
+    char flags[4 * flagCount] <name="Flags">;
     ushort frameID <name="Frame ID">;
     if (frameID % 2 == 0)
     {
@@ -79,7 +79,7 @@ typedef struct(int boneDataStart){
             float unk <optimize=false>;
         }
     } data(boneDataStart) <name="Animation Values">;
-} ANIMDATA <name="Animation Data", bgcolor=cYellow>;
+} ANIMDATA <name="Animation Data", bgcolor=cGreen>;
 
 string floatStrAtDP(float i, int dp){
     int intonly = i;
@@ -129,9 +129,11 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
     Printf("Anim data start is : %u \n", animDataStart);
     ANIMUNK unk(animDataStart);
     Printf("Bone data offst is : %u \n", boneDataStart);
+    FSeek(animDataStart);
     local int sCount = 0;
+    local int fCount = 0;
     struct(int boneDataStart){
-    local int motDataLim = 109;
+    local int motDataLim = 64;
     for (sCount; sCount <motDataLim; ++sCount)
         {
             Printf("loop iteration %u \n", sCount);
@@ -140,7 +142,7 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
                 break;
             }
             /* Shushitsu Manual Padding */
-            /* */
+            /* 
             if (sCount ==   7) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
             if (sCount ==  11) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
             if (sCount ==  17) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
@@ -151,15 +153,23 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
             if (sCount ==  87) { DATAPAD pad( 9) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
             if (sCount ==  93) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
             if (sCount == 101) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
-            
-            /* Yellow Manual Padding*/
-            /*
-            if (sCount == 6) { DATAPAD pad( 1) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
-            if (sCount == 11) { DATAPAD pad( 3) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
-            if (sCount == 17) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
-            if (sCount == 22) { DATAPAD pad( 2) <name="Data Pad", read=padInfo, comment="Manual inscript pads to correct struct", bgcolor=cLtBlue>; }
             */
-            ANIMDATA animData(boneDataStart) <name="Motion Data", read=motDataValue, optimize=false>;
+            /* Yellow Manual Padding*/
+            
+            if (sCount == 6 ||
+                sCount == 56 ) { fCount = 1; }
+            if (sCount == 17 || 
+                sCount == 22 ||
+                sCount == 48) { fCount = 2; }
+            if (sCount == 11 || 
+                sCount == 26 || 
+                sCount == 31 || 
+                sCount == 39) { fCount = 3; }
+            if (sCount == 34) { fCount = 14;}
+            if (sCount == 42) { fCount = 12;}
+            
+            ANIMDATA animData(boneDataStart, fCount) <name="Motion Data", read=motDataValue, optimize=false>;
+            fCount = 0;
         }
     } ANIMDATAGROUP(boneDataStart) <name="Animation Data">;
     Printf("Next anim info is : %u \n", nextAnimInfo);

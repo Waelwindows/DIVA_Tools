@@ -10,9 +10,9 @@ namespace DIVALib.Math
 {
     public class Vector2 : IEnumerator, IEnumerable, IXmlSerializable
     {
-        [FieldOrder(0), FieldScale(100_000), SerializeAs(SerializedType.UInt4)]
+        [FieldOrder(0), SerializeAs(SerializedType.UInt4)]
         public double x;
-        [FieldOrder(1), FieldScale(100_000), SerializeAs(SerializedType.UInt4)]
+        [FieldOrder(1), SerializeAs(SerializedType.UInt4)]
         public double y;
         [FieldOrder(2), Ignore]
         int position;
@@ -107,11 +107,11 @@ namespace DIVALib.Math
 
     public class Vector3 : IEnumerator, IEnumerable, IXmlSerializable
     {
-        [FieldOrder(0), FieldScale(100_000), SerializeAs(SerializedType.UInt4)]
+        [FieldOrder(0), SerializeAs(SerializedType.UInt4)]
         public double x;
-        [FieldOrder(1), FieldScale(100_000), SerializeAs(SerializedType.UInt4)]
+        [FieldOrder(1), SerializeAs(SerializedType.UInt4)]
         public double y;
-        [FieldOrder(2), FieldScale(100_000), SerializeAs(SerializedType.UInt4)]
+        [FieldOrder(2), SerializeAs(SerializedType.UInt4)]
         public double z;
         [FieldOrder(3), Ignore]
         int position;

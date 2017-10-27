@@ -11,12 +11,13 @@
     <AssemblyName>DIVALib</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin\DIVALib\Debug</OutputPath>
+    <OutputPath>..\..\..\bin\lib\DIVALib\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\DIVALib\Release</OutputPath>
+    <OutputPath>..\..\..\bin\lib\DIVALib\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -145,7 +146,6 @@
     <Compile Include="Math\Time.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Math\" />
     <Folder Include="DSC\" />
   </ItemGroup>
   <ItemGroup>

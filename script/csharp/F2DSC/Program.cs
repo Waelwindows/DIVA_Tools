@@ -54,7 +54,7 @@ class Program
         if (success)
         {
             Console.Title = "Project Diva F2nd .DSC Converter : Status: Done";
-            Console.Write("Successfully created ." + (extention == "dsc" ? "xml" : "dsc") + " file \n");
+            Console.Write($"Successfully created . { extention == "dsc" ? "xml" : "dsc" } file \n");
             Console.Write("Don't forget to exit the program before editing, Press any key...");
         } else if (!success && extention == "elp")
         {
