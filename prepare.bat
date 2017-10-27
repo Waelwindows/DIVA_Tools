@@ -1,1 +1,1 @@
-copy script\csharp\DIVATools.sln \
+copy script\csharp\DIVATools.sln .
