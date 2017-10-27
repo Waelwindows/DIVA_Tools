@@ -9,6 +9,15 @@ build_script:
   - dotnet restore script\csharp\DIVATools.sln
   - dotnet clean script\csharp\DIVATools.sln
   - dotnet build script\csharp\DIVATools.sln
-test_script:
-  - cd Tests
-  - dotnet test
+artifacts:
+  - path: bin\FarcPack\Release\FarcPack.exe
+    name: FarcPack
+
+  - path: bin\FDSC\Release\FDSC.exe
+    name: FDSC
+    
+  - path: bin\lib\DIVALib\Release\DIVALib.dll
+    name: DIVALib
+
+  - path: bin\TXP2DDS\Release\TXP2DDS.exe
+    name: TXP2DDS
