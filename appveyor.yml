@@ -1,30 +1,11 @@
-configuration: Release
-
-# enable AssemblyInfo.cs patching with build version number
-assembly_info:
-  patch: true
-  file: AssemblyInfo.*
-  assembly_version: "{version}"
-  assembly_file_version: "{version}"
-  assembly_informational_version: "{version}"
-
-dotnet_csproj:
-  patch: true
-  file: '**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
-  assembly_version: '{version}'
-  file_version: '{version}'
-  informational_version: '{version}'
-
-# restore NuGet packages before running MSBuild
+version: 1.0.{build}
+skip_tags: true
+image: Visual Studio 2017
 before_build:
-  - cmd: dotnet restore script/DIVATools.sln
-         dotnet clean script/DIVATools.sln
-         dotnet build script/DIVATools.sln
-  - nuget restore
-
-# package Web Application project for Web Deploy
-build:
-  verbosity: minimal
-  publish_wap: true
+  - git submodule update --init --recursive
+  - .\prepare.bat
+build_script:
+  - .\build.release.bat
+test_script:
+  - cd Tests
+  - dotnet test
