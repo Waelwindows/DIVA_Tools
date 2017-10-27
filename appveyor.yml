@@ -10,7 +10,7 @@ assembly_info:
 
 dotnet_csproj:
   patch: true
-  file: '**\DIVATools.sln'
+  file: '**\*.csproj'
   version: '{version}'
   package_version: '{version}'
   assembly_version: '{version}'
@@ -19,6 +19,9 @@ dotnet_csproj:
 
 # restore NuGet packages before running MSBuild
 before_build:
+  - cmd: dotnet restore script/DIVATools.sln
+         dotnet clean script/DIVATools.sln
+         dotnet build script/DIVATools.sln
   - nuget restore
 
 # package Web Application project for Web Deploy
