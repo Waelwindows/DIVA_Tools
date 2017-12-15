@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using DdsTools;
+using DIVALib.ImageUtils;
 using TxpFunc;
 
 namespace TXP2DDS

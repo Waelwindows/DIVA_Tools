@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Mail;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 using BinarySerialization;
 using DIVALib.IO;
 
-namespace FDSC
+namespace DIVALib.DSCUtils
 {
     public class DSC : IBinarySerializable
     {

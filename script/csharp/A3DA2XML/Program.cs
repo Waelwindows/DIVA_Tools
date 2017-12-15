@@ -1,6 +1,8 @@
-﻿using System.IO;
-using System.Xml;
-using A3daFunc;
+﻿using System;
+using System.Globalization;
+using System.IO;
+using BinarySerialization;
+using DIVALib.IO;
 
 namespace A3DA2XML
 {
@@ -8,14 +10,19 @@ namespace A3DA2XML
     {
         public static void Main(string[] args)
         {
-            string filePath = "//Users//waelwindows//Documents//farc//effstgpv629//STGPV629S01_EFF_LT_000.a3da";
-            string savePath = "//Users//waelwindows//Documents//farc//effstgpv629//STGPV629S01_EFF_LT_000.xml";
-            FileStream file = new FileStream(filePath, FileMode.Open);
-            FileStream save = new FileStream(savePath, FileMode.Create);
-            A3daFile a3da = new A3daFile(file);
-            XmlDocument doc = new XmlDocument();
-            a3da.ToXml(doc);
-            doc.Save(save);
+            const string path = @"D:\QuickBMS\dt_cam\CAMPV001_PARTS02.a3da";
+            using (var file = new FileStream(path, FileMode.Open))
+            {
+                var serializer = new BinarySerializer();
+                //var a3DaFile = serializer.Deserialize<A3DaFile>(file);
+                //var a3DaHeader = serializer.Deserialize<A3DaHeader>(file);
+                var a3DaHeader = new A3DaHeader();
+                a3DaHeader.Deserialize(file);
+                Console.WriteLine(a3DaHeader);
+                
+
+                Console.ReadLine();
+            }
         }
     }
 }

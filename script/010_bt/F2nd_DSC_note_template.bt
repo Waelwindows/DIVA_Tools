@@ -30,7 +30,7 @@ void vec2_write(vec2 &vec, string str)
 string rad_read(rad r)
 {
     string rslt;
-    SPrintf(rslt, "%.2f radians", r / 100000.0);
+    SPrintf(rslt, "%.2f radians", r / 10000.0);
     return rslt;
 }
 
@@ -38,7 +38,7 @@ void rad_write(rad &r, string str)
 {
     float value;
     SScanf(str, "%f", value);
-    r = value * 100000;
+    r = value * 10000;
 }
 
 uint conv_to_ms(uint t)
@@ -63,9 +63,9 @@ typedef struct {
     INT     holdLentgh <name="Hold Time", bgcolor=cLtRed>;
     INT     isHoldEnd <name="Is Hold End?", bgcolor=cDkYellow>;
     vec2    position <name="Position">;
-    rad     oscilAngle <name="Oscillation Entry Angle", bgcolor=cSilver>;
+    rad     entryAngle <name="Oscillation Entry Angle", bgcolor=cSilver>;
     INT     oscilFrequency <name="Oscillation Frequency", comment="Could also be X Pi Radians", bgcolor=cLtGreen>;
-    rad     entryAngle <name="Entry Angle", bgcolor=cSilver>; //, hidden=true>;
+    rad     oscilAngle <name="Entry Angle", bgcolor=cSilver>; //, hidden=true>;
     UINT    oscilAmplitude <name="Oscillation Amplitude", bgcolor=cLtBlue>;
     UINT    noteTimeoutMS <name="Note Timer (ms)", bgcolor=cLtRed>;
     UINT    unk <name="Unknown Variable", bgcolor=cRed>; //, hidden=true>;

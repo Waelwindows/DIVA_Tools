@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using DdsTools;
 using DIVALib.IO;
+using DIVALib.ImageUtils;
 
 namespace TxpFunc
 {

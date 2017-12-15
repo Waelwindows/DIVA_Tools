@@ -722,9 +722,9 @@ namespace DIVALib.IO
             return encoding.GetString(characters.ToArray());
         }
 
-        public static void WriteCString(Stream destination, string value)
+        public static void WriteCString(Stream destination, string value, byte seperator= 0)
         {
-            WriteCString(destination, value, Encoding.ASCII);
+            WriteCString(destination, value, Encoding.ASCII, seperator);
         }
 
         public static void WriteMagic(Stream destination, string magic)
@@ -732,12 +732,12 @@ namespace DIVALib.IO
             WriteMagic(destination, magic, Encoding.ASCII);
         }
 
-        public static void WriteCString(Stream destination, string value, Encoding encoding)
+        public static void WriteCString(Stream destination, string value, Encoding encoding, byte seperator= 0)
         {
             byte[] buffer = encoding.GetBytes(value);
 
             destination.Write(buffer, 0, buffer.Length);
-            WriteByte(destination, 0);
+            WriteByte(destination, seperator);
         }
 
         public static void WriteMagic(Stream destination, string magic, Encoding encoding)
@@ -747,25 +747,24 @@ namespace DIVALib.IO
             destination.Write(buffer, 0, buffer.Length);
         }
 
-        public static string ReadCString(Stream source, int length)
+        public static string ReadCString(Stream source, byte seperator = 0)
         {
-            return ReadCString(source, length, Encoding.ASCII);
+            return ReadCString(source, Encoding.ASCII, seperator);
         }
 
-        public static string ReadCString(Stream source, int length, Encoding encoding)
+        public static string ReadCString(Stream source, Encoding encoding, byte seperator = 0)
         {
-            byte[] buffer = new byte[length];
-            source.Read(buffer, 0, length);
+            var buffer = new List<byte>();
 
-            for (int i = 0; i < buffer.Length; i++)
+            while (true)
             {
-                if (buffer[i] == 0)
-                {
-                    return encoding.GetString(buffer, 0, i);
-                }
+                var currentByte = ReadByte(source);
+                if (currentByte == seperator)
+                    break;
+                buffer.Add(currentByte);
             }
 
-            return encoding.GetString(buffer);
+            return encoding.GetString(buffer.ToArray());
         }
 
         public static void WriteCString(Stream destination, string value, int length)

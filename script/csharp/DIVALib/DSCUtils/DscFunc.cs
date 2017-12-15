@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 using BinarySerialization;
 using DIVALib.Math;
 
-namespace FDSC
+namespace DIVALib.DSCUtils
 {
     /// <summary>
     ///     Generic parent class for all Dsc functions
@@ -159,11 +159,11 @@ namespace FDSC
 
         [FieldOrder(3)] public Vector2 Position;
 
-        [FieldOrder(4)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillateAngle;
+        [FieldOrder(4)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double EntryAngle;
 
         [FieldOrder(5)] public int OscillateFrequency;
 
-        [FieldOrder(6)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double EntryAngle;
+        [FieldOrder(6)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillateAngle; 
 
         [FieldOrder(7)] public uint OscillateAmplitude;
 
@@ -203,25 +203,18 @@ namespace FDSC
             LINKED_STAR_END = 23
         }
 
-        [FieldOrder(7)] public int entryAngle;
-
+        [FieldOrder(0)] public EType type;
         [FieldOrder(1)] public int holdLength;
-
         [FieldOrder(2)] [SerializeAs(SerializedType.Int4)] public int isHoldEnd;
-
-        [FieldOrder(8)] public uint oscillateAmplitude;
-
-        [FieldOrder(5)] public int oscillateAngle;
-
-        [FieldOrder(6)] public int oscillateFrequency;
-        [FieldOrder(11)] public int pad;
         [FieldOrder(3)] public int posX;
         [FieldOrder(4)] public int posY;
-
+        [FieldOrder(5)] public int entryAngle;
+        [FieldOrder(6)] public int oscillateFrequency;
+        [FieldOrder(7)] public int oscillateAngle; 
+        [FieldOrder(8)] public uint oscillateAmplitude;
         [FieldOrder(9)] public int timeOut;
-
-        [FieldOrder(0)] public EType type;
         [FieldOrder(10)] public int unk;
+        [FieldOrder(11)] public int pad;
 
         public F2Target()
         {

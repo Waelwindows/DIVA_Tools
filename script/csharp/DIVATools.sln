@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FDSC", "FDSC\FDSC.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TXP2DDS", "TXP2DDS\TXP2DDS.csproj", "{F1549705-80DE-46D5-B12F-38D991C11AF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MOT_EDITOR", "MOT_EDITOR\MOT_EDITOR.csproj", "{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,7 @@ Global
 		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Release|x86.ActiveCfg = Release|Any CPU
 		{0BCD4758-560D-40A4-A600-28FB78EE8526}.Release|x86.Build.0 = Release|Any CPU
 		{831E66A4-CE9C-4475-A18F-83F81383B4B3}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{831E66A4-CE9C-4475-A18F-83F81383B4B3}.Debug|Any CPU.Build.0 = Debug|x86
 		{831E66A4-CE9C-4475-A18F-83F81383B4B3}.Debug|x86.ActiveCfg = Debug|x86
 		{831E66A4-CE9C-4475-A18F-83F81383B4B3}.Debug|x86.Build.0 = Debug|x86
 		{831E66A4-CE9C-4475-A18F-83F81383B4B3}.Release|Any CPU.ActiveCfg = Release|x86
@@ -69,6 +72,14 @@ Global
 		{F1549705-80DE-46D5-B12F-38D991C11AF1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F1549705-80DE-46D5-B12F-38D991C11AF1}.Release|x86.ActiveCfg = Release|Any CPU
 		{F1549705-80DE-46D5-B12F-38D991C11AF1}.Release|x86.Build.0 = Release|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Debug|x86.Build.0 = Debug|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2C483B2-B54A-444B-BD73-4C795FA1ACCA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin\lib\DIVALib\</OutputPath>
+    <OutputPath>..\..\..\bin\lib\DIVALib\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -133,6 +133,8 @@
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />
+    <Compile Include="DSCUtils\DscFunc.cs" />
+    <Compile Include="DSCUtils\DscOp.cs" />
     <Compile Include="ImageUtils\DdsTools.cs" />
     <Compile Include="IO\DataPool.cs" />
     <Compile Include="Databases\SpriteDatabase.cs" />
@@ -146,9 +148,7 @@
     <Compile Include="Math\Angle.cs" />
     <Compile Include="Math\Time.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DSC\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

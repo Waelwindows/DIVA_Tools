@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DIVALib.IO;
 
-namespace DdsTools
+namespace DIVALib.ImageUtils
 {
     public enum DdsPFType
     {
@@ -239,7 +239,7 @@ namespace DdsTools
             while (counter < mipMapCount)
             {
                 int bytesToSkip = 0;
-                int dividor = (int)Math.Pow(2, (double)counter);
+                int dividor = (int)((double)counter * (double)counter);
                 bytesToSkip += (int)(pitchOrLinearSize / (dividor * 0.5));
                 uint mWidth = (uint)(width / dividor); uint mHeight = (uint)(height / dividor); uint mBS = (uint)(pitchOrLinearSize / dividor);
                 mipMaps[counter - 1] = new DdsMipMap(mWidth, mHeight, mBS, data.ToList().Skip(bytesToSkip).ToArray());

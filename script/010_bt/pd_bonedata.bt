@@ -18,7 +18,7 @@ typedef struct {
 typedef struct (int count)
 {
 	local int counter = 0;
-	for (counter; counter < hd.sectionCount; ++counter)
+	for (counter; counter < count; ++counter)
 	{
 		struct { int skelOffset; } SKELINFO <name="Skeleton Information">;
 	}

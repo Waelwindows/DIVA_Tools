@@ -27,12 +27,12 @@ typedef struct {
     BigEndian();
     uint    unk <comment="Always set to 0">;
     uint    unk1 <comment="ID? Always a 10 digits">;
-    UINT    thisFileName <name="File Name", comment="Name of the Animation File, always 15 bytes long">;
-    uint    pvNameOffset <name="Properties(?)", comment="End of Offset table">;
-    uint    unk2 <name="UNK Offset", comment="(Relative) Always 0x74 // This could disprove my thoughts about the above being a properties section.">;
-    uint    unk3 <name="HEAD+OFF+PROP size", comment="Always 0x100">;
-    UINT    nameTable_PTRS <name="Name Table PTRs", comment="Address of Name Array (Pointers)">;
-    UINT    nameTable_ID <name="Name IDs(?)", comment="Unsure. Maybe global constants for bones and body parts?">;
+    UINT    animBoneNamesOffset <name="Animation Bone Names Offset", comment="183 Names">;
+    uint    animInfoOffset <name="Animation Information Offset", comment="End of Offset table">;
+    uint    animOptOffset <name="Animation Options Offset", comment="(Relative) Always 0x74 // This could disprove my thoughts about the above being a properties section.">;
+    uint    animDataOffset <name="Animation Data Offset", comment="Always 0x100">;
+    UINT    nameTable_PTRS <name="FrameCounts Start", comment="Address of Name Array (Pointers)">;
+    UINT    nameTable_ID <name="Frame Values Start", comment="Unsure. Maybe global constants for bones and body parts?">;
     int     unk6;
     int     isMain <name="Is Main?", comment="Always 0x3_E81_200 If in a main file">;
     uint ebr[2] <hidden=1>;
@@ -66,9 +66,82 @@ typedef struct {
     uint unk30 <name="Consant", format=hex>;
 } PROPERTIES <name="Properties(?)", bgcolor=cLtGreen, open=true>;
 
+typedef struct{
+    ushort unk;
+    ushort frameCount <name="Frame Count">;
+} ANIM_INFO <name="Animation Info", bgcolor=cGreen>;
+
+typedef struct(int boneDataStart, int flagCount, int overrideFrameID){
+    char flags[4 * flagCount] <name="Flags">;
+    
+    if (overrideFrameID != 0)
+    {
+        ushort pad;
+        local ushort frameID = overrideFrameID;
+    }
+    else{
+        ushort frameID <name="Frame ID">;
+    }
+    /* DT MODE */
+    if (frameID % 2 == 0)
+    {
+        ushort padding <name="Padding">;
+    }
+    local int counter = 0;
+
+    struct(int boneDataStart) {
+        for (counter; counter < frameID; counter++){
+            if (FTell() >= boneDataStart)
+            {
+                break;
+            }
+            float value <name="Value", optimize=false>;
+            if (FTell() >= boneDataStart)
+            {
+                break;
+            }
+            float unk <optimize=false>;
+        }
+    } data(boneDataStart) <name="Animation Values">;
+
+    struct {
+        for (counter; counter < frameID; counter++)
+        {
+            ushort frameCount <name="Frame Count", optimize=false>;
+        }
+    } frameCounts <name="Frame Counts">;
+    counter = 0;
+    
+} ANIM_DATA <name="Animation Data", bgcolor=cGreen>;
 
 //-------------------------------------------//
 // Now initialize and parse the file
 HEADER          header;
 OFFSET_TABLE    offsets;
-PROPERTIES      properties;
+//PROPERTIES      properties;
+FSeek(offsets.animInfoOffset);
+ANIM_INFO info;
+//LittleEndian();
+FSeek(offsets.animDataOffset);
+//int offset[242];
+ANIM_DATA data(offsets.animBoneNamesOffset, 0, 92);
+/*
+ANIM_DATA data(offsets.animBoneNamesOffset, 0);
+ANIM_DATA data(offsets.animBoneNamesOffset, 0);
+ANIM_DATA data(offsets.animBoneNamesOffset, 0);
+ANIM_DATA data(offsets.animBoneNamesOffset, 0);
+ANIM_DATA data(offsets.animBoneNamesOffset, 0);
+*/
+
+local int i = 0;
+
+FSeek(offsets.animBoneNamesOffset);
+struct {
+    for (i; i<185; ++i)
+    {
+        struct
+        {
+            string test1;
+        } NAME;
+    }
+} NAMES;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using DIVALib.DSCUtils;
 
 namespace FDSC
 {
@@ -7,10 +8,26 @@ namespace FDSC
 	{
 		static void Main(string[] args)
 		{
-			if (args.Length != 1)
-				throw new ArgumentException("Needs directory");
+            if (args.Length < 1)
+            {
+                Console.WriteLine("FDSC Tool");
+                Console.WriteLine("=========");
+                Console.WriteLine("Converter for all Project Diva DSC(Diva Script Container) files.\n");
+                Console.WriteLine("Currently Supports:");
+                Console.WriteLine("	- All DT games");
+                Console.WriteLine("	- F");
+                Console.WriteLine("	- F2nd\n");
+                Console.WriteLine("Usage:");
+                Console.WriteLine("	Drag'n'Drop the file onto the application\n");
+                Console.WriteLine("	or\n");
+                Console.WriteLine("	Run from command line:");
+                Console.WriteLine("	");
+                Console.WriteLine("	FDSC [source] ");
+                Console.WriteLine("	Source is a URI to your dsc file");
+                Console.ReadLine();
+            }
 
-			if (!File.Exists(args[0]))
+            if (!File.Exists(args[0]))
 				throw new IOException("file doesn't exist.");
 
 			if (File.GetAttributes(args[0]).HasFlag(FileAttributes.Directory))

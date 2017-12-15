@@ -1,140 +1,283 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Xml;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Xml.Serialization;
+using BinarySerialization;
 using DIVALib.IO;
+using DIVALib.Math;
 
-namespace A3daFunc
+namespace A3DA2XML
 {
-	public class A3daFile
-	{
-		const int fileStart = 0xBB;
-		public List<string> keys;
-		public List<string> values;
-		//byte[] byteData;
+    public class A3DaHeader
+    {
+        public enum EConverterVersion
+        {
+            DreamyTheater2 = 20050823,
+            F = 20111019,
+        }
 
-		public A3daFile() { }
-		public A3daFile(Stream s)
-		{
-			s.Position = fileStart;
-			string fileTXT = DataStream.ReadCString(s);
-			string[] keyPair = fileTXT.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-			List<string> kPValue = new List<string>();
-			keys = new List<string>();
-			values  = new List<string>();
-			s.Position -= 2;
-			SubStream data = new SubStream(s, s.Position);
-			foreach(string kp in keyPair)
-			{                
-				string[] kpSplit = kp.Split('=');
-				if (kpSplit.Length == 1) { break; }
-				string[] keyNames = kpSplit[0].Split('.');
-				if (keyNames[keyNames.Length-1] == "bin_offset")
-				{
-					string keyName = "";
-					keyName = string.Join(".", keyNames);
-					keyName = keyName.Substring(0, keyName.Length - 6);
-					keyName += "value";
-					keys.Add(keyName);
-					data.Position = int.Parse(kpSplit[1]);
-					values.Add(DataStream.ReadByte(data).ToString());
-				}
-				keys.Add(kpSplit[0]);
-				values.Add(kpSplit[1]);
-			 }
-		}
+        public enum EPropertyVersion
+        {
+            DreamyTheater2 = 20050706,
+            F = 20110526,
+        }
 
-		public void ToXml(XmlDocument doc)
-		{
-			XmlDeclaration dec = doc.CreateXmlDeclaration("1.0", "utf-8", null);
-			XmlNode root = doc.CreateElement("a3da_file");
-			doc.AppendChild(dec);
-			doc.AppendChild(root);
-			for (int i = 0; i < keys.Count; ++i)
-			{
-				List<string> keyNames = keys[i].Split('.').ToList();
-				XmlNode parentNode = doc.CreateElement(keyNames[0]);
-				List<XmlNode> childNodes = new List<XmlNode>();
-				//Child node loop
-				for (int x = 1; x < keyNames.Count; ++x)
-				{
-					//Checks if the name is a number and sets it as an ID if it is
-					if (char.IsDigit(keyNames[x][0]))
-					{
-						XmlAttribute id = doc.CreateAttribute("id");
-						id.Value = keyNames[x];
-						if (childNodes.Count == 0)
-						{
-							parentNode.Attributes.Append(id);
-						}else
-						{
-							childNodes[x - 1].Attributes.Append(id);
-						}
-						continue;
-					}
-					XmlNode childNode = doc.CreateElement(keyNames[x]);
-					if (x == keyNames.Count - 1)
-					{
-						childNode.InnerText = values[i];
-					}
-					childNodes.Add(childNode);
-				}
-				//Append nodes
-				for (int nC = childNodes.Count-1; nC >= 0; --nC)
-				{
-					if (nC == 0)
-					{
-						parentNode.AppendChild(childNodes[nC]);
-					}
-					else
-					{
-						childNodes[nC - 1].AppendChild(childNodes[nC]);
-					}
-				}
-				XmlNode foundNode = doc.DocumentElement.SelectSingleNode(keyNames[0]);
+        public const string ConversionDateFormat = @"ddd MMM dd H:mm:ss yyyy";
+        public const string KeyPairDateFormat = @"yyyymmdd";
 
-				List<XmlNode> docNodes = new List<XmlNode>();
-				foreach(XmlNode dN in doc.DocumentElement)
-				{
-					docNodes.Add(dN);
-				}
+        [FieldOrder(0)] public string Magic;
+        [FieldOrder(1)] public byte[] Reserved;
+        [FieldOrder(2)] public DateTime ConvertsionDate;
 
-				if (foundNode == null)
-				{
-					doc.DocumentElement.AppendChild(parentNode);
-				} else 
-				{
-					//doc.DocumentElement.AppendChild(parentNode);
-					List<string> attr = new List<string>();
+        private A3DaKeyPairString _converterVersion;
+        private A3DaKeyPairString _fileName;
+        private A3DaKeyPairString _propertyVersion;
 
-					foreach (XmlNode node in docNodes)
-					{
-						Console.Write("Node name: " + node.Name + " Parent Name: " + parentNode.Name + "\n");
-						if (node.Attributes.Count != 0 && node.Name == parentNode.Name)
-						{
-							attr.Add(node.Attributes[0].Value);
-						}
-					}
-					docNodes.RemoveRange(0, attr.Count);
+        [FieldOrder(3)] public DateTime ConverterVersion
+        {
+            get => DateTime.ParseExact(_converterVersion.Pair, KeyPairDateFormat, CultureInfo.InvariantCulture);
+            set => _converterVersion.Pair = value.ToString();
+        }
+        [FieldOrder(4)] public string FileName
+        {
+            get => _fileName.Pair;
+            set => _fileName.Pair = value;
+        }
+        [FieldOrder(5)] public DateTime PropertyVersion
+        {
+            get => DateTime.ParseExact(_propertyVersion.Pair, KeyPairDateFormat, CultureInfo.InvariantCulture);
+            set => _propertyVersion.Pair = value.ToString();
+        }
 
-					Console.Write(" \nNew iter \n\n");
+        public A3DaHeader()
+        {
+            Reserved = null;
+            ConvertsionDate = DateTime.Now;
+            _converterVersion = new A3DaKeyPairString("_.converter.version", ((int)EConverterVersion.DreamyTheater2).ToString());
+            _fileName = new A3DaKeyPairString("_.file_name", "empty.filename");
+            _propertyVersion = new A3DaKeyPairString("_.converter.version", ConverterVersion.ToString(KeyPairDateFormat));
 
-					if (parentNode.Attributes.Count > 0)
-					{
-						if (attr.Contains(parentNode.Attributes[0].Value))
-						{
-							foundNode.AppendChild(childNodes[0]);
-						}else
-						{
-							doc.DocumentElement.AppendChild(parentNode);
-						}
-					}else
-					{
-						foundNode.AppendChild(childNodes[0]);
-					}
-				}
-			}
-		}
-	}
+        }
+
+        public void Serialize(Stream stream)
+        {
+            DataStream.WriteCString(stream, Magic, 0xA);
+            DataStream.WriteCString(stream, ConvertsionDate.ToString(ConversionDateFormat), 0xA);
+            DataStream.WriteCString(stream, _converterVersion.ToString(), 0xA);
+            DataStream.WriteCString(stream, _fileName.ToString(), 0xA);
+            DataStream.WriteCString(stream, _propertyVersion.ToString(), 0xA);
+        }
+
+        public void Deserialize(Stream stream)
+        {
+            Magic = DataStream.ReadCString(stream, 0xA);
+            ConvertsionDate = DateTime.ParseExact(DataStream.ReadCString(stream, 0xA).Substring(1), ConversionDateFormat, CultureInfo.InvariantCulture);
+            _converterVersion = new A3DaKeyPairString(DataStream.ReadCString(stream, 0xA).Split('='));
+            FileName = DataStream.ReadCString(stream, 0xA).Split('=')[1];
+            _propertyVersion = new A3DaKeyPairString(DataStream.ReadCString(stream, 0xA).Split('='));
+        }
+
+        public override string ToString() => $"{FileName}: Converted at {ConvertsionDate}, version {ConverterVersion.ToShortDateString()}";
+    }
+    /*
+    public class Dta3DaHeader : A3DaHeader
+    {
+        public Dta3DaHeader(string name = "no_name.bin")
+        {
+            ConverterVersion = EConverterVersion.DreamyTheater2;
+            FileName = name;
+            PropertyVersion = EPropertyVersion.DreamyTheater2;
+        }
+    }
+
+    public class Fa3DaHeader : A3DaHeader
+    {
+        public Fa3DaHeader(string name = "no_name.bin")
+        {
+            Magic = "#A3DC__________";
+            
+            ConverterVersion = EConverterVersion.F;
+            FileName = name;
+            PropertyVersion = EPropertyVersion.F;
+        }
+    }
+    */
+    [XmlInclude(typeof(A3DaKeyPair))]
+    [XmlInclude(typeof(A3DaKeyPair<>))]
+    [XmlInclude(typeof(A3DaKeyPairString))]
+    [XmlInclude(typeof(A3DaKeyPairNested))]
+    public class A3DaFile : IBinarySerializable
+    {
+        public const int Filestart = 0x85;
+        [FieldOrder(0)] public A3DaHeader Header;
+        [FieldOrder(1)] public List<A3DaKeyPair> Keypairs;
+
+        public void Serialize(Stream stream, Endianness endianness, BinarySerializationContext serializationContext)
+        {
+            var serializer = new BinarySerializer();
+            serializer.Serialize(stream, Header);
+            foreach (var a3DaKeyPair in Keypairs)
+            {
+                DataStream.WriteCString(stream, a3DaKeyPair.ToString(), 0xA);
+            }
+        }
+
+        public void Deserialize(Stream stream, Endianness endianness, BinarySerializationContext serializationContext)
+        {
+            stream.Position = Filestart;
+            var lines = DataStream.ReadString(stream, (int)(stream.Length - Filestart)).Split('\n');
+            Keypairs = new List<A3DaKeyPair>();
+            foreach (var line in lines)
+            {
+                Keypairs.Add(A3DaKeyPair.Parse(line));
+            }
+        }
+    }
+
+    public class A3DaKeyPair
+    {
+        public string Key;
+        public object Pair;
+
+        public A3DaKeyPair LastElement;
+
+        public A3DaKeyPair() => Key = "empty_key";
+
+        public A3DaKeyPair(string key) => Key = key;
+
+        public override string ToString() => $"{Key} = {Pair}";
+
+        public static A3DaKeyPair Parse(string line)
+        {
+
+            var keypair = line.Split('=');
+            //Console.WriteLine(keypair[0]);
+            var currnetKeyPair = new A3DaKeyPair();
+            if (keypair.Length > 1)
+            {
+                var tree = keypair[0].Split('.');
+                for (var i = tree.Length - 1; i >= 0; --i)
+                    if (i == tree.Length - 1)
+                    {
+                        currnetKeyPair = new A3DaKeyPairString(tree[i - 1], keypair[1]);
+                        if (keypair[1].Contains("("))
+                        {
+                            var componentCount = keypair[1].Split(',').Length;
+                            switch (componentCount)
+                            {
+                                case 2:
+                                    currnetKeyPair =
+                                        new A3DaKeyPair<Vector2>(tree[i - 1], Vector2.Parse(keypair[1]));
+                                    break;
+                                case 3:
+                                    currnetKeyPair =
+                                        new A3DaKeyPair<Vector3>(tree[i - 1], Vector3.Parse(keypair[1]));
+                                    break;
+                            }
+                        }
+                    }
+                    else if (i != 0)
+                    {
+                        currnetKeyPair = new A3DaKeyPairNested(tree[i - 1], currnetKeyPair);
+                    }
+            }
+            return currnetKeyPair;
+        }
+    }
+
+    public class A3DaKeyPair<T> : A3DaKeyPair
+    {
+        public new T Pair;
+
+        public A3DaKeyPair() {}
+
+        public A3DaKeyPair(string key, T pair) : base(key) => Pair = pair;
+
+        public override string ToString() => $"{Key} = {Pair}";
+    }
+
+    public class A3DaKeyPairString : A3DaKeyPair
+    {
+        public new string Pair;
+
+        public A3DaKeyPairString() {}
+
+        public A3DaKeyPairString(string keyPair)
+        {
+            var stringSplit = keyPair.Split('=');
+            Key = stringSplit[0];
+            Pair = stringSplit[1];
+        }
+
+        public A3DaKeyPairString(string key, string pair) : base(key) => Pair = pair;
+
+        public A3DaKeyPairString(IList<string> keyPair)
+        {
+            Key = keyPair[0];
+            Pair = keyPair[1];
+        }
+
+        public override string ToString() => $"{Key} = {Pair}";
+    }
+
+    public class A3DaKeyPairNested : A3DaKeyPair
+    {
+        public A3DaKeyPair Nest;
+
+        public new A3DaKeyPair LastElement
+        {
+            get
+            {
+                A3DaKeyPairNested currentNest = Nest as A3DaKeyPairNested;
+                A3DaKeyPair keyPair;
+                while (true)
+                {
+                    try
+                    {
+                        if ((A3DaKeyPairNested)currentNest.Nest != null)
+                            currentNest = (A3DaKeyPairNested)currentNest.Nest;
+                    }
+                    catch (InvalidCastException)
+                    {
+                        keyPair = currentNest.Nest;
+                        break;
+                    }
+                }
+                return keyPair;
+            }
+            set {
+                A3DaKeyPairNested currentNest = Nest as A3DaKeyPairNested;
+                A3DaKeyPair keyPair;
+                while (true)
+                {
+                    try
+                    {
+                        if ((A3DaKeyPairNested)currentNest.Nest != null)
+                            currentNest = (A3DaKeyPairNested)currentNest.Nest;
+                    }
+                    catch (InvalidCastException)
+                    {
+                        keyPair = currentNest.Nest;
+                        break;
+                    }
+                }
+                keyPair = value;
+            }
+        }
+
+        public A3DaKeyPairNested()
+        {
+        }
+
+        public A3DaKeyPairNested(string key, A3DaKeyPair nest) : base(key)
+        {
+            Nest = nest;
+        }
+
+        public override string ToString()
+        {
+            return $"{Key}.{Nest}";
+        }
+    }
 }
