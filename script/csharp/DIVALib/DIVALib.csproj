@@ -136,6 +136,7 @@
     <Compile Include="DSCUtils\DscFunc.cs" />
     <Compile Include="DSCUtils\DscOp.cs" />
     <Compile Include="ImageUtils\DdsTools.cs" />
+    <Compile Include="ImageUtils\TxpTools.cs" />
     <Compile Include="IO\DataPool.cs" />
     <Compile Include="Databases\SpriteDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />

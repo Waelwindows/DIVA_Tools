@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using BinarySerialization;
 using DIVALib.IO;
-using DIVALib.Math;
+//using DIVALib.Math;
+using System.Numerics;
 using System.Linq;
 
 namespace MOT_EDITOR
@@ -12,7 +13,7 @@ namespace MOT_EDITOR
 
     public class MotFile : IBinarySerializable
     {
-        public const int MaxData = 64;
+        public const int MaxData = 33;
 
         public static readonly Dictionary<int, int> FrameValueOffset = new Dictionary<int, int>
         {
@@ -34,7 +35,10 @@ namespace MOT_EDITOR
             {6, 1},
             {11, 3},
             */
-
+            /*
+            {10, 1}, { 14, 2}, { 20, 2}, { 26, 2}, { 29, 12}, { 32, 15}, { 38, 3}, { 41, 1}, { 46, 2}, { 51, 1}, { 56, 1}, { 61, 3}, { 66, 11}, { 72, 3}, { 75, 1}, { 80, 2}, { 85, 1}
+            */
+            {7, 1},{12, 3},{18, 2},{23, 5},{28, 3},{31, 14},{36, 3},{39, 12},{45, 2},{53, 1}
 
         };
 
@@ -263,24 +267,51 @@ namespace MOT_EDITOR
 
         public Vector3 FrameValue
         {
-            get => new Vector3
-                       {
-                           AnimData[0].Values[CurrentFrame],
-                           AnimData[1].Values[CurrentFrame],
-                           AnimData[2].Values[CurrentFrame]
-                       };
+            get
+            {
+                var xanim = AnimData[0].Values.Last().Value;
+                var yanim = AnimData[1].Values.Last().Value;
+                var zanim = AnimData[2].Values.Last().Value;
+
+                try
+                {
+                    xanim = AnimData[0].Values[CurrentFrame].Value;
+                }
+                catch (Exception e) { }
+                try
+                {
+                    yanim = AnimData[1].Values[CurrentFrame].Value;
+                }
+                catch (Exception e) { }
+                try
+                {
+                    zanim = AnimData[2].Values[CurrentFrame].Value;
+                }
+                catch (Exception e) { }
+
+                return new Vector3(xanim, yanim, zanim);
+
+            }
 
             set
             {
-                AnimData[0].Values[CurrentFrame].Value = (float)value.x;
-                AnimData[1].Values[CurrentFrame].Value = (float)value.y;
-                AnimData[2].Values[CurrentFrame].Value = (float)value.z;
+                AnimData[0].Values[CurrentFrame].Value = value.X;
+                AnimData[1].Values[CurrentFrame].Value = value.Y;
+                AnimData[2].Values[CurrentFrame].Value = value.Z;
             }
         }
 
         public List<Vector3> AnimValues
         {
-            get => null;
+            get
+            {
+                var list = new List<Vector3>();
+                for (int i = 0; i < AnimData[0].Values.Count; i++)
+                {
+                    list.Add(GetAsVector3(i));
+                }
+                return list;
+            }
         }
 
         public BoneAnim(ref List<MotData> data, int start, int size = 3) => AnimData = data.Skip(start).Take(size).ToList();
@@ -305,9 +336,9 @@ namespace MOT_EDITOR
             {
                 switch (i)
                 {
-                    case 0: SetEachFrame(i, vec.x); break;
-                    case 1: SetEachFrame(i, vec.y); break;
-                    case 2: SetEachFrame(i, vec.z); break;
+                    case 0: SetEachFrame(i, vec.X); break;
+                    case 1: SetEachFrame(i, vec.Y); break;
+                    case 2: SetEachFrame(i, vec.Z); break;
                 }
             }
         }
@@ -375,7 +406,7 @@ namespace MOT_EDITOR
         public static MotData Deserialize(Stream stream, int flagCount, bool FMode)
         {
             var data = new MotData();
-            //data.GetFlags(stream, flagCount);
+            data.GetFlags(stream, flagCount);
             data.FrameCount = DataStream.ReadUInt16(stream);
             if (data.FrameCount % 2 == 0 & !FMode)
                 DataStream.ReadUInt16(stream);
@@ -388,7 +419,7 @@ namespace MOT_EDITOR
                 data.Values.Add(serializer.Deserialize<FrameValue>(stream));
             if (data.FrameCount % 2 == 0 & FMode)
                 DataStream.ReadUInt16(stream);
-            data.GetFlags(stream, flagCount);
+            //Data.GetFlags(stream, flagCount);
             data.FMode = FMode;
             return data;
         }

@@ -87,16 +87,14 @@ namespace DIVALib.DSCUtils
         /// <summary>
         ///     The character's rotation on the Z axis
         /// </summary>
-        [FieldOrder(1)] public int orientation;
 
         [FieldOrder(0)] public uint playerID;
 
-        public FMikuRotate()
-        {
-            functionId = 0x03;
-        }
-    }
+        [FieldOrder(1)] public int orientation;
 
+        public FMikuRotate() => functionId = 0x03;
+    }
+        
     /// <summary>
     ///     Changes the selected character's display state
     /// </summary>
@@ -963,7 +961,7 @@ namespace DIVALib.DSCUtils
         /// <summary> Which player to affect </summary>
         [FieldOrder(0)] public int playerID;
 
-        /// <summary> New height </summary>
+        /// <summary> New Height </summary>
         [FieldOrder(1)] public uint height;
 
         public FCharacterHeightAdjust()

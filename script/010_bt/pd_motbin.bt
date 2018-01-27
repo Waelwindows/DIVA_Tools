@@ -18,8 +18,9 @@ typedef struct{
 
 typedef struct(uint offset)
 {
-    local uint counter = 0x10;
-    for (counter; FTell() < offset; counter++)
+    //local uint counter = 0x10;
+    local uint counter = 0;
+    for (counter; FTell() < 9000000000; counter++)
     {
         HEADER header <name="Sub-header", optimize=false, bgcolor=cLtRed>;
     }
@@ -39,14 +40,18 @@ typedef struct{
 // F = 140
 // FT = 148
 typedef struct(int animDataStart){
-    ushort unk[10];
+    short unk[10];
     ushort reserved[25] <name="Reserved", comment="Possibly unused?">;
     ushort const1[2] <name="Const?">;
     //ushort value1[20];
     ushort value[6];
     ushort const2[4];
     ushort value2[10];
-    ushort const3[9];
+    //ushort const3[8];
+    short const3[3];
+    short motDataNum <name="Motion Data Count", comment="Unsure if this is true">;
+    short const4[4];
+    short ikAxisNum <name="Magic Variable :)", comment="Weird IK if 1 or 4, Crashes if 5 or more">;
 
 } ANIMUNK <name="Animation Settings?", comment="Size is game dependant", bgcolor=cLtBlue>;
 
@@ -153,7 +158,7 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
     local int sCount = 0;
     local int fCount = 0;
     struct(int boneDataStart){
-    local int motDataLim = 90;
+    local int motDataLim = 61;
     for (sCount; sCount <motDataLim; ++sCount)
         {
             Printf("loop iteration %u \n", sCount);
@@ -193,6 +198,7 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
             if (sCount == 7) { fCount = 1;}
             if (sCount == 12) { fCount = 3;}
             */
+            /* Weekender 
             if (sCount == 10) { fCount = 1;}
             if (sCount == 14) { fCount = 2;} //337B65
             if (sCount == 20) { fCount = 2;}
@@ -210,6 +216,20 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
             if (sCount == 75) { fCount = 1;}
             if (sCount == 80) { fCount = 2;}
             if (sCount == 85) { fCount = 1;}
+            */
+            /* */
+            if (sCount == 7) { fCount = 1;}
+            if (sCount == 12) { fCount = 3;}
+            if (sCount == 18) { fCount = 2;}
+            if (sCount == 23) { fCount = 5;}
+            if (sCount == 28) { fCount = 3;}
+            if (sCount == 31) { fCount = 15;}
+            if (sCount == 33) { fCount = 4;}
+            if (sCount == 36) { fCount = 3;}
+            if (sCount == 39) { fCount = 12;}
+            if (sCount == 45) { fCount = 2;}
+            if (sCount == 53) { fCount = 1;}
+
             ANIMDATA animData(boneDataStart, fCount) <name="Motion Data", read=motDataValue, optimize=false>;
             //BONEANIMDATA boneAnimData(3, boneDataStart, fCount);
             fCount = 0;
@@ -241,6 +261,10 @@ struct{
             FSeek(hd.animInfoOffset);
             ANIM anim(hd.animDataOffset, hd.boneDataOffset, subHD.header[0].animInfoOffset);
         } else {
+            if (subHD.header[counter].animInfoOffset == 0)
+            {
+                break;
+            }
             if (counter == sizeof(subHD) / sizeof(HEADER) - 1)
             {
                 ANIM anim(subHD.header[counter].animDataOffset, subHD.header[counter].boneDataOffset, 0);

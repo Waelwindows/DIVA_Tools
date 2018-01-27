@@ -1,0 +1,100 @@
+//------------------------------------------------
+//--- 010 Editor v8.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+typedef struct{
+    char magic[3];
+    byte type; 
+    uint width;
+    uint height;
+    uint format;
+    uint id;
+    uint bytesize;
+    byte data[bytesize];
+} TXP_MIP <read=txpMipRead>;
+
+string txpMipRead(TXP_MIP& mip)
+{
+    string s;
+    SPrintf(s, "TXP2: %u x %u (%u bytes)", mip.width, mip.height, mip.bytesize);
+    return s;
+}
+
+typedef struct{
+    local int startOffset = FTell();
+    char magic[3];
+    byte type; 
+    uint mipCount;
+    uint ver <format=hex>;
+    local uint counter;
+    struct{
+        for (counter; counter < mipCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for(counter; counter < mipCount; ++counter)
+        {
+            FSeek(startOffset + OFF_TABLE.offset[counter]);
+            TXP_MIP mip;
+        }
+    } MIPS;
+} TXP_TEX <read=txpTexRead>;
+
+string txpTexRead(TXP_TEX& tex)
+{
+    string s;
+    SPrintf(s, "TXP4: %u mips (%s)", tex.mipCount, txpMipRead(tex.MIPS.mip[0]));
+    return s;
+}
+
+
+typedef struct {
+    char magic[3];
+    byte type;
+    uint texCount;
+    uint ver;
+    local uint counter;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            FSeek(OFF_TABLE.offset[counter]);
+            TXP_TEX tex;
+        }
+    } TEX <name="Textures">;
+} TXP_FILE;
+
+LittleEndian();
+//TXP_FILE file;
+byte magic[4] <hidden=true>;
+FSkip(-4);
+if (magic[3] == 3)
+{
+    TXP_FILE file;
+} else if (magic[3] == 4)
+{
+    TXP_TEX tex;
+} else if (magic[3] == 2)
+{
+    TXP_MIP mip;
+}
+//TXP_MIP mip;

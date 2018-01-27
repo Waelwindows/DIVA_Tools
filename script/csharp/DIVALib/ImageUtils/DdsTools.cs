@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using DIVALib.IO;
+using BinarySerialization;
 
 namespace DIVALib.ImageUtils
 {
@@ -11,22 +10,26 @@ namespace DIVALib.ImageUtils
         RGB,
         RGBA,
         DXT1,
+        DXT2,
         DXT3,
+        DXT4,
         DXT5,
         ATI2n
     }
 
     public class DdsPixelFormat
     {
-        public const uint size = 32;
-        public uint       flags;
-        public char[]     compressionName = new char[4];
-        public uint       RGBBitCount;
-        public uint       RBitMask;
-        public uint       GBitMask;
-        public uint       BBitMask;
-        public uint       ABitMask;
+        [Ignore] public DdsPFType Format => (DdsPFType) Enum.Parse(typeof(DdsPFType), CompressionName);
 
+        [FieldOrder(0)]                 public uint   Size = 32;
+        [FieldOrder(1)]                 public uint   Flags;
+        [FieldOrder(2), FieldLength(4)] public string CompressionName = "    ";
+        [FieldOrder(3)]                 public uint   RGBBitCount;
+        [FieldOrder(4)]                 public uint   RBitMask;
+        [FieldOrder(5)]                 public uint   GBitMask;
+        [FieldOrder(6)]                 public uint   BBitMask;
+        [FieldOrder(7)]                 public uint   ABitMask;
+    
         const uint DDPF_ALPHAPIXELS = 0x1;
         const uint DDPF_ALPHA = 0x2;
         const uint DDPF_FOURCC = 0x4;
@@ -37,216 +40,163 @@ namespace DIVALib.ImageUtils
         public DdsPixelFormat() { }
 
         public DdsPixelFormat(DdsPFType type)
-        {
+        {           
             switch (type)
             {
                 case DdsPFType.RGB:
-                    flags = DDPF_RGB;
-                    compressionName = "RGB ".ToCharArray();
+                    Flags = DDPF_RGB;
                     RGBBitCount = 24;
-                    RBitMask = 0xFF0000;
+                    CompressionName = "RGB ";
+                    RBitMask = 0x0000FF;
                     GBitMask = 0x00FF00;
-                    BBitMask = 0x0000FF; break;
+                    BBitMask = 0xFF0000; break;
                 case DdsPFType.RGBA:
-                    flags = DDPF_RGB | DDPF_ALPHAPIXELS;
-                    compressionName = "RGBA".ToCharArray();
+                    Flags = DDPF_RGB | DDPF_ALPHAPIXELS;
                     RGBBitCount = 32;
-                    RBitMask = 0xFF000000;
-                    GBitMask = 0x00FF0000;
-                    BBitMask = 0x0000FF00;
-                    ABitMask = 0x000000FF; break;
+                    CompressionName = "RGBA";
+                    RBitMask = 0x000000FF;
+                    GBitMask = 0x0000FF00;
+                    BBitMask = 0x00FF0000;
+                    ABitMask = 0xFF000000; break;
                 case DdsPFType.DXT1:
-                    flags = DDPF_FOURCC;
-                    compressionName = "DXT1".ToCharArray();
-                    RGBBitCount = 12;
-                    RBitMask = 0xFF000000;
-                    GBitMask = 0x00FF0000;
-                    BBitMask = 0x0000FF00; break;
-                case DdsPFType.DXT3:
-                    flags = DDPF_FOURCC;
-                    compressionName = "DXT3".ToCharArray();
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "DXT1";
                     RGBBitCount = 16;
-                    RBitMask = 0xFF000000;
-                    GBitMask = 0x00FF0000;
-                    BBitMask = 0x0000FF00; break;
+                    RBitMask = 0x0F;
+                    GBitMask = 0xFF;
+                    BBitMask = 0xF0; break;
+                case DdsPFType.DXT2:
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "DXT2";
+                    RGBBitCount = 24;
+                    RBitMask = 0xF0000000;
+                    GBitMask = 0x0F000000;
+                    BBitMask = 0x00F00000;
+                    ABitMask = 0x000F0000; break;
+                case DdsPFType.DXT3:
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "DXT3";
+                    RGBBitCount = 24;
+                    RBitMask = 0xF0000000;
+                    GBitMask = 0x0F000000;
+                    BBitMask = 0x00F00000; 
+                    ABitMask = 0x000FF000; break;
+                case DdsPFType.DXT4:
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "DXT4";
+                    RGBBitCount = 32;
+                    RBitMask = 0xFF000000; break;
                 case DdsPFType.DXT5:
-                    flags = DDPF_FOURCC;
-                    compressionName = "DXT5".ToCharArray();
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "DXT5";
                     RGBBitCount = 64;
                     RBitMask = 0xFF000000;
-                    GBitMask = 0x00FF0000;
-                    BBitMask = 0x0000FF00; break;
+                    GBitMask = 0x00FF0000; break;
                 case DdsPFType.ATI2n:
-                    flags = DDPF_FOURCC;
-                    compressionName = "ATI2".ToCharArray();
-                    RGBBitCount = 64;
+                    Flags = DDPF_FOURCC;
+                    CompressionName = "ATI2";
+                    RGBBitCount = 16;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
-        public void Save(Stream s)
+        public bool IsUncompressed()
         {
-            DataStream.WriteUInt32(s, size);
-            DataStream.WriteUInt32(s, flags);
-            DataStream.WriteChars(s, compressionName);
-            DataStream.WriteUInt32(s, RGBBitCount);
-            DataStream.WriteUInt32(s, RBitMask);
-            DataStream.WriteUInt32(s, GBitMask);
-            DataStream.WriteUInt32(s, BBitMask);
-            DataStream.WriteUInt32(s, ABitMask);
+            return Format == DdsPFType.RGB || Format == DdsPFType.RGBA;
         }
     }
 
     public class DdsMipMap
     {
-        public uint height;
-        public uint width;
-        public uint byteSize;
-        public byte[] data;
+        [Ignore] public int Height;
+        [Ignore] public int Width;
+        [Ignore] public int ByteSize;
+        [FieldOrder(0), FieldLength("ByteSize")] public List<byte> Data = new List<byte>();
 
         public DdsMipMap() { }
 
-        public DdsMipMap(uint w, uint h, uint bs)
+        public DdsMipMap(int width, int height, int byteSize)
         {
-            width = w; height = h;
-            byteSize = bs;
+            Width = width;
+            Height = height;
+            ByteSize = byteSize;
         }
 
-        public DdsMipMap(uint w, uint h, uint bs, List<byte> d)
-        {
-            width = w; height = h;
-            byteSize = bs;
-            data = d.ToArray();
-        }
-
-        public DdsMipMap(uint w, uint h, uint bs, byte[] d)
-        {
-            width = w; height = h;
-            byteSize = bs;
-            data = d;
-        }
+        public DdsMipMap(int width, int height, int byteSize, IEnumerable<byte> data) : this(width, height, byteSize) => Data = data.ToList();
     }
 
     public class DdsFile
     {
-        public const string magic = "DDS ";
-        public const uint headerSize = 124;
-        public uint flag;
-        public uint height;
-        public uint width;
-        public uint pitchOrLinearSize;
-        public uint depth;
-        public uint mipMapCount;
-        public DdsPixelFormat pixelFormat;
-        public uint caps;
-        public uint caps2;
-        public uint caps3;
-        public uint caps4;
-        public byte[] data;
-        public DdsMipMap[] mipMaps;
+        [FieldOrder(0), FieldLength(4)]                                                              public string          Magic = "DDS ";
+        [FieldOrder(1)]                                                                              public int             HeaderSize = 124;
+        [FieldOrder(2)]                                                                              public int             Flag { get => DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT |
+                                                                                                                                         (MipMapCount > 0 ? DDSD_MIPMAPCOUNT : 0) |
+                                                                                                                                         (PixelFormat.IsUncompressed() ? DDSD_PITCH : DDSD_LINEARSIZE) |
+                                                                                                                                         (Depth > 0 ? DDSD_DEPTH : 0); set { } }
+        [FieldOrder(3)]                                                                              public int             Height;
+        [FieldOrder(4)]                                                                              public int             Width;
+        [FieldOrder(5)]                                                                              public int             PitchOrLinearSize; // { get => Width * Height * (int)(PixelFormat.RGBBitCount / 8); set { } }
+        [FieldOrder(6)]                                                                              public int             Depth = 0;
+        [FieldOrder(7)]                                                                              public int             MipMapCount = 0;
+        [FieldOrder(8), FieldCount(11)]                                                              public uint[]          Reserved = new uint[11];
+        [FieldOrder(9)]                                                                              public DdsPixelFormat  PixelFormat = new DdsPixelFormat();
+        [FieldOrder(10)]                                                                             public int             Caps { get => DDSCAPS_TEXTURE | (MipMapCount > 1 ? DDSCAPS_MIPMAP | DDSCAPS_COMPLEX : 0); set { } }
+        [FieldOrder(11)]                                                                             public int             Caps2;
+        [FieldOrder(12)]                                                                             public int             Caps3;
+        [FieldOrder(13)]                                                                             public int             Caps4;
+        [FieldOrder(14)]                                                                             public int             Reserved2;
+        [FieldOrder(15), FieldLength("PitchOrLinearSize", BindingMode = BindingMode.OneWayToSource)] public List<byte>      Data;
+        [FieldOrder(16), FieldCount("MipMapCount", BindingMode = BindingMode.OneWayToSource)]        public List<DdsMipMap> MipMaps = new List<DdsMipMap>();
 
-        const uint DDSD_CAPS        = 0x1;
-        const uint DDSD_HEIGHT      = 0x2;
-        const uint DDSD_WIDTH       = 0x4;
-        const uint DDSD_PITCH       = 0x8;
-        const uint DDSD_PIXELFORMAT = 0x1000;
-        const uint DDSD_MIPMAPCOUNT = 0x20000;
-        const uint DDSD_LINEARSIZE  = 0x80000;
-        const uint DDSD_DEPTH       = 0x800000;
+        public const int DDSD_CAPS        = 0x1;
+        public const int DDSD_HEIGHT      = 0x2;
+        public const int DDSD_WIDTH       = 0x4;
+        public const int DDSD_PITCH       = 0x8;
+        public const int DDSD_PIXELFORMAT = 0x1000;
+        public const int DDSD_MIPMAPCOUNT = 0x20000;
+        public const int DDSD_LINEARSIZE  = 0x80000;
+        public const int DDSD_DEPTH       = 0x800000;
+
+        public const int DDSCAPS_COMPLEX = 0x8;
+        public const int DDSCAPS_TEXTURE = 0x1000;
+        public const int DDSCAPS_MIPMAP  = 0x400000;
 
         public DdsFile() { }
 
-        public DdsFile(uint w, uint h)
+        public DdsFile(int w, int h)
         {
-            flag = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_MIPMAPCOUNT;
-            height = h;
-            width = w;
+            Height = h;
+            Width = w;
         }
 
-        public DdsFile(DdsPixelFormat format, uint w, uint h)
+        public DdsFile(DdsPixelFormat format, int w, int h) : this(w, h)
         {
-            height = h;
-            width = w;
-            pixelFormat = format;
+            PixelFormat = format;
+            PitchOrLinearSize = w * h * (int)(format.RGBBitCount / 8);
         }
 
-        public DdsFile(Stream s)
-        {
-            if (DataStream.ReadString(s, 4) != magic) { return; }
-            if (DataStream.ReadUInt32(s) != headerSize) { return; }
-            flag = DataStream.ReadUInt32(s);
-            height = DataStream.ReadUInt32(s);
-            width = DataStream.ReadUInt32(s);
-            pitchOrLinearSize = DataStream.ReadUInt32(s);
-            depth = DataStream.ReadUInt32(s);
-            mipMapCount = DataStream.ReadUInt32(s);
-            s.Seek(11 * 4, SeekOrigin.Current);
 
-            pixelFormat = new DdsPixelFormat();
-            if (DataStream.ReadUInt32(s) != DdsPixelFormat.size) { return; }
-            pixelFormat.flags = DataStream.ReadUInt32(s);
-            pixelFormat.compressionName = DataStream.ReadChars(s, 4);
-            pixelFormat.RGBBitCount = DataStream.ReadUInt32(s);
-            pixelFormat.RBitMask = DataStream.ReadUInt32(s);
-            pixelFormat.GBitMask = DataStream.ReadUInt32(s);
-            pixelFormat.BBitMask = DataStream.ReadUInt32(s);
-            pixelFormat.ABitMask = DataStream.ReadUInt32(s);
-
-            caps  = DataStream.ReadUInt32(s);
-            caps2 = DataStream.ReadUInt32(s);
-            caps3 = DataStream.ReadUInt32(s);
-            caps4 = DataStream.ReadUInt32(s);
-            DataStream.ReadUInt32(s);
-            data = DataStream.ReadBytes(s, (int)pitchOrLinearSize);
-            SetMipMaps();
-        }
-
-        public void Save(Stream s)
-        {
-            DataStream.WriteMagic(s, magic);
-            DataStream.WriteUInt32(s, headerSize);
-            DataStream.WriteUInt32(s, flag);
-            DataStream.WriteUInt32(s, height);
-            DataStream.WriteUInt32(s, width);
-            DataStream.WriteUInt32(s, pitchOrLinearSize);
-            DataStream.WriteUInt32(s, depth);
-            DataStream.WriteUInt32(s, mipMapCount);
-            DataStream.WriteNulls(s, 11 * 4);
-            if (pixelFormat == null) { return; }
-            pixelFormat.Save(s);
-            DataStream.WriteUInt32(s, caps);
-            DataStream.WriteUInt32(s, caps2);
-            DataStream.WriteUInt32(s, caps3);
-            DataStream.WriteUInt32(s, caps4);
-            DataStream.WriteNulls(s, 4);
-            DataStream.WriteBytes(s, data);
-            foreach(DdsMipMap mip in mipMaps)
-            {
-                if (mip == null) { return; }
-                DataStream.WriteBytes(s, mip.data);
-            }
-        }
-       
-        protected static DdsFile Clone(DdsFile original)
-        {
-            return (DdsFile) original.MemberwiseClone();
-        }
+        protected static DdsFile Clone(DdsFile original) => (DdsFile)original.MemberwiseClone();
 
         public void SetMipMaps()
         {
-            mipMaps = new DdsMipMap[mipMapCount];
-            uint counter = 1;
-            while (counter < mipMapCount)
+            MipMaps = new List<DdsMipMap>((int)MipMapCount);
+            var mipData = Data.ToList();
+            var dataOffset = PitchOrLinearSize;
+            int Power(int n, int exp) => Enumerable.Repeat(n, exp).Sum(num => num * num);
+            for (var i = 1; i < MipMapCount; ++i)
             {
-                int bytesToSkip = 0;
-                int dividor = (int)((double)counter * (double)counter);
-                bytesToSkip += (int)(pitchOrLinearSize / (dividor * 0.5));
-                uint mWidth = (uint)(width / dividor); uint mHeight = (uint)(height / dividor); uint mBS = (uint)(pitchOrLinearSize / dividor);
-                mipMaps[counter - 1] = new DdsMipMap(mWidth, mHeight, mBS, data.ToList().Skip(bytesToSkip).ToArray());
-                ++counter;
+                var div = (int)System.Math.Pow(2, i);
+                var mipWidth = Width / div;
+                var mipHeight = Height / div;
+                var mipBytesize = (int)(PitchOrLinearSize / System.Math.Pow(4, i));
+                var mip = new DdsMipMap(mipWidth, mipHeight, mipBytesize, mipData.GetRange(dataOffset, mipBytesize));
+                MipMaps.Add(mip);
+                dataOffset += mipBytesize;
             }
-            Array.Resize(ref data, (int)pitchOrLinearSize);
+            Data = Data.GetRange(0, PitchOrLinearSize);
         }
-
     }
 }

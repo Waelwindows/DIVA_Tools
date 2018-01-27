@@ -1,0 +1,65 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: Parse projetc diva _tex.bin
+//   Authors: Skyth, Waelwindows
+//   Version:
+//   Purpose:
+//  Category:
+// File Mask:
+//  ID Bytes:
+//   History:
+//------------------------------------------------
+
+typedef struct {
+    char magic[4] <name="File Magic">;
+    uint size <name="Header Size">;
+    uint unk1;
+    uint version <name="File Version", format=hex>;
+    uint unk2;
+    uint compressionOffset <name="Compression Offset">;
+    uint unk3;
+    uint unk4;
+} SPR_HEADER <name="SPR Header", bgcolor=cLtBlue>;
+
+typedef struct
+{
+    char sprType;
+    char magic[3];
+    int mipCount;
+    int unk1 <format=hex>;
+    int unk2;
+    int mipOffset;
+} SPR_4PXT <name="Mother PXT", bgcolor=cLtRed>;
+
+typedef struct
+{
+    char sprType;
+    char magic[3];
+    int width;
+    int height;
+    int textureType;
+    int mipLevel;
+    int bytesize;
+    ubyte data[width * height];
+} SPR_2PXT <name="SPR Texture", bgcolor=cLtGreen>;
+
+LittleEndian();
+SPR_HEADER hdr;
+BigEndian();
+int texID;
+int texOffset <name="Texture Offset?">;
+int texCount;
+int sprCount;
+int unOffset1;
+int unOffset2;
+int unOffset3;
+int unOffset4;
+
+//FSeek(texOffset - 12);
+FSeek(320);
+SPR_4PXT pxt;
+SPR_2PXT pxt1;
+SPR_2PXT pxt2;
+int pad[3];
+char eofc[4];

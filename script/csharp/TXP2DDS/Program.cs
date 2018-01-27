@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using BinarySerialization;
 using DIVALib.ImageUtils;
-using TxpFunc;
 
 namespace TXP2DDS
 {
@@ -10,50 +10,107 @@ namespace TXP2DDS
     {
         static void Main(string[] args)
         {
-            string dir = "D:\\QuickBMS\\mikitm\\exports\\dds";
-            dir = Console.ReadLine();
-            //dir.Replace("\", "\\");
-            if (dir.Contains("."))
+            if (args.Length < 1)
             {
-                Console.Write("TXP to DDS mode");
-                FileStream file = new FileStream(dir, FileMode.Open);
-                TxpToDds(file, dir.Substring(0, dir.Length-8));
-            } else 
-            {
-                Console.Write("DDS to TXP mode");
-                DdsToTxp(dir);
+                var helpstr = @"TXP2DDS
+==================
+Converter for all .txp/_tex.bin virtua fighter engine games.
+It can export to a .dds file with the equivilant pixel format.
+
+Supports:
+    - All Project DIVA games before F2nd (tested on F)
+    - Batch importing / exporting
+
+Usage:
+    Drag'n'drop your .txp/.dds/directory into the application.
+    or
+    TXP2DDS [source]";
+                Console.WriteLine(helpstr);
+                Console.ReadLine();
             }
-            Console.ReadKey();
+            var dir = args[0];
+
+            if (!File.Exists(args[0]) && !File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
+                throw new IOException("file doesn't exist.");
+
+            if (File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
+            {
+                var ddsPaths = new List<string>();
+                foreach (var filePath in Directory.EnumerateFiles(dir))
+                {
+                    using (var file = new FileStream(filePath, FileMode.Open))
+                    {
+                        switch (Path.GetExtension(filePath))
+                        {
+                            case ".bin":
+                            case ".txp":
+                                TxpToDds(file, filePath);
+                                break;
+                            case ".dds":
+                                ddsPaths.Add(filePath);
+                                break;
+                        }
+                    }
+                }
+                if (ddsPaths.Count > 0) DdsToTxpAtlas(ddsPaths); 
+            }
+            else
+            {
+                using (var file = new FileStream(dir, FileMode.Open))
+                {
+                    switch (Path.GetExtension(dir))
+                    {
+                        case ".bin":
+                        case ".txp":
+                            TxpToDds(file, dir);
+                            break;
+                        case ".dds":
+                            DdsToTxp(file, dir);
+                            break;
+                    }
+                }
+            }
         }
 
-		public static void TxpToDds(Stream s, string path)
+        public static void TxpToDds(Stream s, string path)
 		{
-            TxpFile txp = new TxpFile(s);
-            uint counter = 0;
-            foreach(TxpTexture tex in txp.textures)
-            {
-                FileStream saveFile = new FileStream(string.Format("{0}_{1}.dds", path, ++counter), FileMode.Create);
-                tex.ToDds().Save(saveFile);
-                saveFile.Close();
-            }
+		    var serializer = new BinarySerializer();
+		    var atlas = serializer.Deserialize<TxpTextureAtlas>(s);
+            atlas.SetTextures(s);
+		    var ddsTex = (List<DdsFile>) atlas;
+		    var texPath = $"{path.Substring(0, path.Length - 4)}_tex";
+		    for (var i = 0; i < ddsTex.Count; ++i)
+		    {
+		        using (var save = new FileStream($"{texPath}{i:00}.dds", FileMode.Create)) serializer.Serialize(save, ddsTex[i]);
+		    }
 		}
 
-        public static void DdsToTxp(string directory)
+        public static void DdsToTxp(Stream s, string path)
         {
-            string[] ddsPaths = Directory.GetFiles(directory);
-            DdsFile[] dfiles = new DdsFile[ddsPaths.Length];
-            uint counter = 0;
-            foreach(string path in ddsPaths)
+            var serializer = new BinarySerializer();
+            var dds = serializer.Deserialize<DdsFile>(s);
+            dds.SetMipMaps();
+            using (var file = new FileStream(Path.ChangeExtension(path, "dds"), FileMode.Create)) serializer.Serialize(file, dds.ToTxp());
+        }
+
+        public static void DdsToTxpAtlas(List<string> ddsFiles)
+        {
+            var atlas = new TxpTextureAtlas();
+            var serializer = new BinarySerializer();
+            foreach (var path in ddsFiles)
             {
-                ++counter;
-                FileStream file = new FileStream(path, FileMode.Open);
-                dfiles[counter] = new DdsFile(file);
-                if (dfiles == null) {Console.Write("Oh no, the newly created DDS object is null");}
+                using (var ddsFile = new FileStream(path, FileMode.Open))
+                {
+                    var dds = serializer.Deserialize<DdsFile>(ddsFile);
+                    dds.SetMipMaps();
+                    atlas.Textures.Add(dds.ToTxp());
+                }
             }
-            TxpFile txp = TxpFile.FromDds(dfiles);
-            FileStream save = new FileStream(ddsPaths[0].Substring(0, ddsPaths[0].Length - 5) + "tex.bin", FileMode.Create);
-            txp.Save(save);
-            save.Close();
+            atlas.TextureCount = atlas.Textures.Count;
+            atlas.Textures.ForEach(tex => tex.SetMipOffsets());
+            atlas.SetTextureOffsets();
+            var savePath = ddsFiles[0].Length > 10 ? $"{ddsFiles[0].Slice(end: -10)}.txp" : Path.ChangeExtension(ddsFiles[0], "txp");
+            using (var txpFile = new FileStream(savePath, FileMode.Create)) serializer.Serialize(txpFile, atlas); 
         }
     }
 }

@@ -36,10 +36,6 @@
     <Reference Include="BinarySerializer, Version=7.5.7.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BinarySerializer.7.5.7\lib\netstandard1.3\BinarySerializer.dll</HintPath>
     </Reference>
-    <Reference Include="DIVALib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\lib\DIVALib\Release\DIVALib.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
     </Reference>
@@ -137,11 +133,16 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TxpTexture.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DIVALib\DIVALib.csproj">
+      <Project>{0777cd4f-2d6b-4e46-9f55-ec4dcc1ab59b}</Project>
+      <Name>DIVALib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
