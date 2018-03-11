@@ -29,3 +29,9 @@ artifacts:
 
   - path: bin\TXP2DDS\$(configuration)
     name: TXP2DDS
+
+  - path: bin\SPRTool\$(configuration)
+    name: SPRTool
+
+  - path: bin\DIVAFILEConverter\$(configuration)
+    name: DIVAFILEConverter

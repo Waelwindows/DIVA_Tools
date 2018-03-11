@@ -20,7 +20,7 @@ typedef struct(uint offset)
 {
     //local uint counter = 0x10;
     local uint counter = 0;
-    for (counter; FTell() < 9000000000; counter++)
+    for (counter; FTell() < offset; counter++)
     {
         HEADER header <name="Sub-header", optimize=false, bgcolor=cLtRed>;
     }
@@ -72,7 +72,7 @@ typedef struct(int boneDataStart, int flagCount){
     } frameCounts <name="Frame Counts">;
     counter = 0;
     struct(int boneDataStart) {
-        for (counter; counter < frameID; counter++){
+        for (counter; counter < frameID*2; counter++){
             if (FTell() >= boneDataStart)
             {
                 break;
@@ -217,7 +217,7 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
             if (sCount == 80) { fCount = 2;}
             if (sCount == 85) { fCount = 1;}
             */
-            /* */
+            /* 
             if (sCount == 7) { fCount = 1;}
             if (sCount == 12) { fCount = 3;}
             if (sCount == 18) { fCount = 2;}
@@ -229,6 +229,26 @@ typedef struct(int animDataStart, int boneDataStart, int nextAnimInfo){
             if (sCount == 39) { fCount = 12;}
             if (sCount == 45) { fCount = 2;}
             if (sCount == 53) { fCount = 1;}
+            */
+            if (sCount == 1) { fCount = 1;}
+            if (sCount == 2) { fCount = 2;}
+            if (sCount == 3) { fCount = 1;}
+            if (sCount == 4) { fCount = 3;}
+            if (sCount == 5) { fCount = 1;}
+            if (sCount == 6) { fCount = 3;}
+            if (sCount == 7) { fCount = 6;}
+            if (sCount == 8) { fCount = 2;}
+            if (sCount == 9) { fCount = 4;}
+            if (sCount == 10){ fCount = 20;}
+            if (sCount == 11){ fCount = 2;}
+            if (sCount == 12){ fCount = 4;}
+            if (sCount == 13){ fCount = 18;}
+            if (sCount == 14){ fCount = 1;}
+            if (sCount == 15){ fCount = 1;}
+            if (sCount == 16){ fCount = 1;}
+            if (sCount == 17){ fCount = 2;}
+            if (sCount == 18){ fCount = 1;}
+            if (sCount == 19){ fCount = 1;}
 
             ANIMDATA animData(boneDataStart, fCount) <name="Motion Data", read=motDataValue, optimize=false>;
             //BONEANIMDATA boneAnimData(3, boneDataStart, fCount);

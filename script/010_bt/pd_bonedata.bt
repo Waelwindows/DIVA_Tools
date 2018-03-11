@@ -15,6 +15,19 @@ typedef struct {
     int unk1;
 } HEADER <name="Header", bgcolor=cRed>;
 
+typedef struct {
+	uint offset;
+	local uint cur = FTell();
+	FSeek(offset);
+	string name;
+	FSeek(cur + 4);
+} OFFSET_NAME <read=offName_read>;
+
+string offName_read(OFFSET_NAME &name)
+{
+	return name.name;
+}
+
 typedef struct (int count)
 {
 	local int counter = 0;
@@ -34,18 +47,9 @@ typedef struct
 	float matElement[3];
 } MATRIX <name="Matrix">;
 
-typedef struct
-{
-	string name;
-} BONENAME <name="Bone Name", read=read_bonename>;
-
-string read_bonename(BONENAME &bone)
-{
-	return bone.name;
-}
-
 typedef struct (int skelOffset)
 {
+	local uint cur = FTell();
 	FSeek(skelOffset);
 	int unk1;
 	int skelCount1;
@@ -72,13 +76,37 @@ typedef struct (int skelOffset)
 		local int counter = 0;
 		for (counter; counter < skelCount2; ++counter)
 		{
+			
 			FSeek(current);
 			current = FTell() + 4;
-			int boneNameOffset <hidden=1>;
-			FSeek(boneNameOffset);
-			BONENAME boneNames;
+			
+			OFFSET_NAME name <name="Bone Name">;
 		}
 	} CHARNAMES1(skelCount2) <name="Character Names 1">;
+
+	FSeek(skelNameOffset2);
+	struct(int skelCount2) {
+		local int current = FTell();
+		local int counter = 0;
+		for (counter; counter < skelCount2; ++counter)
+		{
+			FSeek(current);
+			current = FTell() + 4;
+			
+			OFFSET_NAME name <name="Bone Name">;
+		}
+	} CHARNAMES2(skelCount3) <name="Character Names 2">;
+
+	FSeek(skelParents);
+	struct(int count)
+	{
+		local uint counter = 0;
+		for(counter; counter < count; ++counter)
+		{
+			short parent;
+		}
+	} PARENTS(skelCount3);
+	FSeek(cur);
 } CHARSKEL <name="Character Skeleton", bgcolor=cGreen>;
 
 LittleEndian();
@@ -86,5 +114,9 @@ HEADER hd;
 FSeek(hd.skeletonsOffset);
 local int counter = 0;
 CHARS chr(hd.sectionCount);
-CHARSKEL cmnSkel(chr.SKELINFO.skelOffset[0]);
-CHARSKEL cmnSkel(chr.SKELINFO.skelOffset[6]) <comment="MIKU">;
+for (counter; counter < hd.sectionCount; ++counter)
+{
+	CHARSKEL cmnSkel(chr.SKELINFO[counter].skelOffset);
+}
+
+//CHARSKEL cmnSkel(chr.SKELINFO[1].skelOffset) <comment="MIKU">;

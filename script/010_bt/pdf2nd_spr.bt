@@ -3,34 +3,23 @@
 //
 //      File: Parse projetc diva _tex.bin
 //   Authors: Skyth, Waelwindows
-//   Version:
-//   Purpose:
+//   Version: 
+//   Purpose: Parse F2nd's SPR file format
 //  Category:
-// File Mask:
-//  ID Bytes:
+// File Mask: *.spr
+//  ID Bytes: SPRC
 //   History:
 //------------------------------------------------
 
 typedef struct {
-    char magic[4] <name="File Magic">;
-    uint size <name="Header Size">;
-    uint unk1;
-    uint version <name="File Version", format=hex>;
-    uint unk2;
-    uint compressionOffset <name="Compression Offset">;
-    uint unk3;
-    uint unk4;
-} SPR_HEADER <name="SPR Header", bgcolor=cLtBlue>;
-
-typedef struct
-{
-    char sprType;
-    char magic[3];
-    int mipCount;
-    int unk1 <format=hex>;
-    int unk2;
-    int mipOffset;
-} SPR_4PXT <name="Mother PXT", bgcolor=cLtRed>;
+    char    magic[4]        <name="File ID", comment="Always SPRC">;
+    uint    eofc            <name="EOFC Offset", format=hex>;
+    uint    headerOffset    <name="Header Offset", comment="Seems to be always set to 0x20", format=hex>;
+    uint    ver             <name="File Version">;
+    DWORD   ebr1            <hidden=1>;
+    uint    texCompOffset   <name="Texture Compression Offset", format=hex>;
+    QWORD   ebr2            <hidden=1>;
+} OFFSET_TBL <name="SPR Header", bgcolor=cLtBlue>;
 
 typedef struct
 {
@@ -44,22 +33,167 @@ typedef struct
     ubyte data[width * height];
 } SPR_2PXT <name="SPR Texture", bgcolor=cLtGreen>;
 
+
+typedef struct
+{
+    local int startOffset = FTell();
+    byte type;
+    char magic[3];
+    uint mipCount;
+    uint ver <format=hex>;
+    local uint counter;
+    struct{
+        for (counter; counter < mipCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for(counter; counter < mipCount; ++counter)
+        {
+            FSeek(startOffset + OFF_TABLE.offset[counter]);
+            SPR_2PXT mip;
+        }
+    } MIPS;
+} SPR_4PXT <name="Mother PXT", bgcolor=cLtRed>;
+
+typedef struct {
+    local uint curPos = FTell();
+    byte type;
+    char magic[3];
+    uint texCount;
+    uint ver;
+    local uint counter;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            FSeek(curPos+OFF_TABLE.offset[counter]);
+            SPR_4PXT tex;
+        }
+    } TEX <name="Textures">;
+} SPR_3PXT;
+
+typedef struct {
+    local uint curPos = FTell();
+    char magic[4];
+    uint byteSize <name="Container Bytesize", comment="Relative">;
+    uint size <name="Struct Size", comment="In bytes">;
+    uint version <name="Version", format=hex, comment="Not yet investigated">;
+    uint unk;
+    uint byteSize2 <name="Container Bytesize", comment="Again">;
+    uint64 reserved <name="Reserved", hidden=true>;
+    BigEndian();
+    SPR_3PXT pxtAtlas <name="3PXT Texture Atlas">;
+} SPR_TXPC <name="TXPC", bgcolor=cLtYellow>;
+
+typedef struct {
+    LittleEndian();
+    local uint curPos = FTell();
+    char magic[4];
+    uint unk1;
+    uint size <name="Struct Size", comment="In Bytes">;
+    uint version <name="Version?", format=hex>;
+    uint unk2 <name="Version?">;
+    char padding [12] <name="Padding", hidden=true>;
+    //char padding [16] <name="Padding", hidden=true>;
+} EOFC <name="End of File Container", bgcolor=cAqua>;
+
+typedef struct {
+    LittleEndian();
+    local uint curPos = FTell();
+    char magic[4];
+    uint unk1;
+    uint size <name="Struct Size", comment="In Bytes">;
+    uint version <name="Version?", format=hex>;
+    uint unk2;
+    uint unk3;
+    uint64 padding <name="Padding", hidden=true>;
+} POF0 <name="POF", bgcolor=cBlue>;
+
+typedef struct {
+    uint size <name="Struct Size", comment="In Bytes">;
+    int unk2 <format=hex>;
+    int unk3;
+    int pad <name="Padding", hidden=true>;
+} UNK <name="Unknown Struct", bgcolor=cLtPurple >;
+
+typedef struct {
+    uint    id                  <name="ID", comment="Should be always set to 0">;
+    uint    texOffset           <name="Texture Offset", comment="Always 8 bytes before last PXT?", format=hex>;
+    uint    texCount            <name="Texture Count">;
+    uint    sprCount            <name="Sprite Count">;
+    uint    sprPropertOffset    <name="Sprite Properties Offset", format=hex>;
+    uint    texNameOffset       <name="Texture Name Offset Table", format=hex>;
+    uint    sprNameOffset       <name="Sprite Name Offset Table", format=hex>;
+    uint    sprScaleOffset      <name="Sprite Scale Offset", format=hex>;
+} SPR_HEADER1;
+
+typedef struct {
+    uint    unknown    <name="UNK1", hidden=1>; // Seems to be always 0x0
+    int     scale      <name="Scaling">;
+    //QWORD   ebr <hidden=true>;
+} SPR_SCALER;
+ 
+typedef struct {
+    uint texIndex <name="Texture Index">;
+    float unk1 <hidden=1>;
+    float unk2 <hidden=1>; // Various
+    float unk3 <hidden=1>; // Various
+    float unk4 <hidden=1>; // Various
+    float unk5 <hidden=1>; // Various
+    float rectX <name="Rectangle X">;
+    float rectY <name="Rectangle Y">;
+    float rectWidth <name="Rectangle Width">;
+    float rectHeight <name="Rectangle Height">;
+    QWORD   ebr <hidden=true>;
+} SPR_PROPERTY;
+
 LittleEndian();
-SPR_HEADER hdr;
+OFFSET_TBL offset;
 BigEndian();
+/*
 int texID;
-int texOffset <name="Texture Offset?">;
+int texNameID;
 int texCount;
 int sprCount;
 int unOffset1;
 int unOffset2;
 int unOffset3;
 int unOffset4;
+*/
 
-//FSeek(texOffset - 12);
-FSeek(320);
-SPR_4PXT pxt;
-SPR_2PXT pxt1;
-SPR_2PXT pxt2;
-int pad[3];
-char eofc[4];
+SPR_HEADER1 header;
+
+FSeek(header.sprScaleOffset);
+SPR_SCALER scale[header.sprCount] <name="Sprite Scaling", bgcolor=cBlue>;
+ 
+FSeek(header.sprPropertOffset);
+SPR_PROPERTY properties[header.sprCount] <name="Sprite Properties", bgcolor=cYellow>;
+ 
+FSeek(header.sprNameOffset);
+uint sprNames[header.sprCount] <name="Sprite Names Offsets", format=hex, bgcolor=cGreen>;
+ 
+FSeek(header.texNameOffset);
+uint texNames[header.texCount] <name="Texture Names Offsets", format=hex, bgcolor=cRed>;
+
+
+FSeek(offset.eofc-48);
+POF0 pof;
+
+UNK unk;
+
+FSeek(offset.eofc);
+EOFC eof;
+
+LittleEndian();
+SPR_TXPC txpC;
+FSeek(txpC.byteSize + txpC.curPos + txpC.size);
+EOFC eof2;

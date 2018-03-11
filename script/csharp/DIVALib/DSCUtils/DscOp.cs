@@ -8,39 +8,13 @@ using DIVALib.IO;
 
 namespace DIVALib.DSCUtils
 {
-    public class DSC : IBinarySerializable
+    public class DSC
     {
+        [FieldOrder(0)] public int Magic;
+        [FieldOrder(1), FieldOffset(0)]
+        [Subtype("Magic", 0x1202_0220, typeof(DscFile))]
+        [Subtype("Magic", 0x4353_5650, typeof(F2DscFile))]
         public DscContainer File;
-
-        public void Deserialize(Stream s, Endianness endianness, BinarySerializationContext context)
-        {
-            var magic = DataStream.ReadUInt32(s);
-            s.Position -= 4;
-            var serial = new BinarySerializer();
-            switch (magic)
-            {
-                case 302121504:
-                    File = serial.Deserialize(s, typeof(DscFile)) as DscFile;
-                    break;
-                case 0x43535650:
-                    serial.Endianness = Endianness.Big;
-                    File = serial.Deserialize(s, typeof(F2DscFile)) as F2DscFile;
-                    break;
-                default: throw new Exception("invalid dsc file");
-            }
-        }
-
-        public void Serialize(Stream s, Endianness endianness, BinarySerializationContext context)
-        {
-            var serial = new BinarySerializer();
-            serial.Serialize(s, File);
-        }
-
-        public static DSC Deserialize(Stream s)
-        {
-            var serial = new BinarySerializer();
-            return serial.Deserialize(s, typeof(DSC)) as DSC;
-        }
 
         public void XmlDeserialize(Stream s)
         {
@@ -82,7 +56,7 @@ namespace DIVALib.DSCUtils
 
     public abstract class DscContainer
     {
-        public List<DscFunc> Functions = new List<DscFunc>();
+        public List<DscFunction> Functions = new List<DscFunction>();
 
         public abstract void BinSerialize(Stream s);
         public abstract dynamic BinDeserialize(Stream s);
@@ -91,8 +65,15 @@ namespace DIVALib.DSCUtils
         public abstract dynamic XmlDeserialize(Stream s);
     }
 
+    public class DscFile1
+    {
+        [XmlAttribute("version")] [FieldOrder(0)] public uint Magic = 302121504;
+        [FieldOrder(1), SerializeUntil((Int64)32)] public List<DscFunction> Functions;
+
+    }
+
     [XmlRoot("dsc")]
-    [XmlInclude(typeof(DscFunc))]
+    //[XmlInclude(typeof(DscFunc))]
     [XmlInclude(typeof(FEnd))]
     [XmlInclude(typeof(FTime))]
     [XmlInclude(typeof(FMikuMove))]
@@ -177,300 +158,9 @@ namespace DIVALib.DSCUtils
     [XmlInclude(typeof(FEditCamera))]
     [XmlInclude(typeof(FEditModeSelect))]
     [Serializable]
-    public class DscFile : DscContainer, IBinarySerializable
+    public class DscFile : DscContainer
     {
         [XmlAttribute("version")] [FieldOrder(0)] public uint Magic = 302121504;
-
-        public void Deserialize(Stream s, Endianness endianness, BinarySerializationContext context)
-        {
-            if (DataStream.ReadUInt32(s) != Magic)
-                throw new Exception("invalid dsc file.");
-            var eof = false;
-            Console.Write("File size is {0}\n", s.Length);
-            while (!eof)
-            {
-                Console.Write("Current position {0}\n", s.Position);
-                if (s.Position >= s.Length)
-                {
-                    eof = true;
-                    break;
-                }
-                var endian = endianness == Endianness.Little
-                    ? DataStream.Endian.LittleEndian
-                    : DataStream.Endian.BigEndian;
-                var readFuncId = DataStream.ReadUInt32(s, endian);
-                s.Position -= 4;
-                var serial = new BinarySerializer();
-                serial.Endianness = endianness;
-                switch (readFuncId)
-                {
-                    case 0x00:
-                        Functions.Add((FEnd) serial.Deserialize(s, typeof(FEnd)));
-                        break;
-                    case 0x01:
-                        Functions.Add((FTime) serial.Deserialize(s, typeof(FTime)));
-                        break;
-                    case 0x02:
-                        Functions.Add((FMikuMove) serial.Deserialize(s, typeof(FMikuMove)));
-                        break;
-                    case 0x03:
-                        Functions.Add((FMikuRotate) serial.Deserialize(s, typeof(FMikuRotate)));
-                        break;
-                    case 0x04:
-                        Functions.Add((FMikuDisplay) serial.Deserialize(s, typeof(FMikuDisplay)));
-                        break;
-                    case 0x05:
-                        Functions.Add((FMikuShadow) serial.Deserialize(s, typeof(FMikuShadow)));
-                        break;
-                    case 0x06:
-                        Functions.Add((FTarget) serial.Deserialize(s, typeof(FTarget)));
-                        break;
-                    case 0x07:
-                        Functions.Add((FSetMotion) serial.Deserialize(s, typeof(FSetMotion)));
-                        break;
-                    case 0x08:
-                        Functions.Add((FSetPlaydata) serial.Deserialize(s, typeof(FSetPlaydata)));
-                        break;
-                    case 0x09:
-                        Functions.Add((FEffect) serial.Deserialize(s, typeof(FEffect)));
-                        break;
-                    case 0x0A:
-                        Functions.Add((FFadeinField) serial.Deserialize(s, typeof(FFadeinField)));
-                        break;
-                    case 0x0B:
-                        Functions.Add((FEffectOff) serial.Deserialize(s, typeof(FEffectOff)));
-                        break;
-                    case 0x0C:
-                        Functions.Add((FSetCamera) serial.Deserialize(s, typeof(FSetCamera)));
-                        break;
-                    case 0x0D:
-                        Functions.Add((FDataCamera) serial.Deserialize(s, typeof(FDataCamera)));
-                        break;
-                    case 0x0E:
-                        Functions.Add((FChangeField) serial.Deserialize(s, typeof(FChangeField)));
-                        break;
-                    case 0x0F:
-                        Functions.Add((FHideField) serial.Deserialize(s, typeof(FHideField)));
-                        break;
-                    case 0x10:
-                        Functions.Add((FMoveField) serial.Deserialize(s, typeof(FMoveField)));
-                        break;
-                    case 0x11:
-                        Functions.Add((FFadeoutField) serial.Deserialize(s, typeof(FFadeoutField)));
-                        break;
-                    case 0x12:
-                        Functions.Add((FEyeAnim) serial.Deserialize(s, typeof(FEyeAnim)));
-                        break;
-                    case 0x13:
-                        Functions.Add((FMouthAnim) serial.Deserialize(s, typeof(FMouthAnim)));
-                        break;
-                    case 0x14:
-                        Functions.Add((FHandAnim) serial.Deserialize(s, typeof(FHandAnim)));
-                        break;
-                    case 0x15:
-                        Functions.Add((FLookAnim) serial.Deserialize(s, typeof(FLookAnim)));
-                        break;
-                    case 0x16:
-                        Functions.Add((FExpression) serial.Deserialize(s, typeof(FExpression)));
-                        break;
-                    case 0x17:
-                        Functions.Add((FLookCamera) serial.Deserialize(s, typeof(FLookCamera)));
-                        break;
-                    case 0x18:
-                        Functions.Add((FLyric) serial.Deserialize(s, typeof(FLyric)));
-                        break;
-                    case 0x19:
-                        Functions.Add((FMusicPlay) serial.Deserialize(s, typeof(FMusicPlay)));
-                        break;
-                    case 0x1A:
-                        Functions.Add((FModeSelect) serial.Deserialize(s, typeof(FModeSelect)));
-                        break;
-                    case 0x1B:
-                        Functions.Add((FEditMotion) serial.Deserialize(s, typeof(FEditMotion)));
-                        break;
-                    case 0x1C:
-                        Functions.Add((FBarTimeSet) serial.Deserialize(s, typeof(FBarTimeSet)));
-                        break;
-                    case 0x1D:
-                        Functions.Add((FShadowheight) serial.Deserialize(s, typeof(FShadowheight)));
-                        break;
-                    case 0x1E:
-                        Functions.Add((FEditFace) serial.Deserialize(s, typeof(FEditFace)));
-                        break;
-                    case 0x1F:
-                        Functions.Add((FMoveCamera) serial.Deserialize(s, typeof(FMoveCamera)));
-                        break;
-                    case 0x20:
-                        Functions.Add((FPvEnd) serial.Deserialize(s, typeof(FPvEnd)));
-                        break;
-                    case 0x21:
-                        Functions.Add((FShadowpos) serial.Deserialize(s, typeof(FShadowpos)));
-                        break;
-                    case 0x22:
-                        Functions.Add((FEditLyric) serial.Deserialize(s, typeof(FEditLyric)));
-                        break;
-                    case 0x23:
-                        Functions.Add((FEditTarget) serial.Deserialize(s, typeof(FEditTarget)));
-                        break;
-                    case 0x24:
-                        Functions.Add((FEditMouth) serial.Deserialize(s, typeof(FEditMouth)));
-                        break;
-                    case 0x25:
-                        Functions.Add((FSetCharacter) serial.Deserialize(s, typeof(FSetCharacter)));
-                        break;
-                    case 0x26:
-                        Functions.Add((FEditMove) serial.Deserialize(s, typeof(FEditMove)));
-                        break;
-                    case 0x27:
-                        Functions.Add((FEditShadow) serial.Deserialize(s, typeof(FEditShadow)));
-                        break;
-                    case 0x28:
-                        Functions.Add((FEditEyelid) serial.Deserialize(s, typeof(FEditEyelid)));
-                        break;
-                    case 0x29:
-                        Functions.Add((FEditEye) serial.Deserialize(s, typeof(FEditEye)));
-                        break;
-                    case 0x2A:
-                        Functions.Add((FEditItem) serial.Deserialize(s, typeof(FEditItem)));
-                        break;
-                    case 0x2B:
-                        Functions.Add((FEditEffect) serial.Deserialize(s, typeof(FEditEffect)));
-                        break;
-                    case 0x2C:
-                        Functions.Add((FEditDisp) serial.Deserialize(s, typeof(FEditDisp)));
-                        break;
-                    case 0x2D:
-                        Functions.Add((FEditHandAnim) serial.Deserialize(s, typeof(FEditHandAnim)));
-                        break;
-                    case 0x2E:
-                        Functions.Add((FAim) serial.Deserialize(s, typeof(FAim)));
-                        break;
-                    case 0x2F:
-                        Functions.Add((FHandItem) serial.Deserialize(s, typeof(FHandItem)));
-                        break;
-                    case 0x30:
-                        Functions.Add((FEditBlush) serial.Deserialize(s, typeof(FEditBlush)));
-                        break;
-                    case 0x31:
-                        Functions.Add((FNearClip) serial.Deserialize(s, typeof(FNearClip)));
-                        break;
-                    case 0x32:
-                        Functions.Add((FClothWet) serial.Deserialize(s, typeof(FClothWet)));
-                        break;
-                    case 0x33:
-                        Functions.Add((FLightRot) serial.Deserialize(s, typeof(FLightRot)));
-                        break;
-                    case 0x34:
-                        Functions.Add((FSceneFade) serial.Deserialize(s, typeof(FSceneFade)));
-                        break;
-                    case 0x35:
-                        Functions.Add((FToneTrans) serial.Deserialize(s, typeof(FToneTrans)));
-                        break;
-                    case 0x36:
-                        Functions.Add((FSaturate) serial.Deserialize(s, typeof(FSaturate)));
-                        break;
-                    case 0x37:
-                        Functions.Add((FFadeMode) serial.Deserialize(s, typeof(FFadeMode)));
-                        break;
-                    case 0x38:
-                        Functions.Add((FAutoBlink) serial.Deserialize(s, typeof(FAutoBlink)));
-                        break;
-                    case 0x39:
-                        Functions.Add((FPartsDisp) serial.Deserialize(s, typeof(FPartsDisp)));
-                        break;
-                    case 0x3A:
-                        Functions.Add((FTargetFlyingTime) serial.Deserialize(s, typeof(FTargetFlyingTime)));
-                        break;
-                    case 0x3B:
-                        Functions.Add((FCharacterSize) serial.Deserialize(s, typeof(FCharacterSize)));
-                        break;
-                    case 0x3C:
-                        Functions.Add((FCharacterHeightAdjust) serial.Deserialize(s, typeof(FCharacterHeightAdjust)));
-                        break;
-                    case 0x3D:
-                        Functions.Add((FItemAnim) serial.Deserialize(s, typeof(FItemAnim)));
-                        break;
-                    case 0x3E:
-                        Functions.Add((FCharacterPosAdjust) serial.Deserialize(s, typeof(FCharacterPosAdjust)));
-                        break;
-                    case 0x3F:
-                        Functions.Add((FSceneRot) serial.Deserialize(s, typeof(FSceneRot)));
-                        break;
-                    case 0x40:
-                        Functions.Add((FEditMotSmoothLen) serial.Deserialize(s, typeof(FEditMotSmoothLen)));
-                        break;
-                    case 0x41:
-                        Functions.Add((FPvBranchMode) serial.Deserialize(s, typeof(FPvBranchMode)));
-                        break;
-                    case 0x42:
-                        Functions.Add((FDataCameraStart) serial.Deserialize(s, typeof(FDataCameraStart)));
-                        break;
-                    case 0x43:
-                        Functions.Add((FMoviePlay) serial.Deserialize(s, typeof(FMoviePlay)));
-                        break;
-                    case 0x44:
-                        Functions.Add((FMovieDisplay) serial.Deserialize(s, typeof(FMovieDisplay)));
-                        break;
-                    case 0x45:
-                        Functions.Add((FWind) serial.Deserialize(s, typeof(FWind)));
-                        break;
-                    case 0x46:
-                        Functions.Add((FOsageStep) serial.Deserialize(s, typeof(FOsageStep)));
-                        break;
-                    case 0x47:
-                        Functions.Add((FOsageMoveCollider) serial.Deserialize(s, typeof(FOsageMoveCollider)));
-                        break;
-                    case 0x48:
-                        Functions.Add((FCharacterColor) serial.Deserialize(s, typeof(FCharacterColor)));
-                        break;
-                    case 0x49:
-                        Functions.Add((FSeEffect) serial.Deserialize(s, typeof(FSeEffect)));
-                        break;
-                    case 0x4A:
-                        Functions.Add((FEditMoveXYZ) serial.Deserialize(s, typeof(FEditMoveXYZ)));
-                        break;
-                    case 0x4B:
-                        Functions.Add((FEditEyelidAnim) serial.Deserialize(s, typeof(FEditEyelidAnim)));
-                        break;
-                    case 0x4C:
-                        Functions.Add((FEditInstrumentItem) serial.Deserialize(s, typeof(FEditInstrumentItem)));
-                        break;
-                    case 0x4D:
-                        Functions.Add((FEditMotionLoop) serial.Deserialize(s, typeof(FEditMotionLoop)));
-                        break;
-                    case 0x4E:
-                        Functions.Add((FEditExpression) serial.Deserialize(s, typeof(FEditExpression)));
-                        break;
-                    case 0x4F:
-                        Functions.Add((FEditEyeAnim) serial.Deserialize(s, typeof(FEditEyeAnim)));
-                        break;
-                    case 0x50:
-                        Functions.Add((FEditMouthAnim) serial.Deserialize(s, typeof(FEditMouthAnim)));
-                        break;
-                    case 0x51:
-                        Functions.Add((FEditCamera) serial.Deserialize(s, typeof(FEditCamera)));
-                        break;
-                    case 0x52:
-                        Functions.Add((FEditModeSelect) serial.Deserialize(s, typeof(FEditModeSelect)));
-                        break;
-                    default:
-                        Console.Write("Unknown opcode: 0x{0:X}\n", readFuncId);
-                        Console.Write("Last func: {0}\n", Functions[Functions.Count - 1]);
-                        foreach (var func in Functions)
-                            Console.Write("{0}\n", func);
-                        eof = true;
-                        return;
-                }
-            }
-        }
-
-        public void Serialize(Stream s, Endianness endianness, BinarySerializationContext context)
-        {
-            DataStream.WriteUInt32(s, Magic);
-            var serial = new BinarySerializer();
-            foreach (var function in Functions)
-                serial.Serialize(s, function);
-        }
 
         public override void BinSerialize(Stream s)
         {
@@ -500,7 +190,7 @@ namespace DIVALib.DSCUtils
     }
 
     [XmlRoot("dsc")]
-    [XmlInclude(typeof(DscFunc))]
+    [XmlInclude(typeof(DscFunction))]
     [XmlInclude(typeof(FEnd))]
     [XmlInclude(typeof(F2Time))]
     [XmlInclude(typeof(FMikuMove))]
@@ -586,7 +276,7 @@ namespace DIVALib.DSCUtils
     [XmlInclude(typeof(FEditModeSelect))]
     [Serializable]
     //F2nd dsc body
-    public class F2DscFile : DscContainer, IBinarySerializable
+    public class F2DscFile : DscContainer
     {
         [XmlAttribute("version")] [Ignore] public uint Magic = 0x43535650;
 
@@ -595,7 +285,7 @@ namespace DIVALib.DSCUtils
         [FieldOrder(1)] [FieldEndianness(Endianness.Big)] public F2Dscunk Unk;
 
         [FieldOrder(3)] [FieldEndianness(Endianness.Big)] [XmlIgnore] public F2DscEnd End;
-
+        /*
         public void Deserialize(Stream s, Endianness endianness, BinarySerializationContext context)
         {
             var serial = new BinarySerializer();
@@ -889,7 +579,7 @@ namespace DIVALib.DSCUtils
             while (s.Position < Header.byteSize)
                 DataStream.WriteInt32(s, 0);
         }
-
+        */
         public override void BinSerialize(Stream s)
         {
             var serializer = new BinarySerializer();

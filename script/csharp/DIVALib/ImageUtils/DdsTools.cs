@@ -14,12 +14,12 @@ namespace DIVALib.ImageUtils
         DXT3,
         DXT4,
         DXT5,
-        ATI2n
+        ATI2
     }
 
     public class DdsPixelFormat
     {
-        [Ignore] public DdsPFType Format => (DdsPFType) Enum.Parse(typeof(DdsPFType), CompressionName);
+        [Ignore] public DdsPFType Format => (DdsPFType) Enum.Parse(typeof(DdsPFType), CompressionName == "BC5U" ? "ATI2" : CompressionName);
 
         [FieldOrder(0)]                 public uint   Size = 32;
         [FieldOrder(1)]                 public uint   Flags;
@@ -92,7 +92,7 @@ namespace DIVALib.ImageUtils
                     RGBBitCount = 64;
                     RBitMask = 0xFF000000;
                     GBitMask = 0x00FF0000; break;
-                case DdsPFType.ATI2n:
+                case DdsPFType.ATI2:
                     Flags = DDPF_FOURCC;
                     CompressionName = "ATI2";
                     RGBBitCount = 16;
@@ -125,6 +125,8 @@ namespace DIVALib.ImageUtils
         }
 
         public DdsMipMap(int width, int height, int byteSize, IEnumerable<byte> data) : this(width, height, byteSize) => Data = data.ToList();
+
+        public override string ToString() => $"DDS Mip: {Width}x{Height} ({ByteSize})";
     }
 
     public class DdsFile
@@ -139,7 +141,7 @@ namespace DIVALib.ImageUtils
         [FieldOrder(4)]                                                                              public int             Width;
         [FieldOrder(5)]                                                                              public int             PitchOrLinearSize; // { get => Width * Height * (int)(PixelFormat.RGBBitCount / 8); set { } }
         [FieldOrder(6)]                                                                              public int             Depth = 0;
-        [FieldOrder(7)]                                                                              public int             MipMapCount = 0;
+        [FieldOrder(7)]                                                                              public int             MipMapCount = 1;
         [FieldOrder(8), FieldCount(11)]                                                              public uint[]          Reserved = new uint[11];
         [FieldOrder(9)]                                                                              public DdsPixelFormat  PixelFormat = new DdsPixelFormat();
         [FieldOrder(10)]                                                                             public int             Caps { get => DDSCAPS_TEXTURE | (MipMapCount > 1 ? DDSCAPS_MIPMAP | DDSCAPS_COMPLEX : 0); set { } }
@@ -198,5 +200,7 @@ namespace DIVALib.ImageUtils
             }
             Data = Data.GetRange(0, PitchOrLinearSize);
         }
+
+        public override string ToString() => $"DDS File ({MipMapCount} mips): {Width}x{Height} {PixelFormat.CompressionName} ({PitchOrLinearSize})";
     }
 }

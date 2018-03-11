@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using BinarySerialization;
 using DIVALib.IO;
 using DIVALib.FileBases;
 
@@ -12,8 +12,8 @@ namespace DIVALib.Databases
 {
     public class MeshEntry
     {
-        public ushort Id { get; set; }
-        public string Name { get; set; }
+        [FieldOrder(0)] public ushort Id { get; set; }
+        [FieldOrder(1)] public string Name { get; set; }
     }
 
     public class ObjectEntry

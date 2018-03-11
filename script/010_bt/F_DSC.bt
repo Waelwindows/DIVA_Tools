@@ -627,6 +627,13 @@ typedef struct {
     uint unk[24];
 } EDIT_CAMERA <name="EDIT - Camera", bgcolor=cBlue>;
 
+//0x6B
+typedef struct {
+    uint id <hidden=1>;
+    uint lyricID;
+    int unk2;
+} UNK1 <name="NAME", bgcolor=cBlue>;
+
 //0x4
 typedef struct {
     uint id <hidden=1>;
@@ -704,11 +711,14 @@ typedef struct {
             case 0x48: CHARA_COLOR ccolor; break;
             case 0x49: SE_EFFECT sefx; break;
             case 0x51: EDIT_CAMERA ecam; break;
+            case 0x6B: UNK1 unk; break;
+            case 0x6D: UNK1 unk; break;
             default: Printf("Unimplemented func_id (0x%X) at *0x%X offset \n", func_id, pos); isbreak = 1; break;
         }
     }
 } DSC_FILE <name="DSC File", open=true>;
 
 LittleEndian();
+//BigEndian();
 HEADER header;
 DSC_FILE dsc;

@@ -12,43 +12,145 @@
 //------------------------------------------------
 
 typedef struct{
+    char magic[3];
+    byte type; 
+    uint width;
+    uint height;
+    uint format;
+    uint id;
+    uint bytesize;
+    byte data[bytesize];
+} TXP_MIP <read=txpMipRead>;
+
+string txpMipRead(TXP_MIP& mip)
+{
+    string s;
+    SPrintf(s, "TXP2: %u x %u (%u bytes)", mip.width, mip.height, mip.bytesize);
+    return s;
+}
+
+typedef struct{
+    local int startOffset = FTell();
+    char magic[3];
+    byte type; 
+    uint mipCount;
+    uint ver <format=hex>;
+    local uint counter;
+    struct{
+        for (counter; counter < mipCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for(counter; counter < mipCount; ++counter)
+        {
+            FSeek(startOffset + OFF_TABLE.offset[counter]);
+            TXP_MIP mip;
+        }
+    } MIPS;
+} TXP_TEX <read=txpTexRead>;
+
+string txpTexRead(TXP_TEX& tex)
+{
+    string s;
+    SPrintf(s, "TXP4: %u mips (%s)", tex.mipCount, txpMipRead(tex.MIPS.mip[0]));
+    return s;
+}
+
+
+typedef struct {
+    char magic[3];
+    byte type;
+    uint texCount;
+    uint ver;
+    local uint counter;
+    local uint curPos = FTell() - 12;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            uint offset;
+        }
+    } OFF_TABLE <name="Offset Table">;
+    counter = 0;
+    struct{
+        for (counter; counter < texCount; ++counter)
+        {
+            FSeek(curPos + OFF_TABLE.offset[counter]);
+            TXP_TEX tex;
+        }
+    } TEX <name="Textures">;
+} TXP_FILE;
+
+typedef struct{
+    char magic[4];
+    uint size <name="Size?">;
+    uint tst;
+    uint ver <format=hex>;
+    uint tst;
+    uint tst;
+    uint tst;
+    uint tst;
+} ENRS;
+
+typedef struct{
     string texName;
 } TEXNAME <name="Texture Name">;
-
-typedef struct{
-    LittleEndian();
-    uint64 unk1;
-    uint64 unk2;
-    local uint counter;
-    for(counter = 0; counter < 15; counter++ ) {
-        FSeek(unk2 + 32 + (16 * counter));
-        uint texHash;
-        uint null <hidden=1>;
-        uint64 nameOffset;
-        FSeek(nameOffset + 32);
-        TEXNAME name<optimize=0>;
-    };
-} MTXI_10 <name="Chunk Information", comment="MTXI-10 mode">;
-
-typedef struct{
-    BigEndian();
-    uint unk1;
-    uint unk2;
-    uint unk3;
-    uint unk4;
-} MTXI_18 <name="Chunk Information", comment="MTXI-18 mode">;
 
 typedef struct{
     char magic[4] <name="File Magic", comment="Always MTXD">;
     uint byteSize <name="Bytesize">;
     uint size <name="Header Size">;'
     uint ver <name="File Version", format=hex>;
-    switch(ver){
-        case 0x10000000: MTXI_10 m10; break;
-        case 0x18000000: MTXI_18 m18; break;
-    };
+    uint tst;
+    uint subByteSize <name="Subfile Bytesize">;
+    uint tst;
+    uint tst;
 } MTXI_HEADER <name="File Header", bgcolor=cBlue>;
 
+typedef struct{
+    uint texID <format=hex>;
+    uint offset;
+    local uint curPos = FTell();
+    FSeek(offset);
+    string name;
+    FSeek(curPos);
+} MTXI_TEX_NAME <read=texNameRead>;
+
+string texNameRead(MTXI_TEX_NAME& texName)
+{
+    return texName.name;
+}
 
 LittleEndian();
 MTXI_HEADER hd;
+/*
+byte magic[4] <hidden=true>;
+FSkip(-4);
+if (magic[3] == 3)
+{
+    TXP_FILE file;
+} else if (magic[3] == 4)
+{
+    TXP_TEX tex;
+} else if (magic[3] == 2)
+{
+    TXP_MIP mip;
+}
+*/
+BigEndian();
+//ENRS en;
+uint texNameCount;
+uint ts;
+uint ts;
+uint ts;
+local uint i = 0;
+struct {
+for (i; i<texNameCount; ++i)
+{
+    MTXI_TEX_NAME name;
+}
+} TEXNAMES;
+
+//FSeek(400);

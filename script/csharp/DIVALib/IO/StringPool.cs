@@ -4,6 +4,8 @@ using System.Text;
 using System.IO;
 using System.Linq;
 
+using BinarySerialization;
+
 namespace DIVALib.IO
 {
     public class StringPool
@@ -15,28 +17,16 @@ namespace DIVALib.IO
 
         public uint StringAlignment
         {
-            get
-            {
-                return stringAlignment;
-            }
+            get => stringAlignment;
 
-            set
-            {
-                stringAlignment = value > 0 ? value : 1;
-            }
+            set => stringAlignment = value > 0 ? value : 1;
         }
 
         public uint GroupAlignment
         {
-            get
-            {
-                return groupAlignment;
-            }
+            get => groupAlignment;
 
-            set
-            {
-                groupAlignment = value > 0 ? value : 1;
-            }
+            set => groupAlignment = value > 0 ? value : 1;
         }
 
         public bool IsBigEndian { get; set; }
@@ -85,15 +75,9 @@ namespace DIVALib.IO
             }
         }
 
-        public static string Read(Stream source)
-        {
-            return Read(source, DataStream.ReadUInt32(source));
-        }
+        public static string Read(Stream source) => Read(source, DataStream.ReadUInt32(source));
 
-        public static string ReadBE(Stream source)
-        {
-            return Read(source, DataStream.ReadUInt32BE(source));
-        }
+        public static string ReadBE(Stream source) => Read(source, DataStream.ReadUInt32BE(source));
 
         public static string Read(Stream source, long position)
         {
@@ -107,8 +91,7 @@ namespace DIVALib.IO
 
         private class StringItem
         {
-            public readonly List<long> Positions = 
-                new List<long>();
+            public readonly List<long> Positions = new List<long>();
 
             public string Value;
             public int Group;

@@ -5,84 +5,149 @@ using DIVALib.Math;
 
 namespace DIVALib.DSCUtils
 {
-    /// <summary>
-    ///     Generic parent class for all Dsc functions
-    /// </summary>
-    [Serializable]
-    public abstract class DscFunc
+    public class DscFunction
     {
-        /// <summary>
-        ///     The number that specifies which function to be used
-        /// </summary>
-        [XmlIgnore] public int functionId;
+        [FieldOrder(0)] public int FunctionId;
+        [FieldOrder(1)]
+        [Subtype("FunctionId", 0x00, typeof(FEnd))]
+        [Subtype("FunctionId", 0x01, typeof(FTime))]
+        //[Subtype("FunctionId", 0x01, typeof(F2Time))]
+        [Subtype("FunctionId", 0x02, typeof(FMikuMove))]
+        [Subtype("FunctionId", 0x04, typeof(FMikuDisplay))]
+        [Subtype("FunctionId", 0x05, typeof(FMikuShadow))]
+        [Subtype("FunctionId", 0x06, typeof(FTarget))]
+        //[Subtype("FunctionId", 0x06, typeof(F2Target))]
+        [Subtype("FunctionId", 0x07, typeof(FSetMotion))]
+        [Subtype("FunctionId", 0x08, typeof(FSetPlaydata))]
+        [Subtype("FunctionId", 0x09, typeof(FEffect))]
+        [Subtype("FunctionId", 0x0A, typeof(FFadeinField))]
+        [Subtype("FunctionId", 0x0B, typeof(FEffectOff))]
+        [Subtype("FunctionId", 0x0C, typeof(FSetCamera))]
+        [Subtype("FunctionId", 0x0D, typeof(FDataCamera))]
+        [Subtype("FunctionId", 0x0E, typeof(FChangeField))]
+        [Subtype("FunctionId", 0x0F, typeof(FHideField))]
+        [Subtype("FunctionId", 0x10, typeof(FMoveField))]
+        [Subtype("FunctionId", 0x11, typeof(FFadeoutField))]
+        [Subtype("FunctionId", 0x12, typeof(FEyeAnim))]
+        [Subtype("FunctionId", 0x13, typeof(FMouthAnim))]
+        [Subtype("FunctionId", 0x14, typeof(FHandAnim))]
+        [Subtype("FunctionId", 0x15, typeof(FLookAnim))]
+        [Subtype("FunctionId", 0x16, typeof(FExpression))]
+        [Subtype("FunctionId", 0x17, typeof(FLookCamera))]
+        [Subtype("FunctionId", 0x18, typeof(FLyric))]
+        [Subtype("FunctionId", 0x19, typeof(FMusicPlay))]
+        [Subtype("FunctionId", 0x1A, typeof(FModeSelect))]
+        [Subtype("FunctionId", 0x1B, typeof(FEditMotion))]
+        [Subtype("FunctionId", 0x1C, typeof(FBarTimeSet))]
+        [Subtype("FunctionId", 0x1D, typeof(FShadowheight))]
+        [Subtype("FunctionId", 0x1E, typeof(FEditFace))]
+        [Subtype("FunctionId", 0x1F, typeof(FMoveCamera))]
+        [Subtype("FunctionId", 0x20, typeof(FPvEnd))]
+        [Subtype("FunctionId", 0x21, typeof(FShadowpos))]
+        [Subtype("FunctionId", 0x22, typeof(FEditLyric))]
+        [Subtype("FunctionId", 0x23, typeof(FEditTarget))]
+        [Subtype("FunctionId", 0x24, typeof(FEditMouth))]
+        [Subtype("FunctionId", 0x25, typeof(FSetCharacter))]
+        [Subtype("FunctionId", 0x26, typeof(FEditMove))]
+        [Subtype("FunctionId", 0x27, typeof(FEditShadow))]
+        [Subtype("FunctionId", 0x28, typeof(FEditEyelid))]
+        [Subtype("FunctionId", 0x29, typeof(FEditEye))]
+        [Subtype("FunctionId", 0x2A, typeof(FEditItem))]
+        [Subtype("FunctionId", 0x2B, typeof(FEditEffect))]
+        [Subtype("FunctionId", 0x2C, typeof(FEditDisp))]
+        [Subtype("FunctionId", 0x2D, typeof(FEditHandAnim))]
+        [Subtype("FunctionId", 0x2E, typeof(FAim))]
+        [Subtype("FunctionId", 0x2F, typeof(FHandItem))]
+        [Subtype("FunctionId", 0x30, typeof(FEditBlush))]
+        [Subtype("FunctionId", 0x31, typeof(FNearClip))]
+        [Subtype("FunctionId", 0x32, typeof(FClothWet))]
+        [Subtype("FunctionId", 0x33, typeof(FLightRot))]
+        [Subtype("FunctionId", 0x34, typeof(FSceneFade))]
+        [Subtype("FunctionId", 0x35, typeof(FToneTrans))]
+        [Subtype("FunctionId", 0x36, typeof(FSaturate))]
+        [Subtype("FunctionId", 0x37, typeof(FFadeMode))]
+        [Subtype("FunctionId", 0x38, typeof(FAutoBlink))]
+        [Subtype("FunctionId", 0x39, typeof(FPartsDisp))]
+        [Subtype("FunctionId", 0x3A, typeof(FTargetFlyingTime))]
+        [Subtype("FunctionId", 0x3B, typeof(FCharacterSize))]
+        [Subtype("FunctionId", 0x3C, typeof(FCharacterHeightAdjust))]
+        [Subtype("FunctionId", 0x3D, typeof(FItemAnim))]
+        [Subtype("FunctionId", 0x3E, typeof(FCharacterPosAdjust))]
+        [Subtype("FunctionId", 0x3F, typeof(FSceneRot))]
+        [Subtype("FunctionId", 0x40, typeof(FEditMotSmoothLen))]
+        [Subtype("FunctionId", 0x41, typeof(FPvBranchMode))]
+        [Subtype("FunctionId", 0x42, typeof(FDataCameraStart))]
+        [Subtype("FunctionId", 0x43, typeof(FMoviePlay))]
+        [Subtype("FunctionId", 0x44, typeof(FMovieDisplay))]
+        [Subtype("FunctionId", 0x45, typeof(FWind))]
+        [Subtype("FunctionId", 0x46, typeof(FOsageStep))]
+        [Subtype("FunctionId", 0x47, typeof(FOsageMoveCollider))]
+        [Subtype("FunctionId", 0x48, typeof(FCharacterColor))]
+        [Subtype("FunctionId", 0x49, typeof(FSeEffect))]
+        [Subtype("FunctionId", 0x4A, typeof(FEditMoveXYZ))]
+        [Subtype("FunctionId", 0x4B, typeof(FEditEyelidAnim))]
+        [Subtype("FunctionId", 0x4C, typeof(FEditInstrumentItem))]
+        [Subtype("FunctionId", 0x4D, typeof(FEditMotionLoop))]
+        [Subtype("FunctionId", 0x4E, typeof(FEditExpression))]
+        [Subtype("FunctionId", 0x4F, typeof(FEditEyeAnim))]
+        [Subtype("FunctionId", 0x50, typeof(FEditMouthAnim))]
+        [Subtype("FunctionId", 0x51, typeof(FEditCamera))]
+        [Subtype("FunctionId", 0x52, typeof(FEditModeSelect))]
+        public DscFunctionBase Function;
 
         /// <summary>
         ///     The string representation of a DSC function
         /// </summary>
         public override string ToString()
         {
-            return string.Format("[DSC Function] 0x{0:X}: {1}\n", functionId, GetType().Name);
+            return string.Format("[DSC Function] 0x{0:X}: {1}\n", FunctionId, Function.GetType().Name);
         }
     }
+
+    /// <summary>
+    ///     Generic parent class for all Dsc functions
+    /// </summary>
+    [Serializable]
+    public class DscFunctionBase { }
 
     /// <summary>
     ///     Ends the song
     /// </summary>
-    public class FEnd : DscFunc
+    public class FEnd : DscFunctionBase
     {
         public uint unk;
-
-        public FEnd()
-        {
-            functionId = 0x00;
-        }
     }
 
     /// <summary>
     ///     Makes the next function activate after set time
     /// </summary>
-    public class FTime : DscFunc
+    public class FTime : DscFunctionBase
     {
         [FieldOrder(0)] [FieldScale(100)] [SerializeAs(SerializedType.UInt4)] public double timeStamp;
-
-        public FTime()
-        {
-            functionId = 0x01;
-        }
     }
 
     /// <summary>
     ///     Makes the next function activate after set time
     /// </summary>
-    public class F2Time : DscFunc
+    public class F2Time : DscFunctionBase
     {
         [FieldOrder(0)] [FieldEndianness(Endianness.Big)] public uint timeStamp;
-
-        public F2Time()
-        {
-            functionId = 0x01;
-        }
     }
 
     /// <summary>
     ///     Moves the selected character to a specific position
     /// </summary>
-    public class FMikuMove : DscFunc
+    public class FMikuMove : DscFunctionBase
     {
         [FieldOrder(0)] public uint playerID;
 
         [FieldOrder(1)] public Vector3 position;
-
-        public FMikuMove()
-        {
-            functionId = 0x02;
-        }
     }
 
     /// <summary>
     ///     Changes the selected character's orientation
     /// </summary>
-    public class FMikuRotate : DscFunc
+    public class FMikuRotate : DscFunctionBase
     {
         /// <summary>
         ///     The character's rotation on the Z axis
@@ -91,44 +156,32 @@ namespace DIVALib.DSCUtils
         [FieldOrder(0)] public uint playerID;
 
         [FieldOrder(1)] public int orientation;
-
-        public FMikuRotate() => functionId = 0x03;
     }
         
     /// <summary>
     ///     Changes the selected character's display state
     /// </summary>
-    public class FMikuDisplay : DscFunc
+    public class FMikuDisplay : DscFunctionBase
     {
         [FieldOrder(0)] public uint playerID;
 
         [FieldOrder(1)] [SerializeAs(SerializedType.UInt4)] public bool state;
-
-        public FMikuDisplay()
-        {
-            functionId = 0x04;
-        }
     }
 
     /// <summary>
     ///     Changes the selected character's shadow display state
     /// </summary>
-    public class FMikuShadow : DscFunc
+    public class FMikuShadow : DscFunctionBase
     {
         [FieldOrder(0)] public uint playerID;
 
         [FieldOrder(1)] [SerializeAs(SerializedType.UInt4)] public bool state;
-
-        public FMikuShadow()
-        {
-            functionId = 0x05;
-        }
     }
 
     /// <summary>
     ///     Creates a new target with the specified paramaters
     /// </summary>
-    public class FTarget : DscFunc
+    public class FTarget : DscFunctionBase
     {
         public enum EType
         {
@@ -168,17 +221,12 @@ namespace DIVALib.DSCUtils
         [FieldOrder(8)] [SerializeAs(SerializedType.Int4)] public double TimeOut;
 
         [FieldOrder(9)] public int Pad;
-        
-        public FTarget()
-        {
-            functionId = 0x06;
-        }
     }
 
     /// <summary>
     ///     Creates a new target with the specified paramaters
     /// </summary>
-    public class F2Target : DscFunc
+    public class F2Target : DscFunctionBase
     {
         public enum EType
         {
@@ -213,15 +261,10 @@ namespace DIVALib.DSCUtils
         [FieldOrder(9)] public int timeOut;
         [FieldOrder(10)] public int unk;
         [FieldOrder(11)] public int pad;
-
-        public F2Target()
-        {
-            functionId = 0x06;
-        }
     }
 
     /// <summary> Plays an animation on the character </summary>
-    public class FSetMotion : DscFunc
+    public class FSetMotion : DscFunctionBase
     {
         /// <summary> Which animation to play </summary>
         [FieldOrder(1)] public uint animID;
@@ -234,137 +277,87 @@ namespace DIVALib.DSCUtils
 
         /// <summary> Which frame the animation should start on </summary>
         [FieldOrder(2)] [FieldScale(100)] [SerializeAs(SerializedType.Int4)] public double time;
-
-        public FSetMotion()
-        {
-            functionId = 0x07;
-        }
     }
 
     /// <summary> Unknown </summary>
-    public class FSetPlaydata : DscFunc
+    public class FSetPlaydata : DscFunctionBase
     {
         /// <summary> ??? </summary>
         [FieldOrder(1)] public uint mode;
 
         /// <summary> Which player to affect </summary>
         [FieldOrder(0)] public uint playerID;
-
-        public FSetPlaydata()
-        {
-            functionId = 0x08;
-        }
     }
 
     /// <summary> Displays an Effect? </summary>
     /// <remark> From old DIVA, Doesn't do anything in new games </remark>
-    public class FEffect : DscFunc
+    public class FEffect : DscFunctionBase
     {
         /// <summary> ???? </summary>
         [FieldOrder(0)] public Vector3 unk1;
 
         /// <summary> ???? </summary>
         [FieldOrder(1)] public Vector3 unk2;
-
-        public FEffect()
-        {
-            functionId = 0x09;
-        }
     }
 
     /// <summary> ??? </summary>
     /// <remark> From old DIVA, Doesn't do anything in new games </remark>
-    public class FFadeinField : DscFunc
+    public class FFadeinField : DscFunctionBase
     {
-        public FFadeinField()
-        {
-            functionId = 0x0A;
-        }
     }
 
     /// <summary> Hides an Effect? </summary>
     /// <remark> From old DIVA, Doesn't do anything in new games </remark>
-    public class FEffectOff : DscFunc
+    public class FEffectOff : DscFunctionBase
     {
         /// <summary> ???? </summary>
         [FieldOrder(0)] public Vector3 unk1;
 
         /// <summary> ???? </summary>
         [FieldOrder(1)] public Vector3 unk2;
-
-        public FEffectOff()
-        {
-            functionId = 0x0B;
-        }
     }
 
     /// <summary>  ?? </summary>
     /// <remark> Something with the cameras. Haven't looked into it </remark>
-    public class FSetCamera : DscFunc
+    public class FSetCamera : DscFunctionBase
     {
-        public FSetCamera()
-        {
-            functionId = 0x0C;
-        }
     }
 
     /// <summary> Works the same as FSetCamera? </summary>
-    public class FDataCamera : DscFunc
+    public class FDataCamera : DscFunctionBase
     {
-        public FDataCamera()
-        {
-            functionId = 0x0D;
-        }
     }
 
     /// <summary> Changes the stage </summary>
-    public class FChangeField : DscFunc
+    public class FChangeField : DscFunctionBase
     {
         /// <summary> New stage to set. goes by pv_db / pv_field </summary>
         [FieldOrder(0)] public uint fieldID;
-
-        public FChangeField()
-        {
-            functionId = 0x0E;
-        }
     }
 
     /// <summary> Hides the field </summary>
     /// <remark> Haven't looked into it </remark>
-    public class FHideField : DscFunc
+    public class FHideField : DscFunctionBase
     {
         /// <summary> Visibility toggle? </summary>
         [FieldOrder(0)] public uint state;
-
-        public FHideField()
-        {
-            functionId = 0x0F;
-        }
     }
 
     /// <summary> Moves the field </summary>
     /// <remark> Haven't looked into it </remark>
-    public class FMoveField : DscFunc
+    public class FMoveField : DscFunctionBase
     {
-        public FMoveField()
-        {
-            functionId = 0x10;
-        }
     }
 
     /// <summary> Acts the same as FFadeInField </summary>
     /// <remark> From old DIVA, Doesn't do anything in new games </remark>
-    public class FFadeoutField : DscFunc
+    public class FFadeoutField : DscFunctionBase
     {
-        public FFadeoutField()
-        {
-            functionId = 0x11;
-        }
     }
 
     /// <summary> Plays an animation on the character's eyes </summary>
     /// <remark> Only does blinking? </remark>
-    public class FEyeAnim : DscFunc
+    public class FEyeAnim : DscFunctionBase
     {
         /// <summary> Which animation to play? </summary>
         [FieldOrder(1)] public uint animID;
@@ -374,16 +367,11 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ???? </summary>
         [FieldOrder(2)] public uint unk;
-
-        public FEyeAnim()
-        {
-            functionId = 0x12;
-        }
     }
 
     /// <summary> Plays mouth animations </summary>
     /// <remark> Isn't completely researched </remark>
-    public class FMouthAnim : DscFunc
+    public class FMouthAnim : DscFunctionBase
     {
         /// <summary> Which animation to play? </summary>
         [FieldOrder(1)] public uint animID;
@@ -399,15 +387,10 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ??? </summary>
         [FieldOrder(2)] public int unk;
-
-        public FMouthAnim()
-        {
-            functionId = 0x13;
-        }
     }
 
     /// <summary> Hand motions, but haven't looked much into it </summary>
-    public class FHandAnim : DscFunc
+    public class FHandAnim : DscFunctionBase
     {
         /// <summary> Which animation to play? </summary>
         [FieldOrder(1)] public uint animID;
@@ -423,27 +406,17 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ??? </summary>
         [FieldOrder(2)] public int unk;
-
-        public FHandAnim()
-        {
-            functionId = 0x14;
-        }
     }
 
     /// <summary> Makes the character move their eyes, but haven't looked much into it </summary>
-    public class FLookAnim : DscFunc
+    public class FLookAnim : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FLookAnim()
-        {
-            functionId = 0x15;
-        }
     }
 
     /// <summary> Expessions for the face, but haven't looked much into it </summary>
-    public class FExpression : DscFunc
+    public class FExpression : DscFunctionBase
     {
         /// <summary> Which expression to play </summary>
         [FieldOrder(1)] public uint expID;
@@ -456,70 +429,46 @@ namespace DIVALib.DSCUtils
 
         /// <summary> When the animation should start </summary>
         [FieldOrder(2)] public int start;
-
-        public FExpression()
-        {
-            functionId = 0x16;
-        }
     }
 
     /// <summary> No idea what this is for </summary>
-    public class FLookCamera : DscFunc
+    public class FLookCamera : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FLookCamera()
-        {
-            functionId = 0x17;
-        }
     }
 
     /// <summary> Displays a lyric with the specified color </summary>
-    public class FLyric : DscFunc
+    public class FLyric : DscFunctionBase
     {
         /// <summary> "Color per byte" </summary>
         [FieldOrder(1)] public uint color;
 
         /// <summary> "Which lyric to display, Goes by pv_db" </summary>
         [FieldOrder(0)] public uint lyricID;
-
-        public FLyric()
-        {
-            functionId = 0x18;
-        }
     }
 
     /// <summary> Plays the music </summary>
-    public class FMusicPlay : DscFunc
+    public class FMusicPlay : DscFunctionBase
     {
-        public FMusicPlay()
-        {
-            functionId = 0x19;
-        }
     }
 
     /// <summary> Sets the mode. e.g. Chance Time </summary>
     /// <remark> 4 in a row makes it playable in every difficulty </remark>
-    public class FModeSelect : DscFunc
+    public class FModeSelect : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(1)] public int modeID;
 
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint unk;
-
-        public FModeSelect()
-        {
-            functionId = 0x1A;
-        }
     }
 
     /// <summary>
     ///     This doesn't work anymore. It was used in PSP's edit mode and in FT. However, the speed values still work.
     ///     The motion ID is unfunctional
     /// </summary>
-    public class FEditMotion : DscFunc
+    public class FEditMotion : DscFunctionBase
     {
         /// <summary> Which animation to play </summary>
         [FieldOrder(0)] public uint animID;
@@ -529,117 +478,74 @@ namespace DIVALib.DSCUtils
 
         /// <summary> When to start the animation </summary>
         [FieldOrder(1)] public uint start;
-
-        public FEditMotion()
-        {
-            functionId = 0x1B;
-        }
     }
 
     /// <summary>
     ///     First 4 bytes = bpm. This set the actual bpm number rather than time, like CD 00 00 00, which is 205 bpm.
     ///     This doesn't do anything in Sega's dscs because of the bpm time in the notes.
     /// </summary>
-    public class FBarTimeSet : DscFunc
+    public class FBarTimeSet : DscFunctionBase
     {
         /// <summary> Actual BPM value </summary>
         [FieldOrder(0)] public int bpm;
 
         /// <summary> The speed of the notes </summary>
         [FieldOrder(1)] public int noteSpeed;
-
-        public FBarTimeSet()
-        {
-            functionId = 0x1C;
-        }
     }
 
     /// <summary> ???? </summary>
-    public class FShadowheight : DscFunc
+    public class FShadowheight : DscFunctionBase
     {
         /// <summary> ???? </summary>
         [FieldOrder(0)] public uint unk1;
 
         /// <summary> ???? </summary>
         [FieldOrder(1)] public uint unk2;
-
-        public FShadowheight()
-        {
-            functionId = 0x1D;
-        }
     }
 
     /// <summary> Haven't looked into this </summary>
-    public class FEditFace : DscFunc
+    public class FEditFace : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditFace()
-        {
-            functionId = 0x1E;
-        }
     }
 
     /// <summary> Moves camera. Doesn't reposition around character </summary>
     /// <remark> Values Not Researched </remark>
-    public class FMoveCamera : DscFunc
+    public class FMoveCamera : DscFunctionBase
     {
-        public FMoveCamera()
-        {
-            functionId = 0x1F;
-        }
     }
 
     /// <summary> The point where the song ends </summary>
-    public class FPvEnd : DscFunc
+    public class FPvEnd : DscFunctionBase
     {
         /// <summary> Doesn't really exist, made up to please Deserializing </summary>
         [FieldOrder(0)] public uint pad;
-
-        public FPvEnd()
-        {
-            functionId = 0x20;
-        }
     }
 
     /// <summary> ???? </summary>
-    public class FShadowpos : DscFunc
+    public class FShadowpos : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FShadowpos()
-        {
-            functionId = 0x21;
-        }
     }
 
     /// <summary>   </summary>
     /// <remark> From old DIVA, Doesn't do anything in new games </remark>
-    public class FEditLyric : DscFunc
+    public class FEditLyric : DscFunctionBase
     {
-        public FEditLyric()
-        {
-            functionId = 0x22;
-        }
     }
 
     /// <summary>   </summary>
     /// <remark>  </remark>
-    public class FEditTarget : DscFunc
+    public class FEditTarget : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditTarget()
-        {
-            functionId = 0x23;
-        }
     }
 
     /// <summary> Edit variant of FMouthAnim </summary>
-    public class FEditMouth : DscFunc
+    public class FEditMouth : DscFunctionBase
     {
         /// <summary> The animation speed, disabled if -1  </summary>
         [FieldOrder(2)] public int speed;
@@ -649,199 +555,119 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ??? </summary>
         [FieldOrder(0)] public int unk;
-
-        public FEditMouth()
-        {
-            functionId = 0x24;
-        }
     }
 
     /// <summary> Sets the character for edit functions </summary>
-    public class FSetCharacter : DscFunc
+    public class FSetCharacter : DscFunctionBase
     {
         /// <summary> Which player to affect </summary>
         [FieldOrder(0)] public int playerID;
-
-        public FSetCharacter()
-        {
-            functionId = 0x25;
-        }
     }
 
     /// <summary> Edit variant of FMikuMove </summary>
-    public class FEditMove : DscFunc
+    public class FEditMove : DscFunctionBase
     {
         /// <summary> New position </summary>
         [FieldOrder(0)] public Vector3 position;
-
-        public FEditMove()
-        {
-            functionId = 0x26;
-        }
     }
 
     /// <summary> Edit variant of FMikuShadow </summary>
-    public class FEditShadow : DscFunc
+    public class FEditShadow : DscFunctionBase
     {
         /// <summary> Visiblity toggle </summary>
         [FieldOrder(0)] public uint state;
-
-        public FEditShadow()
-        {
-            functionId = 0x27;
-        }
     }
 
     /// <summary> Haven't looked into this </summary>
-    public class FEditEyelid : DscFunc
+    public class FEditEyelid : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditEyelid()
-        {
-            functionId = 0x28;
-        }
     }
 
     /// <summary> Same as above </summary>
-    public class FEditEye : DscFunc
+    public class FEditEye : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditEye()
-        {
-            functionId = 0x29;
-        }
     }
 
     /// <summary> First 4 bytes = I guess what hand it goes on for the player. For the player, it goes by SET_CHARA </summary>
-    public class FEditItem : DscFunc
+    public class FEditItem : DscFunctionBase
     {
         /// <summary> Which item to use, Goes by ???? </summary>
         [FieldOrder(0)] public int itemID;
-
-        public FEditItem()
-        {
-            functionId = 0x2A;
-        }
     }
 
     /// <summary> EDIT Function: Sets an effect </summary>
-    public class FEditEffect : DscFunc
+    public class FEditEffect : DscFunctionBase
     {
         /// <summary> Which effect to display </summary>
         [FieldOrder(0)] public int fxID;
 
         /// <summary> How fast should the effect play </summary>
         [FieldOrder(1)] public int speed;
-
-        public FEditEffect()
-        {
-            functionId = 0x2B;
-        }
     }
 
     /// <summary> Basically MIKU_DISP with 4 less bytes </summary>
-    public class FEditDisp : DscFunc
+    public class FEditDisp : DscFunctionBase
     {
         /// <summary> Visibility toggle </summary>
         [FieldOrder(0)] public uint state;
-
-        public FEditDisp()
-        {
-            functionId = 0x2C;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FEditHandAnim : DscFunc
+    public class FEditHandAnim : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditHandAnim()
-        {
-            functionId = 0x2D;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FAim : DscFunc
+    public class FAim : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FAim()
-        {
-            functionId = 0x2E;
-        }
     }
 
     /// <summary> I've looked into it, but I forgot what they were </summary>
-    public class FHandItem : DscFunc
+    public class FHandItem : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FHandItem()
-        {
-            functionId = 0x2F;
-        }
     }
 
     /// <summary> First 4 bytes = Blush ID </summary>
-    public class FEditBlush : DscFunc
+    public class FEditBlush : DscFunctionBase
     {
         /// <summary> Which blush to display </summary>
         [FieldOrder(0)] public int blushID;
-
-        public FEditBlush()
-        {
-            functionId = 0x30;
-        }
     }
 
     /// <summary> Sets the camera's near clip </summary>
     /// <remark> Speculation! </remark>
-    public class FNearClip : DscFunc
+    public class FNearClip : DscFunctionBase
     {
         /// <summary> The new near clip value </summary>
         [FieldOrder(0)] public uint value;
-
-        public FNearClip()
-        {
-            functionId = 0x31;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FClothWet : DscFunc
+    public class FClothWet : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FClothWet()
-        {
-            functionId = 0x32;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FLightRot : DscFunc
+    public class FLightRot : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FLightRot()
-        {
-            functionId = 0x33;
-        }
     }
 
     /// <summary> First 4 bytes = Fade speed </summary>
-    public class FSceneFade : DscFunc
+    public class FSceneFade : DscFunctionBase
     {
         /// <summary> Fade's Blue Channel </summary>
         [FieldOrder(5)] public uint blue;
@@ -860,118 +686,73 @@ namespace DIVALib.DSCUtils
 
         /// <summary> How fast the fade should play </summary>
         [FieldOrder(0)] public uint speed;
-
-        public FSceneFade()
-        {
-            functionId = 0x34;
-        }
     }
 
     /// <summary> This does load, but always crashes when the function starts. It was used in FT </summary>
-    public class FToneTrans : DscFunc
+    public class FToneTrans : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FToneTrans()
-        {
-            functionId = 0x35;
-        }
     }
 
     /// <summary> De/saturates the screen </summary>
-    public class FSaturate : DscFunc
+    public class FSaturate : DscFunctionBase
     {
         /// <summary> Saturation amount </summary>
         [FieldOrder(0)] public uint amount;
-
-        public FSaturate()
-        {
-            functionId = 0x36;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FFadeMode : DscFunc
+    public class FFadeMode : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FFadeMode()
-        {
-            functionId = 0x37;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FAutoBlink : DscFunc
+    public class FAutoBlink : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FAutoBlink()
-        {
-            functionId = 0x38;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FPartsDisp : DscFunc
+    public class FPartsDisp : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FPartsDisp()
-        {
-            functionId = 0x39;
-        }
     }
 
     /// <summary> Sets the BPM for every incoming note </summary>
     /// <remark>  FT Exclusive </remark>
-    public class FTargetFlyingTime : DscFunc
+    public class FTargetFlyingTime : DscFunctionBase
     {
         /// <summary> New BPM value </summary>
         [FieldOrder(0)] public uint bpm;
-
-        public FTargetFlyingTime()
-        {
-            functionId = 0x3A;
-        }
     }
 
     /// <summary> Sets the character's scaling </summary>
-    public class FCharacterSize : DscFunc
+    public class FCharacterSize : DscFunctionBase
     {
         /// <summary> Which player to affect </summary>
         [FieldOrder(0)] public int playerID;
 
         /// <summary> New size </summary>
         [FieldOrder(1)] public uint size;
-
-        public FCharacterSize()
-        {
-            functionId = 0x3B;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FCharacterHeightAdjust : DscFunc
+    public class FCharacterHeightAdjust : DscFunctionBase
     {
         /// <summary> Which player to affect </summary>
         [FieldOrder(0)] public int playerID;
 
         /// <summary> New Height </summary>
         [FieldOrder(1)] public uint height;
-
-        public FCharacterHeightAdjust()
-        {
-            functionId = 0x3C;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FItemAnim : DscFunc
+    public class FItemAnim : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
@@ -984,140 +765,85 @@ namespace DIVALib.DSCUtils
 
         /// <summary> DESC </summary>
         [FieldOrder(3)] public uint var3;
-
-        public FItemAnim()
-        {
-            functionId = 0x3D;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FCharacterPosAdjust : DscFunc
+    public class FCharacterPosAdjust : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FCharacterPosAdjust()
-        {
-            functionId = 0x3E;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FSceneRot : DscFunc
+    public class FSceneRot : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FSceneRot()
-        {
-            functionId = 0x3F;
-        }
     }
 
     /// <summary>   </summary>
     /// <remark> Not Researched </remark>
-    public class FEditMotSmoothLen : DscFunc
+    public class FEditMotSmoothLen : DscFunctionBase
     {
         /// <summary> ??? </summary>
         [FieldOrder(0)] public uint unk1;
 
         /// <summary> ??? </summary>
         [FieldOrder(1)] public uint unk2;
-
-        public FEditMotSmoothLen()
-        {
-            functionId = 0x40;
-        }
     }
 
     /// <summary> Sets the mode for the rest of the dsc </summary>
-    public class FPvBranchMode : DscFunc
+    public class FPvBranchMode : DscFunctionBase
     {
         /// <summary> Which mode to use </summary>
         [FieldOrder(0)] public uint mode;
-
-        public FPvBranchMode()
-        {
-            functionId = 0x41;
-        }
     }
 
     /// <summary> I guess starts the camera </summary>
-    public class FDataCameraStart : DscFunc
+    public class FDataCameraStart : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FDataCameraStart()
-        {
-            functionId = 0x42;
-        }
     }
 
     /// <summary> Plays the movie, but doesn't display it </summary>
-    public class FMoviePlay : DscFunc
+    public class FMoviePlay : DscFunctionBase
     {
         /// <summary> Play movie? </summary>
         [FieldOrder(0)] [SerializeAs(SerializedType.UInt4)] public bool state;
-
-        public FMoviePlay()
-        {
-            functionId = 0x43;
-        }
     }
 
     /// <summary> Displays the movie, but doesn't play it </summary>
-    public class FMovieDisplay : DscFunc
+    public class FMovieDisplay : DscFunctionBase
     {
         /// <summary> Display movie? </summary>
         [FieldOrder(0)] [SerializeAs(SerializedType.UInt4)] public bool state;
-
-        public FMovieDisplay()
-        {
-            functionId = 0x44;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FWind : DscFunc
+    public class FWind : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FWind()
-        {
-            functionId = 0x45;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FOsageStep : DscFunc
+    public class FOsageStep : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FOsageStep()
-        {
-            functionId = 0x46;
-        }
     }
 
     /// <summary> Moves the hair colliders </summary>
     /// <remark> Speculation! </remark>
-    public class FOsageMoveCollider : DscFunc
+    public class FOsageMoveCollider : DscFunctionBase
     {
         /// <summary> New position for the colliders </summary>
         [FieldOrder(0)] public Vector3 position;
-
-        public FOsageMoveCollider()
-        {
-            functionId = 0x47;
-        }
     }
 
     /// <summary> First 4 bytes = Player ID </summary>
-    public class FCharacterColor : DscFunc
+    public class FCharacterColor : DscFunctionBase
     {
         /// <summary> Alpha channel </summary>
         [FieldOrder(4)] public byte a;
@@ -1133,28 +859,18 @@ namespace DIVALib.DSCUtils
 
         /// <summary> Red channel </summary>
         [FieldOrder(1)] public byte r;
-
-        public FCharacterColor()
-        {
-            functionId = 0x48;
-        }
     }
 
     /// <summary> Plays the bonus effect sounds, but I haven't looked into the values </summary>
-    public class FSeEffect : DscFunc
+    public class FSeEffect : DscFunctionBase
     {
         /// <summary> Which sound to play </summary>
         [FieldOrder(0)] public uint sfxID;
-
-        public FSeEffect()
-        {
-            functionId = 0x49;
-        }
     }
 
     /// <summary> Moves all 3 characters </summary>
     /// <remark> Speculation! </remark>
-    public class FEditMoveXYZ : DscFunc
+    public class FEditMoveXYZ : DscFunctionBase
     {
         /// <summary> Player 1's new position </summary>
         [FieldOrder(0)] public Vector3 player1Position;
@@ -1164,15 +880,10 @@ namespace DIVALib.DSCUtils
 
         /// <summary> Player 3's new position </summary>
         [FieldOrder(2)] public Vector3 player3Position;
-
-        public FEditMoveXYZ()
-        {
-            functionId = 0x4A;
-        }
     }
 
     /// <summary> No idea </summary>
-    public class FEditEyelidAnim : DscFunc
+    public class FEditEyelidAnim : DscFunctionBase
     {
         /// <summary> ??? </summary>
         [FieldOrder(0)] public uint unk1;
@@ -1182,31 +893,21 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ??? </summary>
         [FieldOrder(2)] public uint unk3;
-
-        public FEditEyelidAnim()
-        {
-            functionId = 0x4B;
-        }
     }
 
     /// <summary> Sets the instrument the character uses </summary>
-    public class FEditInstrumentItem : DscFunc
+    public class FEditInstrumentItem : DscFunctionBase
     {
         /// <summary> ??? </summary>
         [FieldOrder(0)] public int unk;
 
         /// <summary> ??? </summary>
         [FieldOrder(1)] public uint unk1;
-
-        public FEditInstrumentItem()
-        {
-            functionId = 0x4C;
-        }
     }
 
     /// <summary> Loops the motion the player uses </summary>
     /// <remark>  Has to have a FSetMotion after it </remark>
-    public class FEditMotionLoop : DscFunc
+    public class FEditMotionLoop : DscFunctionBase
     {
         /// <summary> Which animation to play </summary>
         [FieldOrder(1)] public uint animID;
@@ -1219,15 +920,10 @@ namespace DIVALib.DSCUtils
 
         /// <summary> Which frame the animation should start on </summary>
         [FieldOrder(2)] [FieldScale(100)] [SerializeAs(SerializedType.Int4)] public double time;
-
-        public FEditMotionLoop()
-        {
-            functionId = 0x4D;
-        }
     }
 
     /// <summary> Edit variant of FExpression </summary>
-    public class FEditExpression : DscFunc
+    public class FEditExpression : DscFunctionBase
     {
         /// <summary> Which expression to play </summary>
         [FieldOrder(0)] public uint expID;
@@ -1237,27 +933,17 @@ namespace DIVALib.DSCUtils
 
         /// <summary> When the animation should start </summary>
         [FieldOrder(1)] public int start;
-
-        public FEditExpression()
-        {
-            functionId = 0x4E;
-        }
     }
 
     /// <summary> Basically EYE_ANIM with less values </summary>
-    public class FEditEyeAnim : DscFunc
+    public class FEditEyeAnim : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditEyeAnim()
-        {
-            functionId = 0x4F;
-        }
     }
 
     /// <summary> Edit variant of FMouthAnim </summary>
-    public class FEditMouthAnim : DscFunc
+    public class FEditMouthAnim : DscFunctionBase
     {
         /// <summary> Which animation to play? </summary>
         [FieldOrder(0)] public uint animID;
@@ -1271,14 +957,11 @@ namespace DIVALib.DSCUtils
         /// <summary> ??? </summary>
         [FieldOrder(1)] public int unk;
 
-        public FEditMouthAnim()
-        {
-            functionId = 0x50;
-        }
+
     }
 
     /// <summary> Acts like FMoveCamera but repositions around the player </summary>
-    public class FEditCamera : DscFunc
+    public class FEditCamera : DscFunctionBase
     {
         /// <summary> ??? </summary>
         [FieldOrder(0)] public Vector3 position;
@@ -1303,23 +986,13 @@ namespace DIVALib.DSCUtils
 
         /// <summary> ??? </summary>
         [FieldOrder(7)] public Vector3 unk7;
-
-        public FEditCamera()
-        {
-            functionId = 0x51;
-        }
     }
 
     /// <summary> Edit variant of FModeSelect </summary>
     /// <remark> Does nothing </remark>
-    public class FEditModeSelect : DscFunc
+    public class FEditModeSelect : DscFunctionBase
     {
         /// <summary> DESC </summary>
         [FieldOrder(0)] public uint var;
-
-        public FEditModeSelect()
-        {
-            functionId = 0x52;
-        }
     }
 }

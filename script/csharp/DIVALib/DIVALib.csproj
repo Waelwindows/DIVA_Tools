@@ -130,11 +130,13 @@
   <ItemGroup>
     <Compile Include="Archives\ArchiveBase.cs" />
     <Compile Include="Archives\FarcArchive.cs" />
+    <Compile Include="Crypto\Divafile.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />
     <Compile Include="DSCUtils\DscFunc.cs" />
     <Compile Include="DSCUtils\DscOp.cs" />
+    <Compile Include="ImageUtils\SprTools.cs" />
     <Compile Include="ImageUtils\DdsTools.cs" />
     <Compile Include="ImageUtils\TxpTools.cs" />
     <Compile Include="IO\DataPool.cs" />

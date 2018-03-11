@@ -10,7 +10,8 @@ namespace TXP2DDS
     {
         static void Main(string[] args)
         {
-            if (args.Length < 1)
+            /*
+            if (args.Length == 0)
             {
                 var helpstr = @"TXP2DDS
 ==================
@@ -27,12 +28,16 @@ Usage:
     TXP2DDS [source]";
                 Console.WriteLine(helpstr);
                 Console.ReadLine();
+                return;
             }
             var dir = args[0];
-
+            
             if (!File.Exists(args[0]) && !File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
                 throw new IOException("file doesn't exist.");
 
+            */
+            var dir = @"D:\QuickBMS\nez_txp";
+            
             if (File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
             {
                 var ddsPaths = new List<string>();
@@ -72,17 +77,25 @@ Usage:
             }
         }
 
+        private static void OnMemberDeserialized(object sender, MemberSerializedEventArgs e)
+        {
+            Console.CursorLeft = e.Context.Depth * 4;
+            var value = e.Value ?? "null";
+            Console.WriteLine("D-End: {0} ({1}) @ {2}", e.MemberName, value, e.Offset);
+        }
+
         public static void TxpToDds(Stream s, string path)
 		{
 		    var serializer = new BinarySerializer();
-		    var atlas = serializer.Deserialize<TxpTextureAtlas>(s);
+		    serializer.MemberDeserialized += OnMemberDeserialized;
+            var atlas = serializer.Deserialize<TxpTextureAtlas>(s);
             atlas.SetTextures(s);
 		    var ddsTex = (List<DdsFile>) atlas;
 		    var texPath = $"{path.Substring(0, path.Length - 4)}_tex";
 		    for (var i = 0; i < ddsTex.Count; ++i)
 		    {
 		        using (var save = new FileStream($"{texPath}{i:00}.dds", FileMode.Create)) serializer.Serialize(save, ddsTex[i]);
-		    }
+		    }       
 		}
 
         public static void DdsToTxp(Stream s, string path)

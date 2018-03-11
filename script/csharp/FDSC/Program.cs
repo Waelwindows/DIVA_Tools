@@ -1,13 +1,34 @@
 ﻿using System;
 using System.IO;
+using BinarySerialization;
 using DIVALib.DSCUtils;
 
 namespace FDSC
 {
+
 	class Program
 	{
-		static void Main(string[] args)
+	    private static void OnMemberDeserialized(object sender, MemberSerializedEventArgs e)
+	    {
+	        Console.CursorLeft = e.Context.Depth * 4;
+	        var value = e.Value ?? "null";
+	        Console.WriteLine("D-End: {0} ({1}) @ {2}", e.MemberName, value, e.Offset);
+	    }
+
+        static void Main(string[] args)
 		{
+#if DEBUG
+		    using (var file = new FileStream(@"D:\DIVATools\test_files\dsc\pv_609_extreme.dsc", FileMode.Open))
+		    {
+		        var serial = new BinarySerializer();
+		        //var dsc = serial.Deserialize<DSC>(file);
+		        //serial.MemberDeserialized += OnMemberDeserialized;
+                //file.Position += 4;
+		        var fst = serial.Deserialize<DscFile1>(file);
+                Console.WriteLine("tst");
+		    }
+		    return;
+#endif
             if (args.Length < 1)
             {
                 Console.WriteLine("FDSC Tool");
@@ -48,7 +69,8 @@ namespace FDSC
 			using (var file = new FileStream(path, FileMode.Open))
 			{
 				Console.Write("Beginning DSC Deserialization\n");
-				var dsc = DSC.Deserialize(file);
+			    var serial = new BinarySerializer();
+			    var dsc = serial.Deserialize<DSC>(file);
 				Console.Clear();
 				Console.WriteLine($"DSC has {dsc.File.Functions.Count} functions.");
 				Console.Write("DSC Deserialization Successful\n");

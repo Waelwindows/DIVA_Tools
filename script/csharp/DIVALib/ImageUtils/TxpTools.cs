@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BinarySerialization;
-using DIVALib.DSCUtils;
-using DIVALib.IO;
 
 namespace DIVALib.ImageUtils
 {
@@ -63,8 +61,10 @@ namespace DIVALib.ImageUtils
 
             start = RemapIndex(start);
             end = end == 0 ? str.Length : RemapIndex(end);
-            var rslt = str.Substring(start, end);
-            return rslt;
+
+            var rslt = str.Substring(start, end).Where((c, i) => i % step == 0);
+            rslt = step < 0 ? rslt.Reverse() : rslt;
+            return new string(rslt.ToArray());
         }
     }
 
@@ -77,10 +77,10 @@ namespace DIVALib.ImageUtils
             DXT1 = 6,
             DXT3 = 7,
             DXT5 = 9,
-            ATI2n = 11
+            ATI2 = 11
         }
 
-        public TxpMipmap() => Magic = "TXP"; //TXP2
+        public TxpMipmap() => Magic = 0x54585002; //TXP2
         [FieldOrder(1)]                         public int        Width = 512;
         [FieldOrder(2)]                         public int        Height = 512;
         [FieldOrder(3)]                         public TexFormat  Format = TexFormat.RGB;
@@ -127,8 +127,9 @@ namespace DIVALib.ImageUtils
 
     public class TxpTexture : TxpBase
     {
-        public TxpTexture() => Magic = "TXP"; //TXP4
-        [FieldOrder(1)]                            public int             MipMapCount = 1;
+        public TxpTexture() => Magic = 0x54585004; //TXP4
+
+        [FieldOrder(1)]                            public int             MipMapCount;
         [FieldOrder(2)]                            public int             Version = 0x1010101;
         [FieldOrder(3), FieldCount("MipMapCount")] public List<int>       OffsetTable = new List<int>();
         [FieldOrder(4), FieldCount("MipMapCount")] public List<TxpMipmap> Mipmaps = new List<TxpMipmap>();
@@ -156,9 +157,10 @@ namespace DIVALib.ImageUtils
                 PixelFormat = new DdsPixelFormat(tex.Mipmaps[0].Format.CastTo<DdsPFType>()),
                 Data = tex.Mipmaps[0].Data
             };
-            var mips = new List<DdsMipMap>();
-            tex.Mipmaps.GetRange(1, tex.MipMapCount-1).ForEach(mip => mips.Add((DdsMipMap)mip));
+            var mips = tex.Mipmaps.GetRange(1, tex.MipMapCount - 1).Select(mip => (DdsMipMap) mip).ToList();
             dds.MipMaps = mips;
+            dds.MipMaps = dds.MipMaps.Where(mip => mip.Data.Any()).ToList();
+            dds.MipMaps.Add(new DdsMipMap());
             return dds;
         }
 
@@ -167,7 +169,7 @@ namespace DIVALib.ImageUtils
 
     public class TxpTextureAtlas : TxpBase
     {
-        public TxpTextureAtlas() => Magic = "TXP"; //TXP3
+        public TxpTextureAtlas() => Magic = 0x54585003; //TXP3
         [FieldOrder(1)]                             public int              TextureCount;
         [FieldOrder(2)]                             public uint             Version = 0x1010112;
         [FieldOrder(3), FieldCount("TextureCount")] public List<int>        OffsetTable = new List<int>();
@@ -218,6 +220,6 @@ namespace DIVALib.ImageUtils
 
     public abstract class TxpBase
     {
-        [FieldCount(4), FieldLength(4)] public string Magic = "TXP0";
+        public int Magic = 0x54585000; //TXP0
     }
 }

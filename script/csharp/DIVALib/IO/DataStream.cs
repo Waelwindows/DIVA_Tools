@@ -413,6 +413,13 @@ namespace DIVALib.IO
             return IsLittleEndian(endianness) ? buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24 : buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
         }
 
+        public static int ReadInt32(Stream source, Endianness endianness)
+        {
+            source.Read(buffer, 0, 4);
+
+            return endianness == Endianness.Little ? buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24 : buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+        }
+
         public static int ReadInt32BE(Stream source)
         {
             source.Read(buffer, 0, 4);
@@ -706,6 +713,7 @@ namespace DIVALib.IO
                 characters.Add(buffer[0]);
                 source.Read(buffer, 0, 1);
             }
+            source.Position -= 1;
             return encoding.GetChars(characters.ToArray());
         }
 

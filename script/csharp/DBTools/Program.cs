@@ -12,8 +12,7 @@ namespace DBTools
     {
         static FileFormatBase GetFormat(string name)
         {
-            var culture = CultureInfo.GetCultureInfo("en-US");
-            name = Path.GetFileNameWithoutExtension(name).ToLower(culture);
+            name = Path.GetFileNameWithoutExtension(name).ToLowerInvariant();
 
             switch (name)
             {
@@ -80,14 +79,14 @@ namespace DBTools
                 }
             }
 
-            if (source.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+            if (Path.GetExtension(source) == ".bin")
             {
                 if (destination == null)
                 {
                     destination = Path.ChangeExtension(source, "xml");
                 }
                 
-                if (!destination.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(destination) != ".xml")
                 {
                     destination = Path.ChangeExtension(destination, "xml");
                 }
