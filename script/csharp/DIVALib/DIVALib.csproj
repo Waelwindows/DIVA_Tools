@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\..\bin\lib\DIVALib\Debug\DIVALib.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\..\bin\lib\DIVALib\Release\DIVALib.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -132,6 +134,7 @@
     <Compile Include="Archives\FarcArchive.cs" />
     <Compile Include="Crypto\Divafile.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
+    <Compile Include="Databases\BoneDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />
     <Compile Include="DSCUtils\DscFunc.cs" />
@@ -146,10 +149,9 @@
     <Compile Include="IO\StringPool.cs" />
     <Compile Include="IO\SubStream.cs" />
     <Compile Include="FileBases\FileFormatBase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Vector.cs" />
-    <Compile Include="Math\Angle.cs" />
-    <Compile Include="Math\Time.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

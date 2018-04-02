@@ -56,7 +56,7 @@ namespace DIVALib.DSCUtils
 
     public abstract class DscContainer
     {
-        public List<DscFunction> Functions = new List<DscFunction>();
+        public List<DscFunctionWrapper> Functions = new List<DscFunctionWrapper>();
 
         public abstract void BinSerialize(Stream s);
         public abstract dynamic BinDeserialize(Stream s);
@@ -68,7 +68,7 @@ namespace DIVALib.DSCUtils
     public class DscFile1
     {
         [XmlAttribute("version")] [FieldOrder(0)] public uint Magic = 302121504;
-        [FieldOrder(1), SerializeUntil((Int64)32)] public List<DscFunction> Functions;
+        [FieldOrder(1), SerializeUntil((Int64)32)] public List<DscFunctionWrapper> Functions = new List<DscFunctionWrapper>();
 
     }
 
@@ -190,7 +190,7 @@ namespace DIVALib.DSCUtils
     }
 
     [XmlRoot("dsc")]
-    [XmlInclude(typeof(DscFunction))]
+    [XmlInclude(typeof(DscFunctionWrapper))]
     [XmlInclude(typeof(FEnd))]
     [XmlInclude(typeof(F2Time))]
     [XmlInclude(typeof(FMikuMove))]

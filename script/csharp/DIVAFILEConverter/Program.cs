@@ -31,8 +31,6 @@ namespace DIVAFILEConverter
                 
             }
             
-            //args = new[] {@"C:\Users\waelw.WAELS-PC\Desktop\DIVAFILE\pv_field_723.pfl", @"C:\Users\waelw.WAELS-PC\Desktop\DIVAFILE\pv_field_7231.pfl", "" };
-            //args = new[] { @"C:\Users\waelw.WAELS-PC\Desktop\DIVAFILE\pv_field_7231.pfl"};
 
             using (var file = new FileStream(args[0], FileMode.Open))
             {

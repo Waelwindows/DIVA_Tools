@@ -1,11 +1,12 @@
 ﻿using System;
+//using System.Numerics;
 using System.Xml.Serialization;
 using BinarySerialization;
 using DIVALib.Math;
 
 namespace DIVALib.DSCUtils
 {
-    public class DscFunction
+    public class DscFunctionWrapper
     {
         [FieldOrder(0)] public int FunctionId;
         [FieldOrder(1)]
@@ -13,6 +14,7 @@ namespace DIVALib.DSCUtils
         [Subtype("FunctionId", 0x01, typeof(FTime))]
         //[Subtype("FunctionId", 0x01, typeof(F2Time))]
         [Subtype("FunctionId", 0x02, typeof(FMikuMove))]
+        [Subtype("FunctionId", 0x03, typeof(FMikuRotate))]
         [Subtype("FunctionId", 0x04, typeof(FMikuDisplay))]
         [Subtype("FunctionId", 0x05, typeof(FMikuShadow))]
         [Subtype("FunctionId", 0x06, typeof(FTarget))]
@@ -108,7 +110,10 @@ namespace DIVALib.DSCUtils
     ///     Generic parent class for all Dsc functions
     /// </summary>
     [Serializable]
-    public class DscFunctionBase { }
+    public class DscFunctionBase
+    {
+        public static implicit operator DscFunctionWrapper(DscFunctionBase func) => new DscFunctionWrapper { Function = func };
+    }
 
     /// <summary>
     ///     Ends the song
@@ -123,7 +128,8 @@ namespace DIVALib.DSCUtils
     /// </summary>
     public class FTime : DscFunctionBase
     {
-        [FieldOrder(0)] [FieldScale(100)] [SerializeAs(SerializedType.UInt4)] public double timeStamp;
+        /// <sumary>Time in milliseconds</sumary>
+        [FieldOrder(0)] [FieldScale(100)] [SerializeAs(SerializedType.UInt4)] public double TimeStamp;
     }
 
     /// <summary>
@@ -131,7 +137,7 @@ namespace DIVALib.DSCUtils
     /// </summary>
     public class F2Time : DscFunctionBase
     {
-        [FieldOrder(0)] [FieldEndianness(Endianness.Big)] public uint timeStamp;
+        [FieldOrder(0)] [FieldEndianness(Endianness.Big)] public uint TimeStamp;
     }
 
     /// <summary>
@@ -202,25 +208,28 @@ namespace DIVALib.DSCUtils
             CHANCE_STAR = 15
         }
 
+        /// <summary> The type of the note from <seealso cref="EType"/> </summary>
         [FieldOrder(0)] public EType Type;
-
-        [FieldOrder(1)] [FieldScale(100)] [SerializeAs(SerializedType.Int4)] public double HoldLength;
-
-        [FieldOrder(2)] [SerializeAs(SerializedType.Int4)] public int IsHoldEnd;
-
-        [FieldOrder(3)] public Vector2 Position;
-
+        /// <summary>How long should the note be held in milliseconds </summary>
+        /// <remarks>Used for the note tail calculations. Set to -1 when not a hold note</remarks>
+        [FieldOrder(1)] [FieldScale(100)] [SerializeAs(SerializedType.Int4)] public double HoldLength = -1;
+        [FieldOrder(2)] public int IsHoldEnd = -1;
+        /// <summary>The position at which the target gets spawned at </summary>
+        /// <remarks>The screen limits are (500000, 300000)</remarks>
+        [FieldOrder(3)] public Vector2 Position = new Vector2(250000, 150000);
+        /// <summary> The angle that the note enters at and reaches the target </summary>
         [FieldOrder(4)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double EntryAngle;
-
-        [FieldOrder(5)] public int OscillateFrequency;
-
-        [FieldOrder(6)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillateAngle; 
-
-        [FieldOrder(7)] public uint OscillateAmplitude;
-
-        [FieldOrder(8)] [SerializeAs(SerializedType.Int4)] public double TimeOut;
-
-        [FieldOrder(9)] public int Pad;
+        /// <summary> How quick does the note oscillate </summary>
+        [FieldOrder(5)] public int OscillationFrequency = 2;
+        /// <summary> The angle that the note oscillates at  </summary>
+        [FieldOrder(6)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillationAngle = 3; 
+        /// <summary> The note's oscillation amplitude in ??? </summary>
+        [FieldOrder(7)] public uint OscillationAmplitude = 500;
+        /// <summary> The time taken by the note to reach the target </summary> 
+        [FieldOrder(8)] [SerializeAs(SerializedType.Int4)] public double TimeOut = 1500;
+        /// <summary> Used as a substitute to <seealso cref="TimeOut"/> when it doesn't have a value. </summary>
+        /// <remarks> Uses the last <seealso cref="FBarTimeSet"/>. <c>(60  / BPM * (1 + TimeSignature) * 1000)</c></remarks>
+        [FieldOrder(9)] public int TimeSignature = 3;
     }
 
     /// <summary>
@@ -294,10 +303,17 @@ namespace DIVALib.DSCUtils
     public class FEffect : DscFunctionBase
     {
         /// <summary> ???? </summary>
-        [FieldOrder(0)] public Vector3 unk1;
-
+        [FieldOrder(0)] public int unk;
         /// <summary> ???? </summary>
-        [FieldOrder(1)] public Vector3 unk2;
+        [FieldOrder(1)] public int unk1;
+        /// <summary> ???? </summary>
+        [FieldOrder(2)] public int unk2;
+        /// <summary> ???? </summary>
+        [FieldOrder(3)] public int unk3;
+        /// <summary> ???? </summary>
+        [FieldOrder(4)] public int unk4;
+        /// <summary> ???? </summary>
+        [FieldOrder(5)] public int unk5;
     }
 
     /// <summary> ??? </summary>
@@ -326,6 +342,8 @@ namespace DIVALib.DSCUtils
     /// <summary> Works the same as FSetCamera? </summary>
     public class FDataCamera : DscFunctionBase
     {
+        [FieldOrder(0)] public uint unk;
+        [FieldOrder(1)] public uint unk1;
     }
 
     /// <summary> Changes the stage </summary>
@@ -412,7 +430,13 @@ namespace DIVALib.DSCUtils
     public class FLookAnim : DscFunctionBase
     {
         /// <summary> DESC </summary>
-        [FieldOrder(0)] public uint var;
+        [FieldOrder(0)] public uint unk;
+        /// <summary> DESC </summary>
+        [FieldOrder(1)] public uint unk1;
+        /// <summary> DESC </summary>
+        [FieldOrder(2)] public uint unk2;
+        /// <summary> DESC </summary>
+        [FieldOrder(3)] public uint unk3;
     }
 
     /// <summary> Expessions for the face, but haven't looked much into it </summary>
@@ -487,10 +511,10 @@ namespace DIVALib.DSCUtils
     public class FBarTimeSet : DscFunctionBase
     {
         /// <summary> Actual BPM value </summary>
-        [FieldOrder(0)] public int bpm;
+        [FieldOrder(0)] public int Bpm;
 
         /// <summary> The speed of the notes </summary>
-        [FieldOrder(1)] public int noteSpeed;
+        [FieldOrder(1)] public int NoteSpeed;
     }
 
     /// <summary> ???? </summary>
@@ -803,7 +827,8 @@ namespace DIVALib.DSCUtils
     public class FDataCameraStart : DscFunctionBase
     {
         /// <summary> DESC </summary>
-        [FieldOrder(0)] public uint var;
+        [FieldOrder(0)] public uint unk;
+        [FieldOrder(1)] public uint unk1;
     }
 
     /// <summary> Plays the movie, but doesn't display it </summary>
@@ -824,14 +849,18 @@ namespace DIVALib.DSCUtils
     public class FWind : DscFunctionBase
     {
         /// <summary> DESC </summary>
-        [FieldOrder(0)] public uint var;
+        [FieldOrder(0)] public uint unk;
+        [FieldOrder(1)] public uint unk1;
+        [FieldOrder(2)] public uint unk2;
     }
 
     /// <summary> No idea </summary>
     public class FOsageStep : DscFunctionBase
     {
         /// <summary> DESC </summary>
-        [FieldOrder(0)] public uint var;
+        [FieldOrder(0)] public uint unk;
+        [FieldOrder(1)] public uint unk1;
+        [FieldOrder(2)] public uint unk2;
     }
 
     /// <summary> Moves the hair colliders </summary>

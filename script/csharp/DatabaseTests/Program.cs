@@ -20,14 +20,10 @@ namespace DatabaseTests
     {
         static void Main(string[] args)
         {
-            var tst = new FileStream(@"C:\Users\waelw.WAELS-PC\Desktop\DIVAFILE\pvfield_tstthing.pfl", FileMode.Open);
-            var serial = new BinarySerializer();
-            var divaFile = new DivaFile(tst);
-            using (var save = new FileStream(@"C:\Users\waelw.WAELS-PC\Desktop\DIVAFILE\pvfield_tstthing_divafile.pfl", FileMode.Create))
+            using (var file = File.Open(@"D:\QuickBMS\f2_cam\camdata_binary.bin", FileMode.Open))
             {
-                serial.Serialize(save, divaFile);
+                
             }
-            Console.WriteLine("oo");
         }
 
         private static void OnMemberDeserialized(object sender, MemberSerializedEventArgs e)

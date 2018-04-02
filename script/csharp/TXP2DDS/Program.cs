@@ -10,7 +10,7 @@ namespace TXP2DDS
     {
         static void Main(string[] args)
         {
-            /*
+            
             if (args.Length == 0)
             {
                 var helpstr = @"TXP2DDS
@@ -28,16 +28,20 @@ Usage:
     TXP2DDS [source]";
                 Console.WriteLine(helpstr);
                 Console.ReadLine();
+#if !DEBUG
                 return;
+#endif
             }
+#if !DEBUG
             var dir = args[0];
             
             if (!File.Exists(args[0]) && !File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
                 throw new IOException("file doesn't exist.");
-
-            */
+#endif
+#if DEBUG
             var dir = @"D:\QuickBMS\nez_txp";
-            
+#endif
+
             if (File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
             {
                 var ddsPaths = new List<string>();

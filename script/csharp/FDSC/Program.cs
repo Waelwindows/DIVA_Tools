@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using BinarySerialization;
 using DIVALib.DSCUtils;
 
@@ -15,16 +16,27 @@ namespace FDSC
 	        Console.WriteLine("D-End: {0} ({1}) @ {2}", e.MemberName, value, e.Offset);
 	    }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
 		{
 #if DEBUG
-		    using (var file = new FileStream(@"D:\DIVATools\test_files\dsc\pv_609_extreme.dsc", FileMode.Open))
-		    {
+            //using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\game\NPJB00134\USRDIR\rom\script\pv_007_extreme.dsc", FileMode.Open))
+		    using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc", FileMode.Open))
+            {
 		        var serial = new BinarySerializer();
-		        //var dsc = serial.Deserialize<DSC>(file);
-		        //serial.MemberDeserialized += OnMemberDeserialized;
-                //file.Position += 4;
-		        var fst = serial.Deserialize<DscFile1>(file);
+		        
+		        var dsc = await serial.DeserializeAsync<DscFile1>(file);
+                
+                var firstNote = dsc.Functions.FindIndex(func => func.Function.GetType() == typeof(FTarget));
+                var dscList = dsc.Functions.GetRange(0, firstNote);
+                dsc.Functions.ForEach(func => func = func.Function.GetType() == typeof(FTarget) ? new FMusicPlay() : func);
+                dscList.AddRange(dsc.Functions.GetRange(firstNote, dsc.Functions.Count-firstNote));
+                dsc.Functions = dscList;
+                file.Close();
+                using (var save = File.Create( @"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc") )
+                {
+                    await serial.SerializeAsync(save, dsc);
+                }
+                /**/
                 Console.WriteLine("tst");
 		    }
 		    return;
@@ -63,24 +75,17 @@ namespace FDSC
 			Console.Write("Conversion Complete!\n");
 			Console.ReadLine();
 		}
-
+            
 		public static void DscConvert(string path)
 		{
 			using (var file = new FileStream(path, FileMode.Open))
 			{
-				Console.Write("Beginning DSC Deserialization\n");
 			    var serial = new BinarySerializer();
 			    var dsc = serial.Deserialize<DSC>(file);
-				Console.Clear();
-				Console.WriteLine($"DSC has {dsc.File.Functions.Count} functions.");
-				Console.Write("DSC Deserialization Successful\n");
-				Console.Write($"DSC Type {dsc.File.GetType()}\n");
 				var savePath = Path.ChangeExtension(path, "xml");
-				using (var save = new FileStream(savePath, FileMode.Create))
+				using (var save = File.Create(savePath))
 				{
-					Console.Write("Beginning XML Serialization\n");
 					dsc.File.XmlSerialize(save);
-					Console.Write("XML Serialization Successful\n");
 				}
 			}
 		}
