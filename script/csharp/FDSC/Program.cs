@@ -20,11 +20,12 @@ namespace FDSC
 		{
 #if DEBUG
             //using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\game\NPJB00134\USRDIR\rom\script\pv_007_extreme.dsc", FileMode.Open))
-		    using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc", FileMode.Open))
+            //using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc", FileMode.Open))
+		    using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\game\NPJB00201\USRDIR\rom\script\pv_089_extreme.dsc", FileMode.Open))
             {
 		        var serial = new BinarySerializer();
 		        
-		        var dsc = await serial.DeserializeAsync<DscFile1>(file);
+		        var dsc = await serial.DeserializeAsync<DscFile>(file);
                 
                 var firstNote = dsc.Functions.FindIndex(func => func.Function.GetType() == typeof(FTarget));
                 var dscList = dsc.Functions.GetRange(0, firstNote);
