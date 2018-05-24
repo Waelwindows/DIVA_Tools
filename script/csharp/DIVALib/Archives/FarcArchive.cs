@@ -24,7 +24,7 @@ namespace DIVALib.Archives
 
         public override void Read(Stream source)
         {
-            string signature = DataStream.ReadCString(source, 4);
+            string signature = DataStream.ReadMagic(source, 4);
             
             if (!string.Equals(signature, "farc", StringComparison.OrdinalIgnoreCase))
             {
