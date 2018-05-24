@@ -26,7 +26,7 @@ namespace DIVALib.Archives
         {
             string signature = DataStream.ReadCString(source, 4);
             
-            if (string.Equals(signature, "farc", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(signature, "farc", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException("'FARC' signature could not be found. (expected 'FArC', 'FArc' or 'FARC')");
             }
