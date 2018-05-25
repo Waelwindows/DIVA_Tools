@@ -42,25 +42,19 @@ namespace FarcPack
             for (int i = 0; i < args.Length; i++)
             {
                 string arg = args[i];
+                
+                Func<string, string, bool> compare = (a, b) => arg.Equals(a, StringComparison.OrdinalIgnoreCase) || arg.Equals(b, StringComparison.OrdinalIgnoreCase);
+                alignment = compare("-a", "-alignment") ? uint.Parse(args[++i]) : alignment;
 
-                if (arg.Equals("-a", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("-alignment", StringComparison.OrdinalIgnoreCase))
-                {
-                    alignment = uint.Parse(args[++i]);
-                }
-
-                else if (arg.Equals("-c", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("-compress", StringComparison.OrdinalIgnoreCase))
-                {
-                    compress = true;
-                }
-
-                else if (sourcePath == null)
+                compress = compare("-c", "-compress") || compress;
+                
+                if (sourcePath == null && !compare("-c", "-compress") && !compare("-a", "-alignment"))
                 {
                     sourcePath = arg;
                 }
+                
 
-                else if (destinationPath == null)
+                else if (destinationPath == null && !compare("-c", "-compress") && !compare("-a", "-alignment"))
                 {
                     destinationPath = arg;
                 }
@@ -79,20 +73,17 @@ namespace FarcPack
 
             if (sourcePath.EndsWith(".farc", StringComparison.OrdinalIgnoreCase))
             {
+                destinationPath = destinationPath ?? Path.ChangeExtension(sourcePath, null);
 #if USE_NEW
                 var archive = new FarcArchiveBin();
                 using (var file = File.Open(sourcePath, FileMode.Open))
                 {
                     archive = serial.Deserialize<FarcArchiveBin>(file);
+                    archive.Unpack(destinationPath);
                 }
 #else
                 var archive = new FarcArchive();
                 archive.Load(sourcePath);
-#endif
-
-                destinationPath = destinationPath ?? Path.ChangeExtension(sourcePath, null);
-
-                Directory.CreateDirectory(destinationPath);
 
                 using (Stream source = File.OpenRead(sourcePath))
                 {
@@ -147,6 +138,9 @@ namespace FarcPack
                         }
                     }
                 }
+
+#endif
+
             }
 
             else if (File.GetAttributes(sourcePath).HasFlag(FileAttributes.Directory))

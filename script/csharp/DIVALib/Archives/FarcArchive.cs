@@ -7,6 +7,8 @@ using System.Linq;
 
 using DIVALib.IO;
 using System.Collections;
+using System.Security.Cryptography;
+using System.IO.Compression;
 
 namespace DIVALib.Archives
 {
@@ -110,23 +112,76 @@ namespace DIVALib.Archives
         public const char AlignmentChar = 'x';
 
         [FieldOrder(0), FieldLength(4)]                  public string Magic = "FArc";
-        [FieldOrder(1), FieldEndianness(Endianness.Big)] public int    Size { get => 4 + Entries.Sum(entry => entry.Size); set { } }
+        [FieldOrder(1), FieldEndianness(Endianness.Big)] public int    EntryListSize { get => 4 + Entries.Sum(entry => entry.Size); set { } }
         [FieldOrder(2), FieldEndianness(Endianness.Big)] public int    Alignment = 64;
         [Ignore]                                         public bool   IsCompressed { get => Magic == "FArC" || IsEncrypted;
                                                                                       set => Magic = value && !IsEncrypted ? "FArC" : Magic; }
         [Ignore]                                         public bool   IsEncrypted { get => Magic == "FARC";
                                                                                      set => Magic = value ? "FARC" : Magic; }
         [FieldOrder(3), FieldEndianness(Endianness.Big),
-         FieldLength("Size", 
+         FieldLength("EntryListSize", 
             ConverterType = typeof(FarcEntryConverter))] public List<FarcEntryBin> Entries = new List<FarcEntryBin>();
-        [FieldOrder(4)]                                  public Stream Data = new MemoryStream();
+        [FieldOrder(4)]                                  public Stream             Data = new MemoryStream();
+
+        [Ignore] public int Size => EntryListSize + 8;
+
+        public void Unpack(string destinationPath)
+        {
+            Directory.CreateDirectory(destinationPath);
+
+            //using (Stream Data = File.OpenRead(sourcePath))
+            foreach (var entry in Entries)
+            {
+                using (Stream entrySource = new SubStream(Data, entry.Position - Size, entry.Length))
+                using (Stream destination = File.Create(Path.Combine(destinationPath, entry.FileName)))
+                {
+                    if (IsEncrypted)
+                    {
+                        using (AesManaged aes = new AesManaged
+                        {
+                            KeySize = 128,
+                            Key = FarcArchive.FarcEncryptionKeyBytes,
+                            BlockSize = 128,
+                            Mode = CipherMode.ECB,
+                            Padding = PaddingMode.Zeros,
+                            IV = new byte[16],
+                        })
+                        using (CryptoStream cryptoStream = new CryptoStream(
+                            entrySource,
+                            aes.CreateDecryptor(),
+                            CryptoStreamMode.Read))
+                        {
+                            if (IsCompressed && entry.Length != entry.CompressedLength)
+                            {
+                                using (GZipStream gzipStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
+                                {
+                                    gzipStream.CopyTo(destination);
+                                }
+                            }
+
+                            else { cryptoStream.CopyTo(destination); }
+                        }
+                    }
+
+                    else if (IsCompressed && entry.Length != entry.CompressedLength)
+                    {
+                        using (GZipStream gzipStream = new GZipStream(entrySource, CompressionMode.Decompress))
+                        {
+                            gzipStream.CopyTo(destination);
+                        }
+                    }
+
+                    else { entrySource.CopyTo(destination); }
+                }
+            }
+        }
 
         public void Flush()
         {
             Data = new MemoryStream();
             //DataStream.WriteNulls(Data, Size + 8 - 248 - ((int)Data.Length % Alignment));
             var temp = new MemoryStream();
-            DataStream.WriteNulls(temp, Size + 8);
+            DataStream.WriteNulls(temp, Size);
             var firstAlignment = Alignment - (int)temp.Length % Alignment;
             var tempSize = temp.Length;
             Console.WriteLine(firstAlignment);
@@ -141,7 +196,7 @@ namespace DIVALib.Archives
             //Entries.ForEach(entry => dataPool.Add(Data, entry.FilePath, IsCompressed, false));
             var empty = new MemoryStream();
             var size = new MemoryStream();
-            DataStream.WriteNulls(size, Size + 8 + firstAlignment);
+            DataStream.WriteNulls(size, Size + firstAlignment);
             foreach (var entry in Entries)
             {
                 dataPool.Add(empty, entry.FilePath, IsCompressed, false);
@@ -152,13 +207,14 @@ namespace DIVALib.Archives
             }
             //Entries.ForEach(entry => entry.Length = (int)entry.FilePath.Length);
             dataPool.Write(temp);
-            temp.Position = Size + 8;
+            temp.Position = Size;
             temp.CopyTo(Data);
             Data.Position = 0;
         }
 
         public void Add(FarcEntryBin entry) => Entries.Add(entry);
 
+        [Ignore] public FarcEntryBin this[int i] => Entries[i];
         public IEnumerator<FarcEntryBin> GetEnumerator() => Entries.GetEnumerator();
         public override string ToString() => $"Farc: {Entries.Count} entries{(IsCompressed ? " Compressed" : "")} {(IsEncrypted ? " Encrypted" : "")}";
     }
@@ -179,7 +235,7 @@ namespace DIVALib.Archives
 
         [Ignore] public FileInfo FilePath;
         [Ignore] public int Size => 8 + 1 + (CompressedLength == 0 ? 0 : 8) + FileName.Length;
-        [Ignore] public bool IsCompressed => CompressedLength != 0;
+        [Ignore] public bool IsCompressed => CompressedLength != Length && CompressedLength != 0;
 
         public FarcEntryBin() { }
         public FarcEntryBin(string path) => FilePath = new FileInfo(path);

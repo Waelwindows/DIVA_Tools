@@ -22,10 +22,7 @@ namespace DIVALib.Crypto
         public const string MagicConstant = "DIVAFILE";
         public const string EncryptionKey = "file access deny";
 
-        public DivaFile()
-        {
-            
-        }
+        public DivaFile() { }
 
         public DivaFile(Stream data, bool readFromFileBegin = true)
         {
