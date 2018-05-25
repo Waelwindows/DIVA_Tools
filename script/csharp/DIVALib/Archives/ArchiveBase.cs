@@ -19,20 +19,9 @@ namespace DIVALib.Archives
 
         public virtual long Length
         {
-            get
-            {
-                if (FilePath != null)
-                {
-                    return FilePath.Length;
-                }
+            get => FilePath?.Length ?? length;
 
-                return length;
-            }
-
-            set
-            {
-                length = value;
-            }
+            set => length = value;
         }
 
         public virtual FileInfo FilePath { get; set; }
@@ -130,5 +119,20 @@ namespace DIVALib.Archives
         {
             return entries.GetEnumerator();
         }
+    }
+
+    public abstract class EntryBaseBin
+    {
+        protected long length;
+
+        public virtual long Position { get; set; }
+
+        public virtual long Length { get => FilePath?.Length ?? length;  set => length = value; }
+
+        public virtual FileInfo FilePath { get; set; }
+
+        public virtual Stream Open(Stream source) => new SubStream(source, Position, length);
+
+        public virtual Stream Open() => FilePath.OpenRead();
     }
 }

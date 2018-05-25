@@ -80,7 +80,7 @@ namespace DIVALib.ImageUtils
             ATI2 = 11
         }
 
-        public TxpMipmap() => Magic = 0x54585002; //TXP2
+        public TxpMipmap() => Magic = 0x2505854; //TXP2
         [FieldOrder(1)]                         public int        Width = 512;
         [FieldOrder(2)]                         public int        Height = 512;
         [FieldOrder(3)]                         public TexFormat  Format = TexFormat.RGB;
@@ -127,7 +127,7 @@ namespace DIVALib.ImageUtils
 
     public class TxpTexture : TxpBase
     {
-        public TxpTexture() => Magic = 0x54585004; //TXP4
+        public TxpTexture() => Magic = 0x4505854; //TXP4
 
         [FieldOrder(1)]                            public int             MipMapCount;
         [FieldOrder(2)]                            public int             Version = 0x1010101;
@@ -169,9 +169,16 @@ namespace DIVALib.ImageUtils
 
     public class TxpTextureAtlas : TxpBase
     {
-        public TxpTextureAtlas() => Magic = 0x54585003; //TXP3
+        public enum EVersion : int
+        {
+            ProjectDiva = 0x1010112,
+            ShiningForces = 0x1010153,
+
+        }
+
+        public TxpTextureAtlas() => Magic = 0x3505854; //TXP3
         [FieldOrder(1)]                             public int              TextureCount;
-        [FieldOrder(2)]                             public uint             Version = 0x1010112;
+        [FieldOrder(2)]                             public EVersion         Version = EVersion.ProjectDiva;
         [FieldOrder(3), FieldCount("TextureCount")] public List<int>        OffsetTable = new List<int>();
         [FieldOrder(4), FieldCount("TextureCount")] public List<TxpTexture> Textures = new List<TxpTexture>();
 
@@ -220,6 +227,6 @@ namespace DIVALib.ImageUtils
 
     public abstract class TxpBase
     {
-        public int Magic = 0x54585000; //TXP0
+        public int Magic = 0x0505854; //TXP0
     }
 }

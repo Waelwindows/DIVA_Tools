@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using BinarySerialization;
 using DIVALib.DSCUtils;
@@ -21,24 +22,38 @@ namespace FDSC
 #if DEBUG
             //using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\game\NPJB00134\USRDIR\rom\script\pv_007_extreme.dsc", FileMode.Open))
             //using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc", FileMode.Open))
-		    using (var file = File.Open(@"D:\Emulators\RPSC3\dev_hdd0\game\NPJB00201\USRDIR\rom\script\pv_089_extreme.dsc", FileMode.Open))
-            {
+		    var path = @"D:\dsc\pv_611_extreme.dsc";
+		    path = @"D:\DIVATools\test_files\dsc\pv_717_normal.dsc";
+            using (var file = File.Open(path, FileMode.Open))
+		    {
 		        var serial = new BinarySerializer();
-		        
-		        var dsc = await serial.DeserializeAsync<DscFile>(file);
+		        //serial.Endianness = Endianness.Big;
+		        serial.MemberDeserialized += OnMemberDeserialized;
+                //file.Position = 68;
+		        var dsc = await serial.DeserializeAsync<DscFile2>(file);
+
                 
-                var firstNote = dsc.Functions.FindIndex(func => func.Function.GetType() == typeof(FTarget));
-                var dscList = dsc.Functions.GetRange(0, firstNote);
-                dsc.Functions.ForEach(func => func = func.Function.GetType() == typeof(FTarget) ? new FMusicPlay() : func);
-                dscList.AddRange(dsc.Functions.GetRange(firstNote, dsc.Functions.Count-firstNote));
-                dsc.Functions = dscList;
-                file.Close();
-                using (var save = File.Create( @"D:\Emulators\RPSC3\dev_hdd0\disc\BLJM60527\PS3_GAME\USRDIR\rom\script\pv600\pv_600_extreme.dsc") )
-                {
-                    await serial.SerializeAsync(save, dsc);
-                }
-                /**/
-                Console.WriteLine("tst");
+		        var notesWrapper = dsc.Functions.Where(func => func.Function.GetType() == typeof(FTarget)).ToList();
+		        var indices = notesWrapper.Select(note => dsc.Functions.FindIndex(elem => elem == note)).ToList();
+		        var timesWrapper = indices.Select(i => dsc.Functions[i - 1]).ToList();
+
+		        var times = timesWrapper.Select(wrapper => wrapper.Function).Where(time => time.GetType() == typeof(FTime)).ToList();
+		        var notes = notesWrapper.Select(wrapper => wrapper.Function).ToList();
+
+                /*
+		        using (var save = new StreamWriter(Path.ChangeExtension(path, ".xml")))
+		        {
+		            save.WriteLine(@",timestamp,type,holdLength,bIsHoldEnd,posX,posY,entryAngle,oscillationFrequency,oscillationAngle,oscillationAmplitude,timeout");
+		            for (var i = 0; i < times.Count; ++i)
+		            {
+		                var time = (FTime)times[i];
+		                var note = (FTarget) notes[i];
+		                save.WriteLine($"{i},{(time.TimeStamp > 0 ? time.TimeStamp/1000 : -1)},{note.Type},{note.HoldLength},{note.IsHoldEnd},{note.Position.x/10000},{note.Position.y / 10000}," +
+		                               $"{note.EntryAngle},{note.OscillationFrequency},{note.OscillationAngle},{note.OscillationAmplitude},{note.TimeOut/1000}");
+		            }
+		        }
+                */
+                return;
 		    }
 		    return;
 #endif

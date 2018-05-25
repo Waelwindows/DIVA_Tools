@@ -77,15 +77,6 @@ namespace DIVALib.ImageUtils
 
     }
 
-    public class EndOfFileContainer
-    {
-        [FieldOrder(0)] public int Magic = 0x45_4F_46_43;
-        [FieldOrder(1)] public int UNK;
-        [FieldOrder(2)] public int Size = 32;
-        [FieldOrder(3)] public int Version = 0x10_00_00_00;
-        [FieldOrder(4)] public int UNK2 = 1;
-    }
-
     public class SpriteFile
     {
         [FieldOrder(0), FieldAlignment(16, FieldAlignmentMode.RightOnly)] public SprOffsetTable OffsetTable;

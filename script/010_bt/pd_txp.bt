@@ -90,11 +90,8 @@ FSkip(-4);
 if (magic[3] == 3)
 {
     TXP_FILE file;
-} else if (magic[3] == 4)
+} else
 {
     TXP_TEX tex;
-} else if (magic[3] == 2)
-{
-    TXP_MIP mip;
 }
 //TXP_MIP mip;

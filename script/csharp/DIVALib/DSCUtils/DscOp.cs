@@ -69,7 +69,13 @@ namespace DIVALib.DSCUtils
     {
         [XmlAttribute("version")] [FieldOrder(0)] public uint Magic = 302121504;
         [FieldOrder(1), SerializeUntil((Int64)32)] public List<DscFunctionWrapper> Functions = new List<DscFunctionWrapper>();
+    }
 
+    public class DscFile2
+    {
+        [FieldOrder(0)] [FieldEndianness(Endianness.Little)] public F2DscHeader Header;
+        [FieldOrder(1)] [FieldEndianness(Endianness.Big), FieldAlignment(24, FieldAlignmentMode.RightOnly)] public int Unk;
+        [FieldOrder(2), SerializeUntil((Int64)32), FieldEndianness(Endianness.Big)] public List<DscFunctionWrapper> Functions = new List<DscFunctionWrapper>();
     }
 
     [XmlRoot("dsc")]
@@ -192,7 +198,6 @@ namespace DIVALib.DSCUtils
     [XmlRoot("dsc")]
     [XmlInclude(typeof(DscFunctionWrapper))]
     [XmlInclude(typeof(FEnd))]
-    [XmlInclude(typeof(F2Time))]
     [XmlInclude(typeof(FMikuMove))]
     [XmlInclude(typeof(FMikuRotate))]
     [XmlInclude(typeof(FMikuDisplay))]
@@ -279,12 +284,10 @@ namespace DIVALib.DSCUtils
     public class F2DscFile : DscContainer
     {
         [XmlAttribute("version")] [Ignore] public uint Magic = 0x43535650;
-
         [FieldOrder(0)] [FieldEndianness(Endianness.Little)] public F2DscHeader Header;
-
-        [FieldOrder(1)] [FieldEndianness(Endianness.Big)] public F2Dscunk Unk;
-
+        [FieldOrder(1)] [FieldEndianness(Endianness.Big), FieldAlignment(8, FieldAlignmentMode.LeftOnly)] public uint Unk;
         [FieldOrder(3)] [FieldEndianness(Endianness.Big)] [XmlIgnore] public F2DscEnd End;
+
         /*
         public void Deserialize(Stream s, Endianness endianness, BinarySerializationContext context)
         {
@@ -609,40 +612,14 @@ namespace DIVALib.DSCUtils
 
     public class F2DscHeader
     {
-        [FieldOrder(1)] public uint byteSize;
+        [XmlAttribute("version")] [FieldOrder(0)] public uint Magic = 0x50565343; //PVSC
+        [FieldOrder(1)] public uint ByteSize;
+        [XmlIgnore] [FieldOrder(2)] public uint Size = 64;
+        [FieldOrder(3)] public uint Version = 0x18000000;
+        [XmlIgnore] [FieldOrder(5), FieldAlignment(10, FieldAlignmentMode.LeftOnly)] public uint SubfileSize;
+        [XmlIgnore] [FieldOrder(6), FieldAlignment(16, FieldAlignmentMode.LeftOnly)] public uint unk2;  
+        [XmlIgnore] [FieldOrder(7), FieldAlignment(16, FieldAlignmentMode.LeftOnly)] public uint unk3;
 
-        [XmlIgnore] [FieldOrder(4)] public uint ebr;
-
-        [XmlIgnore] [FieldOrder(6)] public double ebr1;
-
-        [XmlIgnore] [FieldOrder(9)] public double ebr2;
-
-        [XmlIgnore] [FieldOrder(12)] public double ebr3;
-
-        [XmlIgnore] [FieldOrder(13)] public double ebr4;
-
-        [FieldOrder(2)] public uint headerSize = 64;
-
-        [XmlAttribute("version")] [FieldOrder(0)] public uint magic = 1347834691; //PVSC
-
-        [FieldOrder(5)] public uint subfileSize;
-
-        [FieldOrder(7)] public uint unk2;
-
-        [XmlIgnore] [FieldOrder(8)] public uint unk3;
-
-        [FieldOrder(10)] public uint unk4;
-
-        [XmlIgnore] [FieldOrder(11)] public uint unk5;
-
-        [FieldOrder(3)] public uint version = 0x18000000;
-    }
-
-    public class F2Dscunk
-    {
-        [FieldOrder(0)] private uint unk1;
-
-        [FieldOrder(1)] private uint unk2;
     }
 
     public class F2DscEnd

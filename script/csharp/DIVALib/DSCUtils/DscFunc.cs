@@ -3,6 +3,7 @@
 using System.Xml.Serialization;
 using BinarySerialization;
 using DIVALib.Math;
+using Vector2 = System.Numerics.Vector2;
 
 namespace DIVALib.DSCUtils
 {
@@ -12,7 +13,6 @@ namespace DIVALib.DSCUtils
         [FieldOrder(1)]
         [Subtype("FunctionId", 0x00, typeof(FEnd))]
         [Subtype("FunctionId", 0x01, typeof(FTime))]
-        //[Subtype("FunctionId", 0x01, typeof(F2Time))]
         [Subtype("FunctionId", 0x02, typeof(FMikuMove))]
         [Subtype("FunctionId", 0x03, typeof(FMikuRotate))]
         [Subtype("FunctionId", 0x04, typeof(FMikuDisplay))]
@@ -100,10 +100,7 @@ namespace DIVALib.DSCUtils
         /// <summary>
         ///     The string representation of a DSC function
         /// </summary>
-        public override string ToString()
-        {
-            return string.Format("[DSC Function] 0x{0:X}: {1}\n", FunctionId, Function.GetType().Name);
-        }
+        public override string ToString() => $"0x{FunctionId:X2} {Function}";
     }
 
     /// <summary>
@@ -113,6 +110,7 @@ namespace DIVALib.DSCUtils
     public class DscFunctionBase
     {
         public static implicit operator DscFunctionWrapper(DscFunctionBase func) => new DscFunctionWrapper { Function = func };
+        public override string ToString() => $"{GetType().Name}:";
     }
 
     /// <summary>
@@ -130,14 +128,8 @@ namespace DIVALib.DSCUtils
     {
         /// <sumary>Time in milliseconds</sumary>
         [FieldOrder(0)] [FieldScale(100)] [SerializeAs(SerializedType.UInt4)] public double TimeStamp;
-    }
 
-    /// <summary>
-    ///     Makes the next function activate after set time
-    /// </summary>
-    public class F2Time : DscFunctionBase
-    {
-        [FieldOrder(0)] [FieldEndianness(Endianness.Big)] public uint TimeStamp;
+        public override string ToString() => base.ToString() + $" {TimeStamp} ms";
     }
 
     /// <summary>
@@ -204,9 +196,14 @@ namespace DIVALib.DSCUtils
             CROSS_HOLD = 10,
             SQUARE_HOLD = 11,
             STAR = 12,
-            STAR_HOLD = 14,
-            CHANCE_STAR = 15
+            STAR_DOUBLE = 14,
+            CHANCE_STAR = 15,
+            LINKED_STAR = 22,
+            LINKED_STAR_END = 23
         }
+
+        /// <summary> The maximum position you can spawn a target at </summary>
+        public static readonly Vector2 MaxPosition = new Vector2(50, 15);
 
         /// <summary> The type of the note from <seealso cref="EType"/> </summary>
         [FieldOrder(0)] public EType Type;
@@ -214,22 +211,26 @@ namespace DIVALib.DSCUtils
         /// <remarks>Used for the note tail calculations. Set to -1 when not a hold note</remarks>
         [FieldOrder(1)] [FieldScale(100)] [SerializeAs(SerializedType.Int4)] public double HoldLength = -1;
         [FieldOrder(2)] public int IsHoldEnd = -1;
-        /// <summary>The position at which the target gets spawned at </summary>
-        /// <remarks>The screen limits are (500000, 300000)</remarks>
-        [FieldOrder(3)] public Vector2 Position = new Vector2(250000, 150000);
+        /// <summary>The position at which the target spawns at </summary>
+        /// <remarks>The screen limits are <seealso cref="MaxPosition"/></remarks>
+        [FieldOrder(3), FieldScale(10_000), SerializeAs(SerializedType.Int4)] public double PositionX = MaxPosition.X / 2;
+        [FieldOrder(4), FieldScale(10_000), SerializeAs(SerializedType.Int4)] public double PositionY = MaxPosition.Y / 2;
         /// <summary> The angle that the note enters at and reaches the target </summary>
-        [FieldOrder(4)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double EntryAngle;
+        [FieldOrder(5)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double EntryAngle;
         /// <summary> How quick does the note oscillate </summary>
-        [FieldOrder(5)] public int OscillationFrequency = 2;
+        [FieldOrder(6)] public int OscillationFrequency = 2;
         /// <summary> The angle that the note oscillates at  </summary>
-        [FieldOrder(6)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillationAngle = 3; 
+        [FieldOrder(7)] [FieldScale(100_000)] [SerializeAs(SerializedType.Int4)] public double OscillationAngle = 3; 
         /// <summary> The note's oscillation amplitude in ??? </summary>
-        [FieldOrder(7)] public uint OscillationAmplitude = 500;
+        [FieldOrder(8)] public uint OscillationAmplitude = 500;
         /// <summary> The time taken by the note to reach the target </summary> 
-        [FieldOrder(8)] [SerializeAs(SerializedType.Int4)] public double TimeOut = 1500;
+        [FieldOrder(9)] public uint TimeOut = 1500;
         /// <summary> Used as a substitute to <seealso cref="TimeOut"/> when it doesn't have a value. </summary>
         /// <remarks> Uses the last <seealso cref="FBarTimeSet"/>. <c>(60  / BPM * (1 + TimeSignature) * 1000)</c></remarks>
-        [FieldOrder(9)] public int TimeSignature = 3;
+        [FieldOrder(10)] public int TimeSignature = 3;
+        [FieldOrder(11)] public int Pad = -1;
+
+        public override string ToString() => base.ToString() + $" {Type} at ({PositionX:F2}, {PositionY:F2}) ";
     }
 
     /// <summary>

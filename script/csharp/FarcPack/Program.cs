@@ -1,8 +1,10 @@
-﻿using System;
+﻿#define USE_NEW
+
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
-
+using BinarySerialization;
 using DIVALib.Archives;
 using DIVALib.IO;
 
@@ -12,6 +14,7 @@ namespace FarcPack
     {
         static void Main(string[] args)
         {
+#if !DEBUG
             if (args.Length < 1)
             {
                 Console.WriteLine("FARC Pack");
@@ -29,7 +32,7 @@ namespace FarcPack
                 Console.ReadLine();
                 return;
             }
-
+#endif
             string sourcePath = null;
             string destinationPath = null;
 
@@ -62,27 +65,38 @@ namespace FarcPack
                     destinationPath = arg;
                 }
             }
+           
+#if DEBUG
+            sourcePath = @"C:\Users\waelw.WAELS-PC\Desktop\farc\vr_cmn";
+#endif
 
             if (sourcePath == null)
             {
                 throw new ArgumentException("You must provide a source.", nameof(sourcePath));
             }
 
+            var serial = new BinarySerializer();
+
             if (sourcePath.EndsWith(".farc", StringComparison.OrdinalIgnoreCase))
             {
-                FarcArchive archive = new FarcArchive();
-                archive.Load(sourcePath);
-
-                if (destinationPath == null)
+#if USE_NEW
+                var archive = new FarcArchiveBin();
+                using (var file = File.Open(sourcePath, FileMode.Open))
                 {
-                    destinationPath = Path.ChangeExtension(sourcePath, null);
+                    archive = serial.Deserialize<FarcArchiveBin>(file);
                 }
+#else
+                var archive = new FarcArchive();
+                archive.Load(sourcePath);
+#endif
+
+                destinationPath = destinationPath ?? Path.ChangeExtension(sourcePath, null);
 
                 Directory.CreateDirectory(destinationPath);
 
                 using (Stream source = File.OpenRead(sourcePath))
                 {
-                    foreach (FarcEntry entry in archive)
+                    foreach (var entry in archive)
                     {
                         using (Stream entrySource = new SubStream(source, entry.Position, entry.Length))
                         using (Stream destination = File.Create(Path.Combine(destinationPath, entry.FileName)))
@@ -137,25 +151,41 @@ namespace FarcPack
 
             else if (File.GetAttributes(sourcePath).HasFlag(FileAttributes.Directory))
             {
-                FarcArchive archive = new FarcArchive();
+#if USE_NEW
+                var archive = new FarcArchiveBin();
+                archive.Alignment = (int)alignment;
+#else
+                var archive = new FarcArchive();
                 archive.Alignment = alignment;
+#endif
                 archive.IsCompressed = compress;
-
-                if (destinationPath == null)
-                {
-                    destinationPath = sourcePath + ".farc";
-                }
+#if DEBUG
+                archive.Alignment = 64;
+#endif
+                destinationPath = destinationPath ?? sourcePath + ".farc";
 
                 foreach (string fileName in Directory.GetFiles(sourcePath))
                 {
+#if USE_NEW
+                    archive.Add(new FarcEntryBin(fileName));
+#else
                     archive.Add(new FarcEntry
                     {
                         FileName = Path.GetFileName(fileName),
                         FilePath = new FileInfo(fileName)
                     });
+#endif
                 }
 
+#if USE_NEW
+                archive.Flush();
+                using (var save = File.Create(destinationPath))
+                {
+                    serial.Serialize(save, archive);
+                }
+#else
                 archive.Save(destinationPath);
+#endif
             }
         }
     }

@@ -10,7 +10,7 @@ namespace TXP2DDS
     {
         static void Main(string[] args)
         {
-            
+#if !DEBUG
             if (args.Length == 0)
             {
                 var helpstr = @"TXP2DDS
@@ -28,10 +28,10 @@ Usage:
     TXP2DDS [source]";
                 Console.WriteLine(helpstr);
                 Console.ReadLine();
-#if !DEBUG
                 return;
+
+        }
 #endif
-            }
 #if !DEBUG
             var dir = args[0];
             
@@ -40,6 +40,7 @@ Usage:
 #endif
 #if DEBUG
             var dir = @"D:\QuickBMS\nez_txp";
+            dir = @"D:\QuickBMS\nez_txp\test1\acf15p3_tex.bin";
 #endif
 
             if (File.GetAttributes(dir).HasFlag(FileAttributes.Directory))
@@ -91,7 +92,9 @@ Usage:
         public static void TxpToDds(Stream s, string path)
 		{
 		    var serializer = new BinarySerializer();
-		    serializer.MemberDeserialized += OnMemberDeserialized;
+#if DEBUG
+            serializer.MemberDeserialized += OnMemberDeserialized;
+#endif
             var atlas = serializer.Deserialize<TxpTextureAtlas>(s);
             atlas.SetTextures(s);
 		    var ddsTex = (List<DdsFile>) atlas;
@@ -127,7 +130,7 @@ Usage:
             atlas.Textures.ForEach(tex => tex.SetMipOffsets());
             atlas.SetTextureOffsets();
             var savePath = ddsFiles[0].Length > 10 ? $"{ddsFiles[0].Slice(end: -10)}.txp" : Path.ChangeExtension(ddsFiles[0], "txp");
-            using (var txpFile = new FileStream(savePath, FileMode.Create)) serializer.Serialize(txpFile, atlas); 
+            using (var txpFile = File.Create(savePath)) serializer.Serialize(txpFile, atlas); 
         }
     }
 }

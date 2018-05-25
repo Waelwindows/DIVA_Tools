@@ -72,4 +72,38 @@ namespace DIVALib.Databases
     {
         [FieldOrder(0), SerializeUntil(0), FieldEncoding("UTF-8")] public List<OffsetString> StringArray;
     }
+
+    public class F2StringArrayHeader
+    {
+        [FieldOrder(0), FieldLength(4)] public string Magic = "STRA";
+        [FieldOrder(1)] public int Bytesize;
+        [FieldOrder(2)] public int Size = 64;
+        [FieldOrder(3)] public int Version = 0x4000_0000;
+        [FieldOrder(4), FieldAlignment(20, FieldAlignmentMode.LeftOnly)
+            ,FieldAlignment("Size", FieldAlignmentMode.RightOnly)] public int SubfileBytesize;
+    }
+
+    public class F2StringArray
+    {
+        [FieldOrder(0), FieldEndianness(Endianness.Little)] public F2StringArrayHeader Header;
+        [FieldOrder(1)] public int Count;
+        [FieldOrder(2), FieldAlignment(16, FieldAlignmentMode.RightOnly)] public int DataOffset;
+        [FieldOrder(3), FieldCount("Count")
+        ,FieldAlignment(16, FieldAlignmentMode.RightOnly)
+        ,FieldAlignment("DataOffset", FieldAlignmentMode.LeftOnly)] public List<F2StringRecord> StringOffsets;
+        [FieldOrder(4), SerializeUntil((short)0), FieldEncoding("UTF-8")] public List<string> Strings;
+        [FieldOrder(8), FieldEndianness(Endianness.Little)] public BinaOffsetTable OffsetTable;
+
+        public void AssociateRecords() => StringOffsets = StringOffsets.Zip(Strings, (record, str) => new F2StringRecord {ID = record.ID, Offset = record.Offset, String = str}).ToList();
+    }
+
+    public class F2StringRecord
+    {
+        [FieldOrder(0)] public int Offset;
+        [FieldOrder(1)] public int ID;  
+        [Ignore] public string String;
+
+        public override string ToString() => $"#0x{ID:X}: \"{String}\" at 0x{Offset:X} ";
+    }
+
 }

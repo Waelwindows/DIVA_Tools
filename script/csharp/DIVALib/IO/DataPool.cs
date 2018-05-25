@@ -17,15 +17,8 @@ namespace DIVALib.IO
 
         public uint Alignment
         {
-            get
-            {
-                return alignment;
-            }
-
-            set
-            {
-                alignment = value > 0 ? value : 0;
-            }
+            get => alignment;
+            set => alignment = value > 0 ? value : 0;
         }
 
         public byte AlignmentNullByte { get; set; }

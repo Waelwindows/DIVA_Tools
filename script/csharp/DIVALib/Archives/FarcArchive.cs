@@ -2,20 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using BinarySerialization;
+using System.Linq;
 
 using DIVALib.IO;
+using System.Collections;
 
 namespace DIVALib.Archives
 {
     public class FarcEntry : EntryBase
     {
-        public string FileName { get; set; }
-        public long CompressedLength { get; set; }
+        [FieldOrder(0)] public string FileName { get; set; }
+        [FieldOrder(1)] public long CompressedLength { get; set; }
+
+        public static explicit operator FarcEntryBin(FarcEntry entry) => new FarcEntryBin
+        { FileName = entry.FileName, FilePath = entry.FilePath,
+          CompressedLength = entry.CompressedLength,
+          Length = (int)entry.length, Position = (int)entry.Position};
     }
 
     public class FarcArchive : ArchiveBase<FarcEntry>
     {
-        public const string FarcEncryptionKey = "project_diva.bin";
+        public const string FarcEncryptionKey = "project_diva.bin"; 
         public static readonly byte[] FarcEncryptionKeyBytes = Encoding.ASCII.GetBytes(FarcEncryptionKey);
 
         public bool IsCompressed { get; set; }
@@ -95,5 +103,94 @@ namespace DIVALib.Archives
             destination.Seek(4, SeekOrigin.Begin);
             DataStream.WriteUInt32BE(destination, (uint)(headerEndPosition - 8));
         }
+    }
+
+    public class FarcArchiveBin
+    {
+        public const char AlignmentChar = 'x';
+
+        [FieldOrder(0), FieldLength(4)]                  public string Magic = "FArc";
+        [FieldOrder(1), FieldEndianness(Endianness.Big)] public int    Size { get => 4 + Entries.Sum(entry => entry.Size); set { } }
+        [FieldOrder(2), FieldEndianness(Endianness.Big)] public int    Alignment = 64;
+        [Ignore]                                         public bool   IsCompressed { get => Magic == "FArC" || IsEncrypted;
+                                                                                      set => Magic = value && !IsEncrypted ? "FArC" : Magic; }
+        [Ignore]                                         public bool   IsEncrypted { get => Magic == "FARC";
+                                                                                     set => Magic = value ? "FARC" : Magic; }
+        [FieldOrder(3), FieldEndianness(Endianness.Big),
+         FieldLength("Size", 
+            ConverterType = typeof(FarcEntryConverter))] public List<FarcEntryBin> Entries = new List<FarcEntryBin>();
+        [FieldOrder(4)]                                  public Stream Data = new MemoryStream();
+
+        public void Flush()
+        {
+            Data = new MemoryStream();
+            //DataStream.WriteNulls(Data, Size + 8 - 248 - ((int)Data.Length % Alignment));
+            var temp = new MemoryStream();
+            DataStream.WriteNulls(temp, Size + 8);
+            var firstAlignment = Alignment - (int)temp.Length % Alignment;
+            var tempSize = temp.Length;
+            Console.WriteLine(firstAlignment);
+            DataStream.WriteChars(temp, Enumerable.Repeat(AlignmentChar, firstAlignment).ToArray());
+
+            var dataPool = new DataPool
+            {
+                IsBigEndian = true,
+                Alignment = (uint)Alignment,
+                AlignmentNullByte = (byte)AlignmentChar
+            };
+            //Entries.ForEach(entry => dataPool.Add(Data, entry.FilePath, IsCompressed, false));
+            var empty = new MemoryStream();
+            var size = new MemoryStream();
+            DataStream.WriteNulls(size, Size + 8 + firstAlignment);
+            foreach (var entry in Entries)
+            {
+                dataPool.Add(empty, entry.FilePath, IsCompressed, false);
+                entry.Position = (int)size.Length;
+                size = new MemoryStream();
+                DataStream.WriteNulls(size, temp.Length - 8);
+                dataPool.Write(size);
+            }
+            //Entries.ForEach(entry => entry.Length = (int)entry.FilePath.Length);
+            dataPool.Write(temp);
+            temp.Position = Size + 8;
+            temp.CopyTo(Data);
+            Data.Position = 0;
+        }
+
+        public void Add(FarcEntryBin entry) => Entries.Add(entry);
+
+        public IEnumerator<FarcEntryBin> GetEnumerator() => Entries.GetEnumerator();
+        public override string ToString() => $"Farc: {Entries.Count} entries{(IsCompressed ? " Compressed" : "")} {(IsEncrypted ? " Encrypted" : "")}";
+    }
+
+    public class FarcEntryBin
+    {
+        private string _name;
+        private int _length;
+        
+        [FieldOrder(0), FieldEncoding("UTF-8")]          public string FileName { get => FilePath?.Name ?? _name; set => _name = value; }
+        [FieldOrder(1), FieldEndianness(Endianness.Big)] public int    Position;
+        [FieldOrder(2),
+         FieldEndianness(Endianness.Big),
+         SerializeWhen("IsCompressed", true, 
+         RelativeSourceMode = RelativeSourceMode.FindAncestor,
+         AncestorType = typeof(FarcArchiveBin))]         public long   CompressedLength;
+        [FieldOrder(3), FieldEndianness(Endianness.Big)] public int    Length { get => (int?)FilePath?.Length ?? _length; set => _length = value; }
+
+        [Ignore] public FileInfo FilePath;
+        [Ignore] public int Size => 8 + 1 + (CompressedLength == 0 ? 0 : 8) + FileName.Length;
+        [Ignore] public bool IsCompressed => CompressedLength != 0;
+
+        public FarcEntryBin() { }
+        public FarcEntryBin(string path) => FilePath = new FileInfo(path);
+        public FarcEntryBin(string name, int length) { FileName = name; Length = length; }
+
+        public override string ToString() => $"Name:'{FileName}' at 0x{Position:X} S:{Length}{(IsCompressed ? $" CS:{CompressedLength}" : "")}";
+    }
+
+    public class FarcEntryConverter : IValueConverter
+    {
+        public object Convert(object value, object parameter, BinarySerializationContext context) => (int)value - 4;
+        public object ConvertBack(object value, object parameter, BinarySerializationContext context) => (long)value + 4;
     }
 }

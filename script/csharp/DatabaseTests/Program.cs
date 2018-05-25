@@ -1,28 +1,29 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
-
 using BinarySerialization;
-using DIVALib.Crypto;
+using DIVALib.Archives;
 using DIVALib.Databases;
-using DIVALib.IO;
 
 namespace DatabaseTests
 {
 
+    public class TestClass
+    {
+        [FieldScale(100), SerializeAs(SerializedType.Int4)] public double Test;
+    }
+
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            using (var file = File.Open(@"D:\QuickBMS\f2_cam\camdata_binary.bin", FileMode.Open))
+            var serial = new BinarySerializer();
+            serial.Endianness = Endianness.Big;
+            using (var file = File.Open(@"C:\Users\waelw.WAELS-PC\Desktop\farc\rslt_mik.farc", FileMode.Open))
             {
-                
+                var archive = serial.Deserialize<FarcArchiveBin>(file);
+                return;
             }
         }
 
