@@ -5,7 +5,7 @@ A global host of tools used to mod/parse Project DIVA games.
 + `s117` for making DIVAFILETool
 + `Skyth` for working on most of the tools here
 + `Brolijah` for helping reverse most of the formats here
-+ `Stewie 1 .0` for his indepth knowledge of the formats
++ `Stewie 1.0` for his indepth knowledge of the formats
 + `Samyuu` for working on the DIVA modding scene
 
 # Dependencies:
