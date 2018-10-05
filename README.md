@@ -15,7 +15,7 @@ A global host of tools used to mod/parse Project DIVA games.
 
 + `DBTools`: A program that allows you to convert various *_db.bin files in DIVA games.
 + `FarcPack`: A program that allows you to pack/unpack .farc files.
-+ `FDSC`: A program that converts F/DT's .dsc to .xml and vice versa
++ `FDSC`: A program that converts compatible .dsc to .xml and vice versa
 + `TXP2DDS`: A tool that converts sega TXP files into DDS and vice versa.
 + `SPRTool`: A specialized tools that deals with F2nd and later SPR files
 + `DIVAFILEConverter`: A port of DIVAFILETool from s117
